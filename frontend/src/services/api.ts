@@ -17,7 +17,7 @@ import type {
   VoiceTranslateResponse,
 } from '../types/api';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const BASE_URL = (import.meta.env.API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
 
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 25000): Promise<T> {
   const controller = new AbortController();
