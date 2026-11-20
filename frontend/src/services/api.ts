@@ -17,9 +17,26 @@ import type {
   VoiceTranslateResponse,
 } from '../types/api';
 
-const BASE_URL = (import.meta.env.API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const DEFAULT_PROD_API = 'https://ai-tourism-companion.onrender.com';
 
-async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 25000): Promise<T> {
+function resolveApiBaseUrl(): string {
+  const isLocalDevHost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+    window.location.port !== '';
+
+  const configured = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
+  const isConfiguredLocal = configured.includes('127.0.0.1') || configured.includes('localhost');
+
+  if (configured && (isLocalDevHost || !isConfiguredLocal)) {
+    return configured;
+  }
+  return isLocalDevHost ? 'http://127.0.0.1:8000' : DEFAULT_PROD_API;
+}
+
+const BASE_URL = resolveApiBaseUrl();
+
+async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 65000): Promise<T> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -84,7 +101,7 @@ export function postVisionAsk(params: {
     form.append('lng', String(params.lng));
   }
   form.append('session_hash', params.sessionHash);
-  return requestJson<VisionResponse>('/api/vision-ask', { method: 'POST', body: form }, 35000);
+  return requestJson<VisionResponse>('/api/vision-ask', { method: 'POST', body: form }, 70000);
 }
 
 export function getTours(
