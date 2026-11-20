@@ -1,0 +1,28 @@
+# Python / Backend
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.db
+*.sqlite3
+.env
+backend/.env
+
+# Frontend / Node / Capacitor
+node_modules/
+dist/
+dist-ssr/
+*.local
+frontend/android/app/build/
+frontend/android/.gradle/
+frontend/android/local.properties
+.gradle/
+
+# OS / Editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

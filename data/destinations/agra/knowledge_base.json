@@ -1,0 +1,179 @@
+[
+  {
+    "chunk_key": "taj-origins-history",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "Origins, Builders & Timeline of the Taj Mahal",
+    "title_hi": "ताजमहल का इतिहास, निर्माता और निर्माण काल",
+    "content": "Emperor Shah Jahan commissioned the Taj Mahal in 1631-1632 CE in memory of his wife Arjumand Banu Begum, known as Mumtaz Mahal, who passed away in Burhanpur in 1631. Construction of the main mausoleum was largely completed around 1643-1648, with surrounding gates and gardens finished by 1653. Contemporary court chronicles attribute the lead architectural design to Ustad Ahmad Lahori, employing over 20,000 artisans using translucent white marble brought from Makrana in Rajasthan.",
+    "content_hi": "सम्राट शाहजहाँ ने 1631-1632 ई. में अपनी बेगम मुमताज महल की स्मृति में ताजमहल का निर्माण आरंभ कराया। मुख्य मकबरा लगभग 1648 में और पूरा परिसर 1653 तक तैयार हुआ। इसके प्रमुख वास्तुकार उस्ताद अहमद लाहौरी थे और निर्माण में राजस्थान के मकराना से लाए गए सफेद संगमरमर तथा लगभग 20,000 कारीगरों का योगदान रहा।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI) & UNESCO World Heritage Centre",
+    "tags": ["history", "shah jahan", "mumtaz mahal", "ustad ahmad lahori", "makrana marble", "why built", "who built"]
+  },
+  {
+    "chunk_key": "taj-pietra-dura-inlay",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "Pietra Dura (Parchinkari) Floral Stone Inlay",
+    "title_hi": "पर्चिनकारी (पिएत्रा ड्यूरा) संगमरमर जड़ाऊ कला",
+    "content": "The floral borders and dado panels on the Taj Mahal are crafted using Parchinkari (often called Pietra Dura), where semi-precious stones—such as jasper, jade, lapis lazuli, carnelian, and agate—are precision-cut and inlaid into carved recesses in the white marble. Unlike painted frescoes, these stone inlays resist fading and reflect light smoothly across curved surfaces.",
+    "content_hi": "ताजमहल की दीवारों पर बने फूल-पत्ती के अलंकरण 'पर्चिनकारी' कला का उदाहरण हैं, जिसमें सफेद संगमरमर को तराशकर उसमें यशब, लाजवर्द, अकीक और जैस्पर जैसे बहुमूल्य पत्थर जड़े गए हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["carvings", "inlay", "parchinkari", "pietra dura", "architecture", "stones", "flowers"]
+  },
+  {
+    "chunk_key": "taj-calligraphy-optical",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "Thuluth Calligraphy & Architectural Optical Illusions",
+    "title_hi": "सुलेख (कैलीग्राफी) और स्थापत्य का दृष्टि-कौशल",
+    "content": "The monumental arches of both the Great Gate and the main mausoleum feature black jasper calligraphy inlaid into white marble in the Thuluth script, designed by master calligrapher Amanat Khan (Abdul Haq Shirazi). To ensure the Quranic verses look uniform in size from ground level, the lettering is progressively enlarged toward the top of the arches. Similarly, the four corner minarets tilt slightly outward by roughly two degrees so that in an earthquake they would fall away from the central tomb.",
+    "content_hi": "मुख्य द्वार और मकबरे के मेहराबों पर उस्ताद अमानत खान द्वारा तैयार की गई अरबी सुलेख कला है। नीचे से सभी अक्षर एक समान आकार के दिखें, इसके लिए ऊपर के अक्षर क्रमशः बड़े बनाए गए हैं। चारों मीनारें भूकंप से मुख्य गुंबद को सुरक्षित रखने हेतु बाहर की ओर हल्की झुकी हुई हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "UNESCO World Heritage Centre",
+    "tags": ["calligraphy", "inscriptions", "amanat khan", "minarets", "architecture", "quran"]
+  },
+  {
+    "chunk_key": "taj-great-gate-history",
+    "monument_slug": "darwaza-i-rauza",
+    "title": "Darwaza-i-Rauza & Framing Perspective",
+    "title_hi": "दरवाज़ा-ए-रौज़ा और वास्तुकला का प्रवेश प्रभाव",
+    "content": "Built of red sandstone inlaid with white marble calligraphy and crowned by eleven white marble chhatris on both sides, Darwaza-i-Rauza separates the bustling forecourt (Jilaukhana) from the tranquil Charbagh garden. As visitors step through the dark vaulted chamber, the Taj Mahal appears framed within the pointed arch and seems to recede slightly as one walks forward—a deliberate optical effect of Mughal spatial planning.",
+    "content_hi": "लाल बलुआ पत्थर से बना दरवाज़ा-ए-रौज़ा जिलौखाना को शांत चारबाग से अलग करता है। इसके दोनों ओर ग्यारह-ग्यारह संगमरमर की छतरियाँ हैं। इस द्वार से गुजरते समय ताजमहल का दृश्य मेहराब के भीतर फ्रेम होकर प्रकट होता है।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["gate", "gateway", "darwaza", "chhatri", "red sandstone", "entrance"]
+  },
+  {
+    "chunk_key": "taj-mosque-jawab-history",
+    "monument_slug": "taj-mahal-mosque-jawab",
+    "title": "Symmetry of the Mosque & Jawab Pavilion",
+    "title_hi": "ताज मस्जिद और जवाब भवन की समरूपता",
+    "content": "The red sandstone Mosque stands on the western side of the marble plinth facing Mecca and remains an active place of Friday prayer (which is why the complex is closed to general tourists on Fridays). On the eastern side stands the visually identical Jawab ('answer') building, constructed purely to preserve Mughal bilateral symmetry (qarina) and historically used as a guesthouse for visitors.",
+    "content_hi": "मकबरे के पश्चिम में मक्का की ओर मुख किए लाल बलुआ पत्थर की मस्जिद है, जहाँ शुक्रवार को नमाज अदा की जाती है। पूर्व दिशा में समरूपता बनाए रखने के लिए ठीक वैसा ही 'जवाब' भवन बनाया गया था, जो अतिथिगृह के रूप में प्रयुक्त होता था।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["mosque", "jawab", "friday closed", "symmetry", "qarina"]
+  },
+  {
+    "chunk_key": "taj-charbagh-paradise-folklore",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "Charbagh Paradise Symbolism & Spiritual Lore",
+    "title_hi": "चारबाग उद्यान और आध्यात्मिक लोक मान्यता",
+    "content": "While historians document the Charbagh four-quadrant layout as an imperial Timurid-Mughal garden design fed by Yamuna water channels, devotional and Sufi traditions interpret the four waterways and central Al-Kawthar marble tank as an earthly reflection of the gardens of paradise. Pilgrims and poets often view the marble dome rising above the water channels as an allegory of eternal devotion.",
+    "content_hi": "इतिहासकार चारबाग को मुगल उद्यान शैली का उदाहरण मानते हैं, वहीं सूफी और आध्यात्मिक परंपराओं में इसकी चार नहरों और मध्य हौज को स्वर्ग के बगीचे के प्रतीक के रूप में देखा जाता है।",
+    "content_type": "FOLKLORE_TRADITION",
+    "source_name": "Cultural & Literary Tradition of Agra",
+    "tags": ["garden", "charbagh", "spiritual", "pilgrim", "paradise", "tradition", "folklore"]
+  },
+  {
+    "chunk_key": "black-taj-mahal-folklore",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "The Legend of the Black Taj Mahal",
+    "title_hi": "काले ताजमहल की प्रसिद्ध लोककथा",
+    "content": "Popular folklore—traceable to European traveller Jean-Baptiste Tavernier's 1665 writings—claims Shah Jahan planned to build an identical mausoleum in black marble across the Yamuna River at Mehtab Bagh, linked by a silver bridge, before being deposed by Aurangzeb. However, Archaeological Survey of India (ASI) excavations at Mehtab Bagh in the 1990s uncovered no black marble foundations; instead, they revealed an octagonal white plaster-and-stone pool designed to reflect the white Taj Mahal in the moonlight.",
+    "content_hi": "जनश्रुति के अनुसार शाहजहाँ यमुना पार मेहताब बाग में अपने लिए एक काला ताजमहल बनवाना चाहते थे। परंतु भारतीय पुरातत्व सर्वेक्षण (ASI) की खुदाई में काले संगमरमर की किसी नींव के प्रमाण नहीं मिले, बल्कि एक अष्टकोणीय जलाशय मिला जिसमें ताजमहल का प्रतिबिंब दिखाई देता था।",
+    "content_type": "FOLKLORE_TRADITION",
+    "source_name": "Local Folklore (critically compared with ASI Mehtab Bagh Excavations)",
+    "tags": ["black taj", "myth", "legend", "folklore", "mehtab bagh", "tavernier", "aurangzeb"]
+  },
+  {
+    "chunk_key": "artisans-hands-folklore",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "The Myth of Artisans' Hands Being Cut Off",
+    "title_hi": "कारीगरों के हाथ काटे जाने की किंवदंती",
+    "content": "A widely circulated folk legend alleges that Shah Jahan ordered the hands of the Taj Mahal's craftsmen cut off so no rival monument could ever be built. Historians and official Mughal court records (such as the Badshahnama) show zero evidence of this; on the contrary, skilled artisans received imperial stipends, land grants in nearby Taj Ganj, and continued working on Shah Jahan's later projects in Shahjahanabad (Old Delhi), including the Red Fort.",
+    "content_hi": "प्रचलित लोककथा में कहा जाता है कि शाहजहाँ ने कारीगरों के हाथ कटवा दिए थे। हालांकि समकालीन मुगल दस्तावेजों (पादशाहनामा) में इसका कोई ऐतिहासिक प्रमाण नहीं है; बल्कि कारीगरों को पुरस्कार व जागीरें मिलीं और उन्होंने आगे दिल्ली के लाल किले में भी कार्य किया।",
+    "content_type": "FOLKLORE_TRADITION",
+    "source_name": "Popular Urban Legend (Refuted by Mughal Court Chronicles)",
+    "tags": ["hands", "artisans", "myth", "legend", "folklore", "workers", "taj ganj"]
+  },
+  {
+    "chunk_key": "taj-changing-colors-folklore",
+    "monument_slug": "taj-mahal-mausoleum",
+    "title": "Changing Hues of the Marble",
+    "title_hi": "दिन के प्रहरों में ताजमहल के बदलते रंग",
+    "content": "Local poetic lore says the Taj Mahal mirrors the moods of Mumtaz Mahal—blushing soft pink at dawn, shining milky white at noon, turning golden under sunset, and glowing silvery blue in full moonlight. Scientifically, translucent Makrana marble scatters ambient sunlight and atmospheric particles at different angles throughout the day.",
+    "content_hi": "स्थानीय लोक-काव्य में कहा जाता है कि ताजमहल के बदलते रंग मुमताज महल के भावों को दर्शाते हैं—प्रातः गुलाबी, दोपहर में श्वेत, संध्या को सुनहरा और पूर्णिमा को चाँदनी सा नीला। वैज्ञानिक दृष्टि से यह पारदर्शी मकराना संगमरमर पर सूर्य के प्रकाश के कोण का प्रभाव है।",
+    "content_type": "FOLKLORE_TRADITION",
+    "source_name": "Agra Poetic & Local Guide Tradition",
+    "tags": ["colors", "moonlight", "sunrise", "sunset", "pink", "folklore", "story"]
+  },
+  {
+    "chunk_key": "agra-fort-history",
+    "monument_slug": "amar-singh-gate",
+    "title": "Agra Fort: From Sikarwar Rajputs & Lodis to Mughal Capital",
+    "title_hi": "आगरा किला: प्राचीन इतिहास से मुगल राजधानी तक",
+    "content": "Originally a brick fort known as Badalgarh held by the Sikarwar Rajputs and later the Lodi dynasty, the fortress was rebuilt in red sandstone by Emperor Akbar starting in 1565 CE using over 4,000 builders for eight years. His grandson Shah Jahan later transformed the inner palaces with white marble. Amar Singh Gate (originally Akbar Darwaza) features a bent L-shaped ramp designed to slow charging war elephants and expose attackers to defenders above.",
+    "content_hi": "मूलतः ईंटों से बने 'बादलगढ़' किले को 1565 ई. में सम्राट अकबर ने लाल बलुआ पत्थर से भव्य रूप में पुनः बनवाया। बाद में शाहजहाँ ने इसके भीतर सफेद संगमरमर के महल जोड़े। अमर सिंह द्वार का मोड़दार ढलान शत्रु सेना और हाथियों की गति धीमी करने हेतु बनाया गया था।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI) & UNESCO",
+    "tags": ["agra fort", "akbar", "amar singh gate", "badalgarh", "history", "defense"]
+  },
+  {
+    "chunk_key": "jahangiri-mahal-history",
+    "monument_slug": "jahangiri-mahal",
+    "title": "Jahangiri Mahal & Rajput-Mughal Architectural Synthesis",
+    "title_hi": "जहाँगीरी महल और मुगल-राजपूत स्थापत्य संगम",
+    "content": "Built by Akbar primarily as a residence for the royal women (zenana) and his Rajput queens such as Mariam-uz-Zamani, Jahangiri Mahal blends Islamic arches with traditional Hindu and Rajput brackets, chhajja eaves, lotus medallions, and flat stone-beam roofs. In front stands the Hauz-i-Jahangiri, a monolithic sandstone bathing bowl carved from a single stone block in 1610 CE.",
+    "content_hi": "अकबर द्वारा राजपरिवार की रानियों के लिए निर्मित जहाँगीरी महल में राजपूत व मुगल कला का अद्भुत मेल है—इसमें कमल के चिह्न, नक्काशीदार कोष्ठक और छज्जे देखने को मिलते हैं। इसके सामने एक ही पत्थर को तराशकर बनाया गया 'हौज-ए-जहाँगीरी' स्थित है।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["jahangiri mahal", "akbar", "rajput", "hauz-i-jahangiri", "carvings", "palace"]
+  },
+  {
+    "chunk_key": "musamman-burj-history",
+    "monument_slug": "musamman-burj",
+    "title": "Musamman Burj & Shah Jahan's Final Years",
+    "title_hi": "मुसम्मन बुर्ज और शाहजहाँ के अंतिम वर्ष",
+    "content": "Constructed by Shah Jahan between 1632 and 1640 on the site of an earlier pavilion built by Akbar, the octagonal white marble Musamman Burj (Shah Burj) offers an uninterrupted view across the Yamuna bend toward the Taj Mahal. After the Mughal war of succession in 1658, Emperor Aurangzeb placed Shah Jahan under house arrest in Agra Fort, where Shah Jahan spent his final eight years until his death in January 1666.",
+    "content_hi": "1632 से 1640 के बीच शाहजहाँ द्वारा निर्मित अष्टकोणीय संगमरमर का मुसम्मन बुर्ज यमुना के पार ताजमहल का सीधा दृश्य प्रस्तुत करता है। 1658 के उत्तराधिकार युद्ध के बाद औरंगज़ेब ने शाहजहाँ को यहीं किले में नजरबंद रखा, जहाँ 1666 में उनका निधन हुआ।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["musamman burj", "shah jahan", "aurangzeb", "prison", "view", "marble"]
+  },
+  {
+    "chunk_key": "musamman-burj-folklore",
+    "monument_slug": "musamman-burj",
+    "title": "Folklore of the Reflective Gem & Secret River Tunnels",
+    "title_hi": "मुसम्मन बुर्ज के रत्न और गुप्त सुरंगों की लोककथा",
+    "content": "Local tradition holds that an ailing Shah Jahan gazed at the Taj Mahal reflected in a sparkling gem inlaid into the marble pillar of Musamman Burj—or in a brass bowl of water—when too weak to stand at the balcony. Another popular folk tale speaks of secret tunnels connecting Agra Fort to the Yamuna and the Taj Mahal, though ASI surveys confirm the lower chambers are royal water-cooling rooms (tahkhanas) and defensive passages rather than cross-river tunnels.",
+    "content_hi": "लोककथा के अनुसार वृद्धावस्था में कमजोर होने पर शाहजहाँ बुर्ज के स्तंभ में जड़े हीरे या पानी के कटोरे में ताजमहल का प्रतिबिंब निहारते थे। किले से ताजमहल तक गुप्त सुरंग की कहानियाँ भी प्रचलित हैं, परंतु सर्वेक्षण से पता चलता है कि निचले कक्ष ग्रीष्मकालीन ठंडे तहखाने थे।",
+    "content_type": "FOLKLORE_TRADITION",
+    "source_name": "Agra Oral Tradition & Guide Lore",
+    "tags": ["musamman burj", "tunnel", "gem", "mirror", "folklore", "legend"]
+  },
+  {
+    "chunk_key": "taj-visiting-rules-urs",
+    "monument_slug": null,
+    "title": "Visiting Hours, Friday Closure & Annual Shah Jahan Urs",
+    "title_hi": "दर्शन समय, शुक्रवार बंद और वार्षिक उर्स परंपरा",
+    "content": "The Taj Mahal opens 30 minutes before sunrise and closes 30 minutes before sunset daily except Fridays, when it closes to general visitors for Friday prayers at the Mosque. Once a year during the three-day Shah Jahan Urs (in the Islamic month of Rajab), entry to the Taj Mahal is free for visitors and the lower real graves inside the crypt are opened to the public as part of a centuries-old commemorative tradition.",
+    "content_hi": "ताजमहल प्रतिदिन सूर्योदय से 30 मिनट पहले खुलता है और सूर्यास्त से 30 मिनट पहले बंद होता है, केवल शुक्रवार को जुमे की नमाज के कारण बंद रहता है। वर्ष में एक बार तीन दिवसीय शाहजहाँ उर्स के दौरान प्रवेश निःशुल्क होता है और तहखाने की असली कब्रें दर्शन के लिए खुलती हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI) & UP Tourism",
+    "tags": ["timings", "tickets", "friday", "urs", "pilgrim", "tradition", "entry"]
+  },
+  {
+    "chunk_key": "agra-parchinkari-odop-craft",
+    "monument_slug": null,
+    "title": "Living Heritage: Parchinkari & Agra's ODOP Craft Legacy",
+    "title_hi": "जीवंत विरासत: पर्चिनकारी और आगरा की ओडीओपी शिल्प परंपरा",
+    "content": "Descendants of the seventeenth-century Mughal artisans settled in Taj Ganj and Gokulpura still practice hand-cut marble inlay (Parchinkari) using traditional bow-lathes and brass chisels. Alongside leather footwear—Agra's designated One District One Product (ODOP) industry alongside marble inlay crafts—these artisan workshops connect visitors directly to Agra's living heritage economy.",
+    "content_hi": "ताजगंज और गोकुलपुरा के कई कारीगर परिवार आज भी पारंपरिक औजारों से संगमरमर में पर्चिनकारी कला को जीवित रखे हुए हैं। चमड़े के जूते और संगमरमर जड़ाऊ हस्तशिल्प उत्तर प्रदेश की 'एक जनपद एक उत्पाद (ODOP)' योजना में आगरा की प्रमुख पहचान हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "UP ODOP Mission & District Gazetteer Agra",
+    "tags": ["odop", "crafts", "parchinkari", "marble", "leather", "artisans", "taj ganj"]
+  },
+  {
+    "chunk_key": "yamuna-cultural-respect",
+    "monument_slug": null,
+    "title": "Visitor Etiquette & Cultural Respect at Agra Monuments",
+    "title_hi": "आगरा स्मारकों पर सांस्कृतिक मर्यादा और शिष्टाचार",
+    "content": "Both the Taj Mahal and Agra Fort are revered heritage sites with living religious spaces. Visitors stepping onto the main Taj marble terrace must wear provided shoe covers or walk barefoot, silence phones inside the inner mausoleum, respect prayer areas around the Mosque, and note that tripods, drones, food items, and tobacco are restricted inside the ASI monument perimeter.",
+    "content_hi": "ताजमहल और आगरा किला दोनों संवेदनशील और पवित्र विरासत स्थल हैं। मुख्य संगमरमर चबूतरे पर जाने से पहले शू-कवर पहनना या नंगे पैर चलना आवश्यक है। भीतर शांति बनाए रखें; ड्रोन, तिपाई (ट्राईपॉड), खाद्य सामग्री और तंबाकू परिसर में वर्जित हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI)",
+    "tags": ["rules", "shoe cover", "etiquette", "respect", "prohibited", "camera", "baggage"]
+  }
+]
+

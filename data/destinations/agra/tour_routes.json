@@ -1,0 +1,156 @@
+[
+  {
+    "slug": "quick-30m",
+    "title": "30-Minute Express Highlight Tour (Step-Free)",
+    "title_hi": "30-मिनट त्वरित मुख्य दर्शन (रैंप एवं समतल मार्ग)",
+    "duration_minutes": 30,
+    "step_free": true,
+    "description": "Ideal for visitors short on time or seeking a completely step-free route: enter via Darwaza-i-Rauza, enjoy the classic reflecting-pool view from the accessible garden plinth, and admire the red sandstone Mosque/Jawab symmetry.",
+    "description_hi": "कम समय वाले या सीढ़ी-रहित सुगम मार्ग चाहने वाले यात्रियों के लिए उत्तम यात्रा: मुख्य द्वार से प्रवेश, चारबाग उद्यान से ताज का भव्य दृश्य और निचले चबूतरे से दर्शन।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "darwaza-i-rauza",
+        "duration_min": 10,
+        "audio_script_en": "Welcome to Darwaza-i-Rauza, the Great Gate of the Taj Mahal. Notice the eleven white marble domes crowning the arch and the inlaid black marble calligraphy. As you step through this shaded red sandstone portal, watch how the white mausoleum appears framed before you.",
+        "audio_script_hi": "ताजमहल के मुख्य द्वार दरवाज़ा-ए-रौज़ा में आपका स्वागत है। मेहराब के ऊपर बनी 11 सफेद गुंबदें और सुंदर अरबी सुलेख देखें। इस द्वार से आगे बढ़ते ही ताजमहल का प्रथम भव्य दृश्य आपके सामने खुलता है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level red-stone ramp leads straight through the gateway."
+      },
+      {
+        "order": 2,
+        "monument_slug": "taj-mahal-mausoleum",
+        "duration_min": 12,
+        "audio_script_en": "Standing along the central marble pool, you are looking at Makrana marble crafted between 1631 and 1648 under Shah Jahan and architect Ustad Ahmad Lahori. Notice the four minarets subtly leaning outward to protect the tomb during earthquakes.",
+        "audio_script_hi": "मध्य जलकुंड के पास से आप 1631 से 1648 के बीच मकराना संगमरमर से बने ताजमहल को देख रहे हैं। चारों मीनारें भूकंप से मुख्य गुंबद को सुरक्षित रखने हेतु बाहर की ओर हल्की झुकी हुई हैं।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Viewing from the lower red-sandstone terrace and Diana Bench is fully step-free with shaded seating."
+      },
+      {
+        "order": 3,
+        "monument_slug": "taj-mahal-mosque-jawab",
+        "duration_min": 8,
+        "audio_script_en": "To your west stands the active Friday Mosque, balanced on the east by the identical Jawab pavilion. Together, they anchor the Taj Mahal in perfect Mughal symmetry overlooking the Yamuna River.",
+        "audio_script_hi": "पश्चिम दिशा में मस्जिद और पूर्व में उसके समरूप 'जवाब' भवन स्थित हैं, जो यमुना किनारे संपूर्ण परिसर को अद्भुत संतुलन प्रदान करते हैं।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Accessible ramp runs along the lower terrace beside the Jawab."
+      }
+    ]
+  },
+  {
+    "slug": "classic-1hr",
+    "title": "1-Hour Classic Taj & Folklore Walk (Step-Free Option)",
+    "title_hi": "1-घंटे की क्लासिक ताज विरासत और कथा यात्रा (सुगम मार्ग)",
+    "duration_minutes": 60,
+    "step_free": true,
+    "description": "A balanced one-hour walk covering the Great Gate, Charbagh paradise garden lore, Pietra Dura stone craft details, the Black Taj myth vs ASI evidence, and the twin riverside pavilions.",
+    "description_hi": "मुख्य द्वार, चारबाग की कथाएँ, पर्चिनकारी जड़ाऊ कला, काले ताज की किंवदंती बनाम पुरातत्व प्रमाण और मस्जिद-जवाब के दर्शन की एक घंटे की संपूर्ण सैर।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "darwaza-i-rauza",
+        "duration_min": 15,
+        "audio_script_en": "Begin at the Great Gate. Beyond the gate lies the Charbagh, a four-part Mughal garden symbolizing paradise. Look closely at the calligraphy around the arch—architects enlarged the upper letters so every line looks equal in size from below.",
+        "audio_script_hi": "मुख्य द्वार से शुरुआत करें। यहाँ से चारबाग उद्यान दिखता है, जो स्वर्ग के बगीचे का प्रतीक है। मेहराब पर ऊपर के अक्षर नीचे से एक समान दिखने के लिए बड़े बनाए गए हैं।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Paved central walkway; shaded benches inside the gate arcade."
+      },
+      {
+        "order": 2,
+        "monument_slug": "taj-mahal-mausoleum",
+        "duration_min": 30,
+        "audio_script_en": "Recorded history credits over 20,000 artisans using jasper, jade, and lapis lazuli for floral Parchinkari inlay. Across the river lies Mehtab Bagh—folklore says Shah Jahan planned a Black Taj there, though ASI excavations revealed only a white reflection pool.",
+        "audio_script_hi": "इतिहास बताता है कि 20,000 से अधिक कारीगरों ने पर्चिनकारी में कीमती पत्थर जड़े। यमुना पार मेहताब बाग में काले ताजमहल की लोककथा प्रचलित है, पर ASI खुदाई में वहां केवल प्रतिबिंब देखने का जलाशय मिला।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Lower terrace is step-free; upper marble plinth has stairs (shoe covers required)."
+      },
+      {
+        "order": 3,
+        "monument_slug": "taj-mahal-mosque-jawab",
+        "duration_min": 15,
+        "audio_script_en": "Finish your hour at the Mosque and Jawab terrace, watching the Yamuna bend toward Agra Fort in the distance where Shah Jahan spent his final years.",
+        "audio_script_hi": "मस्जिद और जवाब चबूतरे पर अपनी यात्रा पूर्ण करें, जहाँ से दूर यमुना किनारे आगरा किला दिखाई देता है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Rest points and drinking water access nearby on the lower terrace."
+      }
+    ]
+  },
+  {
+    "slug": "half-day-3hr",
+    "title": "Half-Day Twin Heritage Trail: Taj Mahal & Agra Fort",
+    "title_hi": "अर्ध-दिवसीय युगल विरासत यात्रा: ताजमहल एवं आगरा किला",
+    "duration_minutes": 180,
+    "step_free": false,
+    "description": "Experience Agra's connected story across both UNESCO monuments—starting at the Taj Mahal in soft morning light and continuing 2.5 km west to Akbar's Agra Fort, Jahangiri Mahal, and Shah Jahan's Musamman Burj.",
+    "description_hi": "सुबह ताजमहल से प्रारंभ कर ढाई किलोमीटर दूर आगरा किले के अमर सिंह द्वार, जहाँगीरी महल और मुसम्मन बुर्ज तक की संपूर्ण तीन घंटे की ऐतिहासिक यात्रा।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "darwaza-i-rauza",
+        "duration_min": 15,
+        "audio_script_en": "Start at Darwaza-i-Rauza at dawn to witness the optical illusion of the Taj Mahal seeming to shrink as you walk toward the central garden.",
+        "audio_script_hi": "प्रातःकाल दरवाज़ा-ए-रौज़ा से शुरुआत कर चारबाग में प्रवेश के अद्भुत दृश्य का अनुभव करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Ramps available; early morning avoids midday heat."
+      },
+      {
+        "order": 2,
+        "monument_slug": "taj-mahal-mausoleum",
+        "duration_min": 45,
+        "audio_script_en": "Explore the lower plinth and, if able to climb stairs, step onto the white marble platform to examine Pietra Dura botanical carvings and echo-filled acoustics inside the octagonal chamber.",
+        "audio_script_hi": "निचले व ऊपरी संगमरमर चबूतरे से पर्चिनकारी की बारीक नक्काशी और मुख्य गुंबद की अद्भुत गूँज का अनुभव करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Upper marble plinth involves steep stone stairs."
+      },
+      {
+        "order": 3,
+        "monument_slug": "taj-mahal-mosque-jawab",
+        "duration_min": 15,
+        "audio_script_en": "Observe the red sandstone Mosque and its mirrored Jawab before exiting toward Agra Fort (about 10 minutes by battery auto or taxi).",
+        "audio_script_hi": "मस्जिद और जवाब भवन देखने के बाद लगभग 10 मिनट की दूरी पर स्थित आगरा किले की ओर प्रस्थान करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Electric golf carts operate outside East and West gates."
+      },
+      {
+        "order": 4,
+        "monument_slug": "amar-singh-gate",
+        "duration_min": 20,
+        "audio_script_en": "Welcome to Agra Fort! Walk up the defensive dog-leg ramp of Amar Singh Gate, built by Emperor Akbar in 1565 to deter war elephants and invaders.",
+        "audio_script_hi": "आगरा किले में स्वागत है! 1565 में अकबर द्वारा बनवाए गए अमर सिंह द्वार के सुरक्षात्मक ढलान पर चलें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Paved ramp; steep slope."
+      },
+      {
+        "order": 5,
+        "monument_slug": "jahangiri-mahal",
+        "duration_min": 35,
+        "audio_script_en": "Inside Jahangiri Mahal, spot the fusion of Rajput carved stone brackets and Mughal courtyards, plus the giant monolithic Hauz-i-Jahangiri bowl outside.",
+        "audio_script_hi": "जहाँगीरी महल में राजपूत-मुगल स्थापत्य शैली और एकाश्म पत्थर से बना हौज-ए-जहाँगीरी देखें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Ground courtyard is flat with shaded rest areas."
+      },
+      {
+        "order": 6,
+        "monument_slug": "musamman-burj",
+        "duration_min": 30,
+        "audio_script_en": "End your trail at Musamman Burj—the marble octagonal balcony where an imprisoned Shah Jahan looked across the Yamuna toward Mumtaz Mahal's tomb.",
+        "audio_script_hi": "मुसम्मन बुर्ज पर यात्रा समाप्त करें, जहाँ से शाहजहाँ यमुना पार ताजमहल को निहारा करते थे।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Contains low steps and raised thresholds."
+      }
+    ]
+  }
+]
+

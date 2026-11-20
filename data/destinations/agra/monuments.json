@@ -1,0 +1,167 @@
+[
+  {
+    "slug": "darwaza-i-rauza",
+    "name": "Darwaza-i-Rauza (The Great Gate)",
+    "name_hi": "दरवाज़ा-ए-रौज़ा (मुख्य शाही प्रवेश द्वार)",
+    "short_summary": "Monumental red sandstone southern gateway leading into the Charbagh garden with optical framing of the Taj Mahal.",
+    "short_summary_hi": "ताजमहल के चारबाग उद्यान में प्रवेश कराने वाला भव्य लाल बलुआ पत्थर का मुख्य द्वार।",
+    "lat": 27.1721,
+    "lng": 78.0421,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 10,
+    "visual_cues": [
+      "red sandstone gateway",
+      "large central pishtaq arch",
+      "eleven small white marble chhatri domes on top",
+      "calligraphy border around arch",
+      "framing view of distant white taj mahal"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Shaded stone benches inside the Forecourt (Jilaukhana)",
+      "Covered alcoves inside the Great Gate arcade"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Step-free paved access and wooden/stone ramps through the forecourt and gate passage.",
+    "accessibility_notes_hi": "प्रवेश प्रांगण और मुख्य द्वार से होकर रैंप युक्त समतल मार्ग उपलब्ध है।"
+  },
+  {
+    "slug": "taj-mahal-mausoleum",
+    "name": "Taj Mahal Main Mausoleum",
+    "name_hi": "ताजमहल मुख्य मकबरा",
+    "short_summary": "Ivory-white Makrana marble mausoleum built by Emperor Shah Jahan featuring Pietra Dura floral inlay and symmetrical minarets.",
+    "short_summary_hi": "सम्राट शाहजहाँ द्वारा मकराना के सफेद संगमरमर से निर्मित मुख्य मकबरा, जिसमें पर्चिनकारी की उत्कृष्ट कला है।",
+    "lat": 27.1751,
+    "lng": 78.0421,
+    "geofence_radius_m": 35,
+    "visit_duration_min": 25,
+    "visual_cues": [
+      "white marble onion dome",
+      "four corner minarets",
+      "chamfered octagonal building",
+      "pietra dura floral marble inlay",
+      "arabic calligraphy on arch",
+      "lotus finial on dome",
+      "reflecting pool front view"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": true,
+    "step_free": false,
+    "rest_points": [
+      "Red sandstone benches along the central marble tank (Al-Kawthar)",
+      "Shaded corners of the Charbagh garden pathways"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Garden pathways and the lower red sandstone plinth are wheelchair accessible via ramps; climbing onto the upper white marble plinth and inner tomb chamber involves steep stairs.",
+    "accessibility_notes_hi": "उद्यान और निचला लाल चबूतरा व्हीलचेयर के लिए सुगम है, परंतु ऊपरी सफेद संगमरमर के चबूतरे पर जाने के लिए सीढ़ियाँ हैं।"
+  },
+  {
+    "slug": "taj-mahal-mosque-jawab",
+    "name": "Taj Mosque & Jawab Pavilion",
+    "name_hi": "ताज मस्जिद एवं जवाब भवन",
+    "short_summary": "Twin red sandstone structures flanking the mausoleum on the west and east to maintain architectural symmetry.",
+    "short_summary_hi": "मुख्य मकबरे के पश्चिम और पूर्व में समरूपता बनाए रखने के लिए निर्मित लाल बलुआ पत्थर के दो जुड़वाँ भवन।",
+    "lat": 27.1750,
+    "lng": 78.0408,
+    "geofence_radius_m": 25,
+    "visit_duration_min": 10,
+    "visual_cues": [
+      "red sandstone mosque with white marble domes",
+      "three arched bays",
+      "white marble geometric floor inlay",
+      "twin pavilion on river terrace"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Cool shaded veranda bays inside the Jawab and Mosque exterior"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Accessible from the lower red sandstone terrace via stone ramps; modest footwear/respectful dress observed near the active Friday mosque.",
+    "accessibility_notes_hi": "निचले लाल चबूतरे से रैंप द्वारा सुगम पहुँच; मस्जिद परिसर में मर्यादित आचरण अपेक्षित है।"
+  },
+  {
+    "slug": "amar-singh-gate",
+    "name": "Amar Singh Gate (Agra Fort)",
+    "name_hi": "अमर सिंह द्वार (आगरा किला)",
+    "short_summary": "The primary public entrance to Agra Fort featuring a defensive dog-leg L-shaped ramp and glazed tile work.",
+    "short_summary_hi": "आगरा किले का मुख्य प्रवेश द्वार, जिसमें सुरक्षा हेतु मोड़दार ढलान और आकर्षक पत्थर की नक्काशी है।",
+    "lat": 27.1763,
+    "lng": 78.0211,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 15,
+    "visual_cues": [
+      "massive red sandstone fort walls",
+      "two semi-octagonal bastions",
+      "blue glazed ceramic tile inlay",
+      "steep paved ramp between inner and outer gate"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "ASI ticket counter courtyard benches",
+      "Shaded lawn immediately past the inner gate"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Step-free inclined ramp from the outer gate up to the fort lawns; the slope is moderately steep so wheelchair users may appreciate an attendant.",
+    "accessibility_notes_hi": "प्रवेश से किले के भीतर तक रैंप मार्ग है, हालांकि ढलान कुछ तीव्र है इसलिए सहायता उपयोगी हो सकती है।"
+  },
+  {
+    "slug": "jahangiri-mahal",
+    "name": "Jahangiri Mahal",
+    "name_hi": "जहाँगीरी महल",
+    "short_summary": "Akbar-era red sandstone palace showcasing an expressive fusion of Timurid and Rajput architectural motifs.",
+    "short_summary_hi": "अकबर काल का लाल बलुआ पत्थर का महल, जो मुगल और राजपूत स्थापत्य शैली का सुंदर संगम दर्शाता है।",
+    "lat": 27.1781,
+    "lng": 78.0218,
+    "geofence_radius_m": 25,
+    "visit_duration_min": 20,
+    "visual_cues": [
+      "ornate red sandstone facade",
+      "carved stone brackets and chhajja eaves",
+      "massive monolithic stone bowl Hauz-i-Jahangiri",
+      "central courtyard with Hindu-style lotus motifs"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Lawn seating facing Hauz-i-Jahangiri",
+      "Shaded ground-floor galleries"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Ground courtyard and front facade are step-free via paved garden paths; upper rooftop galleries require stairs.",
+    "accessibility_notes_hi": "भूतल का प्रांगण और बाहरी भाग समतल मार्ग से सुगम हैं; ऊपरी मंजिल पर जाने के लिए सीढ़ियाँ हैं।"
+  },
+  {
+    "slug": "musamman-burj",
+    "name": "Musamman Burj (Octagonal Tower)",
+    "name_hi": "मुसम्मन बुर्ज (अष्टकोणीय मीनार)",
+    "short_summary": "Marble pavilion overlooking the Yamuna River and Taj Mahal where Emperor Shah Jahan spent his final years.",
+    "short_summary_hi": "यमुना और ताजमहल की ओर मुख किए सफेद संगमरमर का अष्टकोणीय मंडप, जहाँ शाहजहाँ ने अंतिम वर्ष बिताए।",
+    "lat": 27.1802,
+    "lng": 78.0226,
+    "geofence_radius_m": 25,
+    "visit_duration_min": 15,
+    "visual_cues": [
+      "octagonal white marble pavilion",
+      "delicate jali lattice screens",
+      "gilded copper dome chhatri",
+      "panoramic view of taj mahal across river bend"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": false,
+    "step_free": false,
+    "rest_points": [
+      "Shaded stone benches in the adjoining Anguri Bagh courtyard"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Viewing from the Khas Mahal courtyard involves low steps; direct access into the tower alcove has raised marble thresholds.",
+    "accessibility_notes_hi": "खास महल प्रांगण और मंडप तक पहुँचने के लिए कुछ सीढ़ियाँ और ऊँची देहली पार करनी होती है।"
+  }
+]
+

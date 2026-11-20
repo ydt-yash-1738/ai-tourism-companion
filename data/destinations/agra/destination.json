@@ -1,0 +1,60 @@
+{
+  "slug": "agra",
+  "name": "Agra Heritage Zone (Taj Mahal & Agra Fort)",
+  "name_hi": "आगरा विरासत क्षेत्र (ताजमहल एवं आगरा किला)",
+  "state": "Uttar Pradesh",
+  "description": "Home to two UNESCO World Heritage Sites—the Taj Mahal and Agra Fort—alongside centuries-old Mughal craftsmanship, Yamuna riverfront gardens, and vibrant local bazaars.",
+  "description_hi": "दो यूनेस्को विश्व धरोहर स्थलों—ताजमहल और आगरा किला—के साथ मुगलकालीन शिल्प कला, यमुना तट के बागों और जीवंत स्थानीय बाजारों का ऐतिहासिक नगर।",
+  "center_lat": 27.1751,
+  "center_lng": 78.0421,
+  "supported_languages": ["en", "hi", "ur", "ta", "bn", "fr", "ja", "es"],
+  "emergency_helplines": [
+    {
+      "label": "National Emergency (Police / Fire / Medical)",
+      "label_hi": "राष्ट्रीय आपातकालीन सेवा",
+      "number": "112",
+      "category": "emergency"
+    },
+    {
+      "label": "Medical Ambulance",
+      "label_hi": "एम्बुलेंस सेवा",
+      "number": "108",
+      "category": "medical"
+    },
+    {
+      "label": "Women Power Line (UP)",
+      "label_hi": "महिला पावर लाइन (उ.प्र.)",
+      "number": "1090",
+      "category": "police"
+    },
+    {
+      "label": "UP / Incredible India Tourist Helpline",
+      "label_hi": "पर्यटन हेल्पलाइन",
+      "number": "1363",
+      "category": "help_desk"
+    },
+    {
+      "label": "Agra Tourist Police Station",
+      "label_hi": "आगरा पर्यटन पुलिस थाना",
+      "number": "+91-562-2226431",
+      "category": "police"
+    },
+    {
+      "label": "S.N. Medical College Hospital Emergency",
+      "label_hi": "एस.एन. मेडिकल कॉलेज अस्पताल आपातकाल",
+      "number": "+91-562-2260353",
+      "category": "medical"
+    }
+  ],
+  "metadata_json": {
+    "odop_products": ["Leather Products", "Marble Inlay (Parchinkari)"],
+    "best_season": "October to March",
+    "weekly_closure": "Taj Mahal is closed every Friday for prayers; Agra Fort remains open all days.",
+    "official_sources": [
+      "Archaeological Survey of India (ASI)",
+      "UNESCO World Heritage Centre",
+      "Uttar Pradesh Tourism"
+    ]
+  }
+}
+

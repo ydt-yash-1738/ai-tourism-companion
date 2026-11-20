@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: up-ai-tourism-companion-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_CHAT_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_EMBED_MODEL
+        value: gemini-embedding-001
+      - key: VOICE_PROVIDER
+        value: auto
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: SARVAM_STT_MODEL
+        value: saaras:v4
+      - key: SARVAM_TTS_MODEL
+        value: bulbul:v3
+      - key: SARVAM_TTS_SPEAKER
+        value: shubh
+      - key: BHASHINI_USER_ID
+        sync: false
+      - key: BHASHINI_ULCA_API_KEY
+        sync: false
+      - key: BHASHINI_PIPELINE_ID
+        value: 64392f96daac500b55c543cd
+      - key: CORS_ORIGINS
+        value: http://localhost:5173,http://localhost,https://localhost,capacitor://localhost
+      - key: APP_ENV
+        value: production
+
