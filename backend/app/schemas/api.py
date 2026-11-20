@@ -300,6 +300,7 @@ class VoiceTTSRequest(BaseModel):
     pace: float = Field(default=1.0, ge=0.5, le=2.0)
     output_format: Literal["wav", "mp3"] = "wav"
     provider: VoiceProviderChoice = "auto"
+    auto_translate: bool = False
 
 
 class VoiceTTSResponse(BaseModel):
@@ -309,4 +310,16 @@ class VoiceTTSResponse(BaseModel):
     provider: VoiceProviderUsed
     fallback_to_device: bool = False
     message: str = ""
+    spoken_text: str = ""
+
+
+class VoiceTranslateRequest(BaseModel):
+    texts: list[str] = Field(..., min_length=1, max_length=40)
+    target_language: str = Field(default="hi", min_length=2, max_length=16)
+
+
+class VoiceTranslateResponse(BaseModel):
+    translations: list[str]
+    target_language: str
+    translated: bool
 

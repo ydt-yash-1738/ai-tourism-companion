@@ -1,0 +1,39 @@
+@mixin card-surface {
+  background: var(--surface-card);
+  border: 1px solid var(--border-sand);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 3px solid var(--saffron);
+    outline-offset: 2px;
+  }
+}
+
+@mixin tricolour-top-strip {
+  background: linear-gradient(
+    90deg,
+    var(--saffron) 0%,
+    var(--saffron) 33.3%,
+    #ffffff 33.3%,
+    var(--navy) 50%,
+    #ffffff 66.6%,
+    var(--emerald) 66.6%,
+    var(--emerald) 100%
+  );
+}
+
+@mixin tablet-up {
+  @media (min-width: 720px) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+

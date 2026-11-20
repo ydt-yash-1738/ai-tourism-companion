@@ -1,0 +1,403 @@
+@use 'mixins' as m;
+
+.companion-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+
+  @include m.tablet-up {
+    padding-bottom: 24px;
+  }
+}
+
+.companion-topbar {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-sand);
+  position: sticky;
+  top: 0;
+  z-index: 45;
+
+  &__row {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    @include m.tablet-up {
+      padding: 10px 16px;
+    }
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__city {
+    font-family: var(--font-display);
+    font-size: calc(1.08rem * var(--text-scale));
+    font-weight: 700;
+    color: var(--navy-deep);
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @include m.tablet-up {
+      font-size: calc(1.26rem * var(--text-scale));
+    }
+  }
+
+  &__sub {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+}
+
+.compact-mobile-hide {
+  display: none;
+  @include m.tablet-up {
+    display: inline;
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  &.is-online {
+    background: var(--emerald-tint);
+    color: var(--emerald-deep);
+  }
+
+  &.is-offline {
+    background: var(--terracotta-tint);
+    color: var(--terracotta);
+  }
+}
+
+.sos-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--sos-red);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  animation: sosPulse 2.4s infinite;
+
+  &:hover {
+    background: var(--sos-red-deep);
+  }
+}
+
+.control-ribbon {
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-sand);
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    @include m.tablet-up {
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 8px 16px;
+    }
+  }
+
+  &__group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+  }
+}
+
+.lang-select {
+  min-height: 38px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.persona-chip {
+  min-height: 36px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-sand);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+
+  &.is-active {
+    background: var(--saffron);
+    border-color: var(--saffron);
+    color: #ffffff;
+  }
+}
+
+.desktop-tabs {
+  display: none;
+
+  @include m.tablet-up {
+    display: flex;
+    max-width: 1120px;
+    width: 100%;
+    margin: 14px auto 0;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  &__btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--tap-target);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-sand);
+    background: var(--surface-card);
+    color: var(--text-secondary);
+    font-weight: 700;
+    transition: all 0.16s ease;
+
+    &.is-active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #ffffff;
+      box-shadow: var(--shadow-card);
+    }
+  }
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-sand);
+  box-shadow: 0 -4px 16px rgba(18, 52, 107, 0.08);
+  padding: 5px 4px calc(5px + env(safe-area-inset-bottom, 0px));
+
+  @include m.tablet-up {
+    display: none;
+  }
+
+  &__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 2px;
+
+    &.is-active {
+      color: var(--navy);
+      background: var(--navy-tint);
+      font-weight: 700;
+    }
+  }
+}
+
+.companion-main {
+  max-width: 1120px;
+  width: 100%;
+  margin: 10px auto 0;
+  padding: 0 12px;
+  flex: 1;
+
+  @include m.tablet-up {
+    margin: 14px auto 0;
+    padding: 0 16px;
+  }
+}
+
+.offline-banner {
+  margin-bottom: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--terracotta-tint);
+  border: 1px solid rgba(155, 61, 44, 0.35);
+  color: var(--terracotta);
+  font-size: calc(0.84rem * var(--text-scale));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+// Emergency SOS Modal
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(11, 32, 68, 0.64);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+
+.sos-modal {
+  @include m.card-surface;
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  border: 2px solid var(--sos-red);
+  padding: 16px;
+  animation: fadeSlideUp 0.22s ease;
+
+  @include m.tablet-up {
+    padding: 20px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-sand);
+
+    h2 {
+      color: var(--sos-red);
+      font-size: calc(1.38rem * var(--text-scale));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  &__nearest-grid {
+    display: grid;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  &__spot {
+    padding: 11px;
+    border-radius: var(--radius-sm);
+    background: var(--sos-tint);
+    border: 1px solid rgba(198, 40, 40, 0.25);
+
+    strong {
+      display: block;
+      color: var(--text-primary);
+    }
+
+    span {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+  }
+
+  &__helplines {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+
+    @include m.tablet-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__call-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    min-height: var(--tap-target);
+    border-radius: var(--radius-sm);
+    background: var(--navy);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+
+    &:hover {
+      background: var(--navy-deep);
+    }
+
+    .num {
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--saffron);
+      color: #ffffff;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+  }
+}

@@ -10,7 +10,7 @@
 
 | Layer | Technology | Rationale |
 | :--- | :--- | :--- |
-| **Frontend & Android App** | **React + Vite + Tailwind CSS + Capacitor** | Single web codebase wrapped into an Android APK/AAB via Android Studio, plus `/admin` web dashboard for UC-9. |
+| **Frontend & Android App** | **React + Vite + SCSS + Capacitor** | Single web codebase wrapped into an Android APK/AAB via Android Studio, plus `#admin` dashboard for UC-9. |
 | **Backend API** | **FastAPI (Python 3.11)** on **Render** | High-speed async Python, automatic OpenAPI/Swagger docs, native compatibility with `google-genai`, Pillow, and `pgvector`. |
 | **Database & Vectors** | **Neon PostgreSQL + `pgvector`** *(with SQLite fallback for zero-config local dev)* | Stores structured POIs, facilities, ODOP items, anonymised analytics, and 768-dim RAG embeddings in a single DB. |
 | **AI & Vision** | **Gemini 3.5 Flash-Lite** (`gemini-3.5-flash-lite`, `google-genai`) + **`gemini-embedding-001`** (`output_dimensionality=768`) | Unified multimodal LLM (text RAG, camera image recognition, Hindi/English/regional multilingual responses, strict JSON output). |
@@ -57,8 +57,8 @@
   - [x] Anonymised Tourism Dept analytics & knowledge-gap tracker (`UC-9`)
   - [x] Offline site bundle endpoint (`GET /api/destinations/{slug}/offline-pack`)
   - [x] Idempotent CLI seed script (`backend/scripts/seed_destination.py`)
-  - [x] Indian-language Voice API (`backend/app/routers/voice.py` + `voice_service.py`) wiring **Sarvam AI** (`saaras:v4` STT, `bulbul:v3` TTS) + **Bhashini ULCA** 2-step pipeline + Capacitor `device_fallback`
-  - [x] Automated pytest verification across all 9 UCs, `pgvector` PostgreSQL compilation, and mocked Sarvam/Bhashini voice pipelines (`13/13 passed`)
+  - [x] Indian-language Voice & Translation API (`backend/app/routers/voice.py` + `voice_service.py` + `translate_service.py`) wiring **Sarvam AI** (`saaras:v4` STT, `bulbul:v3` TTS) + **Bhashini ULCA** + cached `/api/voice/translate` & TTS `auto_translate` + Capacitor `device_fallback`
+  - [x] Automated pytest verification across all 9 UCs, `pgvector` PostgreSQL compilation, mocked Sarvam/Bhashini voice pipelines, and cached translation (`14/14 passed`)
 - [x] **Phase 2A — Cloud Services Activated & Live Verified:**
   - [x] Free **Neon PostgreSQL (`pgvector 0.8.7`)** project connected via `backend/.env` (unused Neon boilerplate vars removed)
   - [x] Google AI Studio `GEMINI_API_KEY` configured (`gemini-3.5-flash-lite` + `gemini-embedding-001`); `backend/.env.example` sanitized
@@ -71,14 +71,18 @@
   - [ ] Deploy `backend/` to **Render** using `backend/render.yaml` and set `DATABASE_URL`, `GEMINI_API_KEY`, `SARVAM_API_KEY`, `CORS_ORIGINS` (plus optional `BHASHINI_*` keys if institutional access is obtained)
   - [ ] *(Optional enhancement)* Pre-generate static Hindi/English MP3 audio files for `tour_routes.json` stops
 - [ ] **Phase 3 — Frontend & Capacitor Android App (`frontend/`):**
-  - [ ] Scaffold React + Vite + Tailwind CSS + Capacitor Android project
-  - [ ] Build core Companion UI: Multilingual Chat (`UC-1`), Fact vs Folklore cards (`UC-3`), Persona selector (`UC-7`), Accessibility Mode & Read Aloud (`UC-8`)
-  - [ ] Integrate `@capacitor/camera` for Point & Ask (`UC-2`)
-  - [ ] Build Leaflet map + Audio Tour player with `@capacitor/geolocation` + manual controls (`UC-4`)
-  - [ ] Build Facilities filter view + persistent offline 1-Tap SOS modal (`UC-6`)
-  - [ ] Build Personalised Nearby & UP ODOP finder (`UC-5`)
-  - [ ] Implement "Download Offline Pack" (`@capacitor/filesystem` / IndexedDB + `@capacitor/network`)
-  - [ ] Build `/admin` Tourism Department Analytics Dashboard with Recharts (`UC-9`)
+  - [x] React + Vite + TypeScript + modular SCSS UI (`frontend/src/styles/`) themed around Uttar Pradesh Government & Digital India heritage (no Tailwind)
+  - [x] Location-aware UP Heritage Cities landing view (`CitySelectorView.tsx`) with custom hand-sketched SVG monument icons (only Agra clickable; 7 UP heritage cities as placeholders)
+  - [x] Build core Companion UI: Multilingual Chat (`UC-1`), Fact vs Folklore cards (`UC-3`), Persona selector (`UC-7`), Accessibility Mode `Aa+` & Sarvam/Web Speech Read Aloud (`UC-8`)
+  - [x] Photo Point & Ask UI (`CameraTab.tsx`, `UC-2`) with live/demo GPS attachment
+  - [x] Build Leaflet map + Audio Tour player with GPS proximity + manual controls (`TourTab.tsx`, `UC-4`)
+  - [x] Build Facilities filter view + persistent offline 1-Tap SOS modal (`FacilitiesTab.tsx` + `EmergencyModal.tsx`, `UC-6`)
+  - [x] Build Personalised Nearby & UP ODOP finder (`NearbyTab.tsx`, `UC-5`)
+  - [x] Implement "Download Offline Pack" (`localStorage` cache + online/offline failover + local keyword search)
+  - [x] Build Tourism Department Analytics Dashboard (`#admin`, `AdminDashboard.tsx`) with Recharts (`UC-9`)
+  - [x] Full 10-language UI i18n (`frontend/src/data/i18n.ts`) + cached batch translation (`translateCache.ts`) + auto-translated Sarvam AI / Web Speech TTS across `en, hi, mr, ta, bn, te, ur, fr, ja, es`
+  - [x] Readable typography (`Outfit` + `Inter` + Indic `Noto Sans` scripts) and Android/mobile-optimized SCSS layouts (swipeable filter bars, non-zooming 16px inputs, compact featured city grid, safe-area bottom nav)
+  - [ ] Add Capacitor (`@capacitor/core`, `@capacitor/cli`, `@capacitor/android`) & native plugins (`camera`, `geolocation`, `network`, `filesystem`) and sync Android Studio project
 - [ ] **Phase 4 — Verification & Demo Readiness:**
   - [ ] Build Android APK via Android Studio (using Android Studio's bundled JDK 17/21)
   - [ ] Test Airplane Mode offline fallback on Android device
@@ -138,7 +142,8 @@ Structured `ChatResponse` JSON -> (Optional) POST /api/voice/tts (Sarvam AI bulb
 | `GET /api/analytics/summary` | UC-9 | Aggregated questions, languages, spots, facilities, personas, and knowledge gaps |
 | `GET /api/voice/status` | UC-1, 4, 8 | Check Sarvam AI & Bhashini voice provider status |
 | `POST /api/voice/stt` | UC-1 | Speech-to-Text (`Sarvam AI` → `Bhashini` → `device_fallback`) |
-| `POST /api/voice/tts` | UC-1, 4, 8 | Text-to-Speech (`Sarvam AI` → `Bhashini` → `device_fallback`) |
+| `POST /api/voice/tts` | UC-1, 4, 8 | Text-to-Speech (`Sarvam AI` → `Bhashini` → `device_fallback`, optional `auto_translate`) |
+| `POST /api/voice/translate` | UC-1, 4, 5, 6 | Cached batch translation for UI cards, tour audio scripts & facilities |
 
 ---
 

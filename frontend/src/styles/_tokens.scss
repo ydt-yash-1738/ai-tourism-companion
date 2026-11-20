@@ -1,0 +1,74 @@
+// Uttar Pradesh Heritage x Digital India Design Tokens
+
+:root {
+  // Brand & Tricolour Digital India Accents
+  --saffron: #e86f1f;
+  --saffron-deep: #c95810;
+  --saffron-tint: #fff3e8;
+
+  --navy: #12346b;
+  --navy-deep: #0b2044;
+  --navy-tint: #edf3fc;
+
+  --emerald: #147a4b;
+  --emerald-deep: #0d5a36;
+  --emerald-tint: #eaf7f0;
+
+  // Heritage Marble & Sandstone Neutrals
+  --bg-ivory: #faf6ef;
+  --bg-parchment: #f3ece0;
+  --surface-card: #ffffff;
+  --surface-muted: #f7f2e9;
+  --border-sand: #e2d4be;
+  --border-strong: #c8b392;
+
+  // High-readability ink contrast for outdoor mobile sunlight
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #526077;
+
+  // Semantic Heritage Accents
+  --brass: #b88420;
+  --brass-tint: #fdf7e6;
+  --terracotta: #9b3d2c;
+  --terracotta-tint: #fdf0ed;
+  --sos-red: #c62828;
+  --sos-red-deep: #9c1a1a;
+  --sos-tint: #fdecec;
+
+  // Ultra-readable typography across Latin & Indic scripts (Outfit + Inter + Noto Sans)
+  --font-display:
+    'Outfit', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Bengali',
+    'Noto Sans Telugu', system-ui, -apple-system, 'Roboto', sans-serif;
+  --font-sans:
+    'Inter', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Bengali',
+    'Noto Sans Telugu', system-ui, -apple-system, 'Roboto', sans-serif;
+
+  // Geometry & Shadows
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 3px 14px rgba(18, 52, 107, 0.06), 0 1px 3px rgba(17, 24, 39, 0.05);
+  --shadow-lift: 0 12px 28px rgba(18, 52, 107, 0.12), 0 3px 8px rgba(232, 111, 31, 0.1);
+  --shadow-modal: 0 24px 60px rgba(11, 32, 68, 0.32);
+
+  --text-scale: 1;
+  --tap-target: 44px;
+}
+
+// UC-8 Accessibility Mode overrides
+body.a11y-mode {
+  --bg-ivory: #ffffff;
+  --bg-parchment: #f0f2f7;
+  --surface-card: #ffffff;
+  --border-sand: #2a3a59;
+  --border-strong: #12346b;
+  --text-primary: #000000;
+  --text-secondary: #111c33;
+  --text-muted: #1e2c48;
+  --text-scale: 1.18;
+  --tap-target: 52px;
+  font-weight: 500;
+}

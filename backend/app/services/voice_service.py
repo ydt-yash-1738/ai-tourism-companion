@@ -1,4 +1,5 @@
 import base64
+import logging
 from typing import Literal
 import httpx
 
@@ -10,6 +11,9 @@ from app.schemas.api import (
     VoiceTTSRequest,
     VoiceTTSResponse,
 )
+from app.services.translate_service import translate_text
+
+logger = logging.getLogger(__name__)
 
 SARVAM_STT_URL = "https://api.sarvam.ai/speech-to-text"
 SARVAM_TTS_URL = "https://api.sarvam.ai/text-to-speech"
@@ -100,8 +104,9 @@ def _sarvam_stt(
 ) -> VoiceSTTResponse:
     iso_lang, bcp47 = _normalize_language(language)
     sarvam_lang = bcp47 or "unknown"
+    clean_ctype = (content_type or "audio/wav").split(";", 1)[0].strip().lower() or "audio/wav"
     headers = {"api-subscription-key": settings.SARVAM_API_KEY.strip()}
-    files = {"file": (filename or "recording.wav", audio_bytes, content_type or "audio/wav")}
+    files = {"file": (filename or "recording.wav", audio_bytes, clean_ctype)}
     data = {"model": settings.SARVAM_STT_MODEL, "language_code": sarvam_lang}
 
     with httpx.Client(timeout=25.0) as client:
@@ -314,6 +319,7 @@ def transcribe_audio(
                 return _sarvam_stt(audio_bytes, filename, content_type, language)
             return _bhashini_stt(audio_bytes, filename, content_type, language)
         except Exception as exc:
+            logger.warning("STT provider '%s' failed: %s", prov, exc)
             errors.append(f"{prov}: {type(exc).__name__}")
 
     reason = (
@@ -333,15 +339,25 @@ def transcribe_audio(
 def synthesize_speech(req: VoiceTTSRequest) -> VoiceTTSResponse:
     """Synthesize speech via Sarvam AI or Bhashini, signaling device TTS fallback if unavailable."""
     iso_lang, _ = _normalize_language(req.language)
-    providers = _resolve_providers(req.provider, iso_lang)
+    spoken = req.text
+    if req.auto_translate and iso_lang not in ("en", "auto"):
+        spoken = translate_text(req.text, iso_lang)
+    effective_req = req if spoken == req.text else req.model_copy(update={"text": spoken})
+
+    providers = _resolve_providers(effective_req.provider, iso_lang)
     errors: list[str] = []
 
     for prov in providers:
         try:
-            if prov == "sarvam":
-                return _sarvam_tts(req)
-            return _bhashini_tts(req)
+            res = (
+                _sarvam_tts(effective_req)
+                if prov == "sarvam"
+                else _bhashini_tts(effective_req)
+            )
+            res.spoken_text = spoken
+            return res
         except Exception as exc:
+            logger.warning("TTS provider '%s' failed: %s", prov, exc)
             errors.append(f"{prov}: {type(exc).__name__}")
 
     reason = (
@@ -356,5 +372,6 @@ def synthesize_speech(req: VoiceTTSRequest) -> VoiceTTSResponse:
         provider="device_fallback",
         fallback_to_device=True,
         message=reason,
+        spoken_text=spoken,
     )
 

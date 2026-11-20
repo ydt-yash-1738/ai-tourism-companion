@@ -181,3 +181,105 @@ def test_voice_input_validation():
         bad_tts = client.post("/api/voice/tts", json={"text": "", "language": "hi"})
         assert bad_tts.status_code == 422
 
+
+def test_translate_endpoint_and_auto_translate_tts(monkeypatch):
+    from app.services import translate_service
+
+    translate_service.clear_translation_cache()
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "fake_gemini_key")
+    monkeypatch.setattr(settings, "SARVAM_API_KEY", "sarvam_test_key")
+
+    call_count = 0
+
+    class _FakeResp:
+        def __init__(self, text: str):
+            self.text = text
+
+    class _FakeModels:
+        def generate_content(self, **_kwargs):
+            nonlocal call_count
+            call_count += 1
+            return _FakeResp(
+                json.dumps({"translations": ["ताजमहाल शाहजहान यांनी बांधला."]})
+            )
+
+    class _FakeClient:
+        def __init__(self, **_kwargs):
+            self.models = _FakeModels()
+
+    monkeypatch.setattr(translate_service.genai, "Client", _FakeClient)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/text-to-speech":
+            body = json.loads(request.content.decode("utf-8"))
+            assert body["target_language_code"] == "mr-IN"
+            assert body["text"] == "ताजमहाल शाहजहान यांनी बांधला."
+            return httpx.Response(
+                200,
+                json={"audios": [base64.b64encode(b"MR_WAV").decode("ascii")]},
+            )
+        return httpx.Response(404)
+
+    _install_mock_transport(monkeypatch, handler)
+
+    with TestClient(app) as client:
+        # English passthrough
+        en_res = client.post(
+            "/api/voice/translate",
+            json={"texts": ["Welcome to Agra"], "target_language": "en"},
+        )
+        assert en_res.status_code == 200
+        assert en_res.json()["translations"] == ["Welcome to Agra"]
+        assert en_res.json()["translated"] is False
+
+        # Marathi batch translation (calls Gemini once, then hits cache)
+        mr_res = client.post(
+            "/api/voice/translate",
+            json={"texts": ["Shah Jahan built the Taj Mahal."], "target_language": "mr"},
+        )
+        assert mr_res.status_code == 200
+        assert mr_res.json()["translations"] == ["ताजमहाल शाहजहान यांनी बांधला."]
+        assert mr_res.json()["translated"] is True
+
+        # TTS with auto_translate=True reuses cached Marathi text and speaks mr-IN
+        tts = client.post(
+            "/api/voice/tts",
+            json={
+                "text": "Shah Jahan built the Taj Mahal.",
+                "language": "mr",
+                "auto_translate": True,
+            },
+        )
+        assert tts.status_code == 200
+        tdata = tts.json()
+        assert tdata["provider"] == "sarvam"
+        assert tdata["spoken_text"] == "ताजमहाल शाहजहान यांनी बांधला."
+        assert base64.b64decode(tdata["audio_base64"]) == b"MR_WAV"
+
+    assert call_count == 1
+    translate_service.clear_translation_cache()
+
+
+def test_sarvam_stt_strips_codec_mime_parameters(monkeypatch):
+    monkeypatch.setattr(settings, "SARVAM_API_KEY", "sarvam_test_key")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/speech-to-text":
+            body_bytes = request.content
+            assert b"audio/webm;codecs=opus" not in body_bytes
+            assert b"audio/webm" in body_bytes
+            return httpx.Response(200, json={"transcript": "Where is Taj Mahal?", "language_code": "en-IN"})
+        return httpx.Response(404)
+
+    _install_mock_transport(monkeypatch, handler)
+
+    with TestClient(app) as client:
+        res = client.post(
+            "/api/voice/stt",
+            files={"audio": ("voice_query.webm", b"WEBM_BYTES", "audio/webm;codecs=opus")},
+            data={"language": "en"},
+        )
+        assert res.status_code == 200
+        assert res.json()["provider"] == "sarvam"
+        assert res.json()["transcript"] == "Where is Taj Mahal?"
+

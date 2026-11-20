@@ -7,7 +7,10 @@ from app.schemas.api import (
     VoiceStatusResponse,
     VoiceTTSRequest,
     VoiceTTSResponse,
+    VoiceTranslateRequest,
+    VoiceTranslateResponse,
 )
+from app.services.translate_service import translate_texts
 from app.services.voice_service import get_voice_status, synthesize_speech, transcribe_audio
 
 MAX_AUDIO_BYTES = 10 * 1024 * 1024
@@ -50,4 +53,15 @@ async def speech_to_text(
 def text_to_speech(req: VoiceTTSRequest):
     """Convert answer/tour text into natural Indian-language speech audio (base64)."""
     return synthesize_speech(req)
+
+
+@router.post("/translate", response_model=VoiceTranslateResponse)
+def translate_batch(req: VoiceTranslateRequest):
+    """Batch-translate UI or heritage card text into the visitor's selected language."""
+    translations, translated = translate_texts(req.texts, req.target_language)
+    return VoiceTranslateResponse(
+        translations=translations,
+        target_language=req.target_language,
+        translated=translated,
+    )
 

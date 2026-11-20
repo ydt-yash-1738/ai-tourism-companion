@@ -1,0 +1,462 @@
+@use 'mixins' as m;
+
+.tab-panel {
+  animation: fadeSlideUp 0.25s ease;
+}
+
+.section-card {
+  @include m.card-surface;
+  padding: 14px;
+  margin-bottom: 12px;
+
+  @include m.tablet-up {
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+}
+
+// UC-1 + UC-3 Guide Chat
+.guide-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.starter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.chip-btn {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-ivory);
+  color: var(--navy-deep);
+  font-size: calc(0.83rem * var(--text-scale));
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.35;
+
+  &:hover {
+    background: var(--saffron-tint);
+    border-color: var(--saffron);
+  }
+}
+
+.chat-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.chat-bubble {
+  @include m.card-surface;
+  padding: 14px;
+  animation: fadeSlideUp 0.24s ease;
+  word-break: break-word;
+
+  @include m.tablet-up {
+    padding: 16px;
+  }
+
+  &.is-user {
+    align-self: flex-end;
+    max-width: 88%;
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+  }
+
+  &.is-assistant {
+    align-self: stretch;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+
+  &__summary {
+    margin: 0;
+    font-size: calc(0.98rem * var(--text-scale));
+    line-height: 1.62;
+  }
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+
+  @include m.tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.fact-box {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--navy-tint);
+  border-left: 4px solid var(--navy);
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  &__item {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    p {
+      margin: 0 0 4px;
+      font-size: calc(0.9rem * var(--text-scale));
+    }
+    cite {
+      font-style: normal;
+      font-size: 0.76rem;
+      color: var(--navy);
+      font-weight: 600;
+    }
+  }
+}
+
+.folklore-box {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--brass-tint);
+  border: 1px dashed var(--brass);
+  border-left: 4px solid var(--saffron);
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--terracotta);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  &__item {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    p {
+      margin: 0 0 4px;
+      font-size: calc(0.9rem * var(--text-scale));
+    }
+    cite {
+      font-style: normal;
+      font-size: 0.76rem;
+      color: var(--terracotta);
+      font-weight: 600;
+    }
+  }
+}
+
+.gap-notice {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--terracotta-tint);
+  color: var(--terracotta);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.chat-composer {
+  @include m.card-surface;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: sticky;
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 25;
+  box-shadow: 0 6px 24px rgba(18, 52, 107, 0.14);
+
+  @include m.tablet-up {
+    padding: 10px;
+    gap: 8px;
+    bottom: 12px;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    min-height: var(--tap-target);
+    border: 1px solid var(--border-sand);
+    border-radius: var(--radius-pill);
+    padding: 9px 14px;
+    background: var(--bg-ivory);
+    color: var(--text-primary);
+  }
+
+  .mic-recording {
+    background: var(--sos-red);
+    border-color: var(--sos-red);
+    color: #ffffff;
+    animation: pulseRing 1.2s infinite;
+  }
+}
+
+// UC-2 Camera Tab
+.camera-dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-ivory);
+  padding: 20px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  &__preview {
+    max-height: 230px;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-sand);
+    object-fit: cover;
+  }
+}
+
+.cue-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+
+  span {
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-parchment);
+    color: var(--navy-deep);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+}
+
+// Leaflet Map + Tours + Facilities
+.map-frame {
+  height: 235px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-sand);
+  margin-bottom: 12px;
+
+  @include m.tablet-up {
+    height: 360px;
+    margin-bottom: 14px;
+  }
+}
+
+.custom-pin {
+  background: transparent;
+  border: none;
+
+  &__badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+
+    &.is-active {
+      background: var(--saffron);
+      transform: scale(1.14);
+    }
+
+    &.is-accessible {
+      background: var(--emerald);
+    }
+
+    &.is-emergency {
+      background: var(--sos-red);
+    }
+  }
+}
+
+// Mobile horizontal swipeable chip bars
+.filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include m.tablet-up {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 8px;
+  }
+}
+
+.tour-stop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tour-stop {
+  @include m.card-surface;
+  padding: 13px;
+  border-left: 4px solid var(--border-strong);
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  &.is-current {
+    border-left-color: var(--saffron);
+    background: #fffaf3;
+  }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  &__a11y {
+    margin-top: 8px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--emerald-tint);
+    color: var(--emerald-deep);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+}
+
+.audio-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+
+  span {
+    width: 3px;
+    height: 100%;
+    background: currentColor;
+    border-radius: 2px;
+    animation: waveBar 0.75s ease-in-out infinite;
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+  }
+}
+
+// UC-5 Nearby + ODOP & UC-6 Facilities Cards
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  @include m.tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+.info-card {
+  @include m.card-surface;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  @include m.tablet-up {
+    padding: 16px;
+  }
+
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__tag {
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: var(--bg-parchment);
+    color: var(--navy-deep);
+
+    &.is-odop {
+      background: var(--emerald-tint);
+      color: var(--emerald-deep);
+      border: 1px solid rgba(20, 122, 75, 0.3);
+    }
+
+    &.is-saffron {
+      background: var(--saffron-tint);
+      color: var(--saffron-deep);
+    }
+
+    &.is-emergency {
+      background: var(--sos-tint);
+      color: var(--sos-red);
+    }
+  }
+
+  &__meta-list {
+    margin: 4px 0 0;
+    padding: 9px 0 0;
+    border-top: 1px solid var(--border-sand);
+    font-size: calc(0.84rem * var(--text-scale));
+    color: var(--text-secondary);
+    display: grid;
+    gap: 4px;
+  }
+
+  &__actions {
+    margin-top: auto;
+    padding-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
