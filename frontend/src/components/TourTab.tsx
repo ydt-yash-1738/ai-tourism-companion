@@ -11,6 +11,7 @@ import {
   Play,
   Square,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getTours, postAnalyticsEvent } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -27,6 +28,7 @@ import {
 import { LeafletMap, type MapPinItem } from './LeafletMap';
 
 interface TourTabProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   isOnline: boolean;
@@ -37,6 +39,7 @@ interface TourTabProps {
 }
 
 export function TourTab({
+  destinationSlug,
   language,
   persona,
   isOnline,
@@ -49,6 +52,7 @@ export function TourTab({
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
   const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
 
   const [maxMinutes, setMaxMinutes] = useState<number | undefined>(undefined);
   const [stepFreeOnly, setStepFreeOnly] = useState(false);
@@ -76,13 +80,13 @@ export function TourTab({
     });
   }, [offlinePack, maxMinutes, stepFreeOnly]);
 
-  const reqKey = isOnline ? `${maxMinutes ?? 'all'}|${stepFreeOnly}|${retryCount}` : null;
+  const reqKey = isOnline ? `${destinationSlug}|${maxMinutes ?? 'all'}|${stepFreeOnly}|${retryCount}` : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getTours('agra', { maxMinutes, stepFreeOnly })
+    getTours(destinationSlug, { maxMinutes, stepFreeOnly })
       .then((res) => {
         if (!active) return;
         setLiveRoutes(res);
@@ -97,7 +101,7 @@ export function TourTab({
     return () => {
       active = false;
     };
-  }, [reqKey, maxMinutes, stepFreeOnly, ui.serverErrorDesc]);
+  }, [reqKey, destinationSlug, maxMinutes, stepFreeOnly, ui.serverErrorDesc]);
 
   const routes = isOnline && !apiError ? liveRoutes : offlineRoutes;
 
@@ -188,7 +192,7 @@ export function TourTab({
     setActiveStopIdx(0);
     if (isOnline) {
       postAnalyticsEvent({
-        destination_slug: 'agra',
+        destination_slug: destinationSlug,
         event_type: 'tour_start',
         session_hash: sessionHash,
         language,
@@ -205,7 +209,7 @@ export function TourTab({
     const stop = stops[idx];
     if (stop && isOnline) {
       postAnalyticsEvent({
-        destination_slug: 'agra',
+        destination_slug: destinationSlug,
         event_type: 'spot_visit',
         session_hash: sessionHash,
         language,
@@ -419,7 +423,7 @@ export function TourTab({
           {activeRoute ? (
             <>
               <LeafletMap
-                center={[27.1751, 78.0421]}
+                center={destConfig.center}
                 pins={mapPins}
                 polyline={polyline}
                 userCoords={userCoords}

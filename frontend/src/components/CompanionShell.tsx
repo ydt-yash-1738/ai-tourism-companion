@@ -20,8 +20,10 @@ import {
   WifiOff,
   X,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { LANGUAGE_OPTIONS, PERSONA_OPTIONS } from '../data/upCities';
+import { translateBatchCached } from '../services/translateCache';
 import type { Monument, OfflinePack, PersonaType } from '../types/api';
 import { CameraTab } from './CameraTab';
 import { EmergencyModal } from './EmergencyModal';
@@ -34,6 +36,7 @@ import { TourTab } from './TourTab';
 export type CompanionTabId = 'guide' | 'camera' | 'tour' | 'nearby' | 'facilities';
 
 interface CompanionShellProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   a11yMode: boolean;
@@ -51,13 +54,6 @@ interface CompanionShellProps {
   onBackToCities: () => void;
   onOpenAdmin: () => void;
 }
-
-const TAB_HERO_IMAGES: Record<Exclude<CompanionTabId, 'guide'>, { image: string; position: string }> = {
-  tour: { image: '/images/monuments/darwaza-i-rauza.webp', position: 'center 45%' },
-  camera: { image: '/images/nearby/parchinkari-artisan-hub.webp', position: 'center 50%' },
-  nearby: { image: '/images/nearby/itimad-ud-daulah-baby-taj.webp', position: 'center 40%' },
-  facilities: { image: '/images/taj-mahal-banner.webp', position: 'center 75%' },
-};
 
 const ONBOARDING_KEY = 'up_companion_onboarded_v1';
 
@@ -78,6 +74,7 @@ function writeOnboarded() {
 }
 
 export function CompanionShell({
+  destinationSlug,
   language,
   persona,
   a11yMode,
@@ -96,11 +93,56 @@ export function CompanionShell({
   onOpenAdmin,
 }: CompanionShellProps) {
   const ui = getUiText(language);
+  const isHi = language.startsWith('hi');
+  const baseLang = language.toLowerCase().split('-')[0];
+  const destConfig = getDestinationConfig(destinationSlug);
   const [activeTab, setActiveTab] = useState<CompanionTabId>('guide');
   const [sosOpen, setSosOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardStep, setOnboardStep] = useState<number | null>(() => (readOnboarded() ? null : 0));
   const [scrolled, setScrolled] = useState(false);
+  const [translatedStrings, setTranslatedStrings] = useState<Record<string, string>>({});
+
+  const liveOk = isOnline && serverReachable;
+
+  useEffect(() => {
+    if (!liveOk || destinationSlug === 'agra' || baseLang === 'en' || baseLang === 'hi') {
+      return;
+    }
+    let active = true;
+    const raw = [destConfig.copy.companionTitleEn];
+    Object.values(destConfig.tabHeroes).forEach((hero) => {
+      if (hero.eyebrowEn) raw.push(hero.eyebrowEn);
+      if (hero.titleEn) raw.push(hero.titleEn);
+    });
+    const unique = Array.from(new Set(raw.filter(Boolean)));
+    translateBatchCached(unique, baseLang)
+      .then((res) => {
+        if (!active) return;
+        const next: Record<string, string> = {};
+        unique.forEach((orig, idx) => {
+          if (res[idx]) next[`${baseLang}::${orig}`] = res[idx];
+        });
+        setTranslatedStrings((prev) => ({ ...prev, ...next }));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [liveOk, destinationSlug, baseLang, destConfig]);
+
+  const trShell = (enText: string, hiText = ''): string => {
+    if (isHi && hiText) return hiText;
+    if (baseLang !== 'en' && baseLang !== 'hi') {
+      return translatedStrings[`${baseLang}::${enText}`] || enText;
+    }
+    return enText;
+  };
+
+  const companionTitle =
+    destinationSlug === 'agra'
+      ? ui.companionTitle
+      : trShell(destConfig.copy.companionTitleEn, destConfig.copy.companionTitleHi);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -121,8 +163,6 @@ export function CompanionShell({
   const connLabel =
     connection === 'online' ? ui.online : connection === 'offline' ? ui.offline : ui.serverUnreachable;
   const workingOffline = connection !== 'online';
-  // Tabs skip live requests when the server is known to be unreachable and use the offline pack at once
-  const liveOk = isOnline && serverReachable;
 
   const tabs: Array<{ id: CompanionTabId; label: string; icon: typeof MessageSquare }> = [
     { id: 'guide', label: ui.tabs.guide, icon: MessageSquare },
@@ -148,7 +188,7 @@ export function CompanionShell({
           </button>
 
           <div className="app-header__title">
-            <span className="app-header__city">{ui.companionTitle}</span>
+            <span className="app-header__city">{companionTitle}</span>
             <span className={`conn-badge is-${connection}`} role="status">
               <ConnIcon size={12} />
               {connLabel}
@@ -216,20 +256,31 @@ export function CompanionShell({
         )}
 
         <div key={activeTab} className="tab-stage">
-          {activeTab !== 'guide' && (
-            <PhotoHero
-              image={TAB_HERO_IMAGES[activeTab].image}
-              objectPosition={TAB_HERO_IMAGES[activeTab].position}
-              eyebrow={ui.tabHeroes[activeTab].eyebrow}
-              title={ui.tabHeroes[activeTab].title}
-            />
-          )}
+          {activeTab !== 'guide' && (() => {
+            const heroCfg = destConfig.tabHeroes[activeTab];
+            const heroEyebrow = heroCfg.eyebrowEn
+              ? trShell(heroCfg.eyebrowEn, heroCfg.eyebrowHi)
+              : ui.tabHeroes[activeTab].eyebrow;
+            const heroTitle = heroCfg.titleEn
+              ? trShell(heroCfg.titleEn, heroCfg.titleHi)
+              : ui.tabHeroes[activeTab].title;
+            return (
+              <PhotoHero
+                image={heroCfg.image}
+                objectPosition={heroCfg.position}
+                eyebrow={heroEyebrow}
+                title={heroTitle}
+              />
+            );
+          })()}
+
           {activeTab === 'guide' && (
             <GuideTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               simpleLanguage={a11yMode}
-              isOnline={isOnline && serverReachable}
+              isOnline={liveOk}
               sessionHash={sessionHash}
               monuments={monuments}
               offlinePack={offlinePack}
@@ -239,6 +290,7 @@ export function CompanionShell({
 
           {activeTab === 'camera' && (
             <CameraTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               simpleLanguage={a11yMode}
@@ -251,6 +303,7 @@ export function CompanionShell({
 
           {activeTab === 'tour' && (
             <TourTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               isOnline={liveOk}
@@ -262,11 +315,18 @@ export function CompanionShell({
           )}
 
           {activeTab === 'nearby' && (
-            <NearbyTab language={language} isOnline={liveOk} userCoords={userCoords} offlinePack={offlinePack} />
+            <NearbyTab
+              destinationSlug={destinationSlug}
+              language={language}
+              isOnline={liveOk}
+              userCoords={userCoords}
+              offlinePack={offlinePack}
+            />
           )}
 
           {activeTab === 'facilities' && (
             <FacilitiesTab
+              destinationSlug={destinationSlug}
               language={language}
               isOnline={liveOk}
               sessionHash={sessionHash}
@@ -408,6 +468,7 @@ export function CompanionShell({
       )}
 
       <EmergencyModal
+        destinationSlug={destinationSlug}
         open={sosOpen}
         onClose={() => setSosOpen(false)}
         language={language}

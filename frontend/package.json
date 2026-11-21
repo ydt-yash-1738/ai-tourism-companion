@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pack:export": "cd ../backend && python -m scripts.export_offline_pack --slug agra --out ../frontend/public/packs/agra.json",
+    "pack:export": "cd ../backend && python -m scripts.export_offline_pack --slug agra --out ../frontend/public/packs/agra.json && python -m scripts.export_offline_pack --slug sarnath --out ../frontend/public/packs/sarnath.json",
     "android:sync": "npm run build && cap sync android",
     "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
     "android:release": "npm run android:sync && cd android && ./gradlew assembleRelease"

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accessibility,
   AlertTriangle,
@@ -10,27 +10,25 @@ import {
   Landmark,
   Loader2,
   Mic,
+  RotateCcw,
   Send,
   ShieldCheck,
   Square,
   Volume2,
   WifiOff,
 } from 'lucide-react';
+import { getDestinationConfig, getMonumentMedia } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { PERSONA_OPTIONS } from '../data/upCities';
-import {
-  AGRA_VISITOR_SNAPSHOT,
-  GUIDE_MONUMENT_SPOTLIGHTS,
-  GUIDE_TOPIC_CARDS,
-  getMonumentMedia,
-} from '../data/agraMedia';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
 import { offlineLocalChatSearch } from '../services/offlineStore';
 import { speakText, startBrowserSpeechFallback, stopSpeaking } from '../services/speech';
+import { translateBatchCached } from '../services/translateCache';
 import type { ChatResponse, Monument, OfflinePack, PersonaType } from '../types/api';
 
 interface GuideTabProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   simpleLanguage: boolean;
@@ -51,6 +49,7 @@ interface ChatTurn {
 }
 
 export function GuideTab({
+  destinationSlug,
   language,
   persona,
   simpleLanguage,
@@ -62,6 +61,10 @@ export function GuideTab({
 }: GuideTabProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
+  const baseLang = language.toLowerCase().split('-')[0];
+  const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
+
   const [selectedMonument, setSelectedMonument] = useState<string>('');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,6 +73,8 @@ export function GuideTab({
   const [voiceStatus, setVoiceStatus] = useState<string>('');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatTurn[]>([]);
+  const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
+  const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
@@ -96,6 +101,103 @@ export function GuideTab({
     };
   }, []);
 
+  const spotlightMonuments = useMemo(() => {
+    const liveBySlug = new Map(monuments.map((m) => [m.slug, m]));
+    const merged = destConfig.monumentSpotlights.map((spot) => {
+      const live = liveBySlug.get(spot.slug);
+      return {
+        slug: spot.slug,
+        name: live?.name || spot.name,
+        nameHi: live?.name_hi || spot.nameHi,
+        shortSummary: live?.short_summary || spot.shortSummary,
+        shortSummaryHi: live?.short_summary_hi || spot.shortSummaryHi,
+        visitDurationMin: live?.visit_duration_min ?? spot.visitDurationMin,
+        stepFree: live?.step_free ?? spot.stepFree,
+        promptEn: spot.promptEn,
+        promptHi: spot.promptHi,
+      };
+    });
+
+    monuments.forEach((m) => {
+      if (!merged.some((item) => item.slug === m.slug)) {
+        merged.push({
+          slug: m.slug,
+          name: m.name,
+          nameHi: m.name_hi,
+          shortSummary: m.short_summary,
+          shortSummaryHi: m.short_summary_hi,
+          visitDurationMin: m.visit_duration_min,
+          stepFree: m.step_free,
+          promptEn: `Tell me the verified history and local folklore of ${m.name}.`,
+          promptHi: `${m.name_hi || m.name} का प्रमाणित इतिहास और लोककथा बताइए।`,
+        });
+      }
+    });
+
+    return merged;
+  }, [monuments, destConfig.monumentSpotlights]);
+
+  const translationReqKey = useMemo(() => {
+    if (!needsDynamicTranslate || !isOnline) return null;
+    return `${destinationSlug}|${baseLang}|${spotlightMonuments.map((m) => m.slug).join(',')}`;
+  }, [needsDynamicTranslate, isOnline, destinationSlug, baseLang, spotlightMonuments]);
+
+  const translating = Boolean(
+    translationReqKey && translationSettledKey !== translationReqKey,
+  );
+
+  useEffect(() => {
+    if (!translationReqKey) return;
+    let active = true;
+    const raw: string[] = [];
+    spotlightMonuments.forEach((m) => {
+      raw.push(m.name, m.shortSummary, m.promptEn);
+    });
+    destConfig.topicCards.forEach((t) => {
+      raw.push(t.badgeEn, t.titleEn, t.descEn, t.questionEn);
+    });
+    destConfig.visitorSnapshot.forEach((s) => {
+      raw.push(s.titleEn, s.bodyEn);
+    });
+    if (destinationSlug !== 'agra') {
+      raw.push(
+        destConfig.guideBanner.greetingEn,
+        destConfig.guideBanner.greetingSubEn,
+        destConfig.copy.guideHeadingEn,
+        destConfig.copy.allMonumentsEn,
+        destConfig.copy.exploreMonumentsHeadingEn,
+        destConfig.copy.chatPlaceholderEn,
+      );
+    }
+
+    const unique = Array.from(new Set(raw.filter(Boolean)));
+    translateBatchCached(unique, baseLang)
+      .then((res) => {
+        if (!active) return;
+        const next: Record<string, string> = {};
+        unique.forEach((orig, idx) => {
+          next[`${baseLang}::${orig}`] = res[idx] || orig;
+        });
+        setTranslatedMap((prev) => ({ ...prev, ...next }));
+        setTranslationSettledKey(translationReqKey);
+      })
+      .catch(() => {
+        if (active) setTranslationSettledKey(translationReqKey);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [translationReqKey, baseLang, destinationSlug, spotlightMonuments, destConfig]);
+
+  const tr = (enText: string, hiText = ''): string => {
+    if (isHi && hiText) return hiText;
+    if (needsDynamicTranslate) {
+      return translatedMap[`${baseLang}::${enText}`] || enText;
+    }
+    return enText;
+  };
+
   const sendQuestion = async (rawQuestion: string, monumentOverride?: string) => {
     const question = rawQuestion.trim();
     if (!question || loading) return;
@@ -117,7 +219,7 @@ export function GuideTab({
       if (isOnline) {
         try {
           res = await postChat({
-            destination_slug: 'agra',
+            destination_slug: destinationSlug,
             question,
             language,
             persona,
@@ -297,7 +399,11 @@ export function GuideTab({
     );
   };
 
-  const tr = (en: string, hi: string) => (isHi && hi ? hi : en);
+  const handleResetChat = () => {
+    stopSpeaking();
+    setSpeakingId(null);
+    setMessages([]);
+  };
 
   const monumentName = (slug: string | null | undefined) => {
     const m = monuments.find((x) => x.slug === slug);
@@ -305,24 +411,72 @@ export function GuideTab({
     return isHi && m.name_hi ? m.name_hi : m.name;
   };
 
+  const bannerSrc = `${import.meta.env.BASE_URL}${destConfig.guideBanner.image.replace(/^\//, '')}`;
+  const greetingSub =
+    destinationSlug === 'agra'
+      ? ui.greetingSub
+      : tr(destConfig.guideBanner.greetingSubEn, destConfig.guideBanner.greetingSubHi);
+  const greeting =
+    destinationSlug === 'agra'
+      ? ui.greeting
+      : tr(destConfig.guideBanner.greetingEn, destConfig.guideBanner.greetingHi);
+  const guideHeading =
+    destinationSlug === 'agra'
+      ? ui.guideHeading
+      : tr(destConfig.copy.guideHeadingEn, destConfig.copy.guideHeadingHi);
+  const allMonumentsLabel =
+    destinationSlug === 'agra'
+      ? ui.allMonuments
+      : tr(destConfig.copy.allMonumentsEn, destConfig.copy.allMonumentsHi);
+  const exploreHeading =
+    destinationSlug === 'agra'
+      ? ui.exploreMonumentsHeading
+      : tr(destConfig.copy.exploreMonumentsHeadingEn, destConfig.copy.exploreMonumentsHeadingHi);
+  const chatPlaceholder =
+    destinationSlug === 'agra'
+      ? ui.chatPlaceholder
+      : tr(destConfig.copy.chatPlaceholderEn, destConfig.copy.chatPlaceholderHi);
+
   return (
     <div className="guide-layout">
       <div className="photo-banner">
-        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" data-parallax="0.2" />
+        <img src={bannerSrc} alt="" aria-hidden="true" data-parallax="0.2" />
         <div className="guide-banner">
           <span className="guide-banner__eyebrow">
             <span className="dot-live" />
-            {ui.greetingSub}
+            {greetingSub}
           </span>
-          <h2>{ui.greeting}</h2>
+          <h2>{greeting}</h2>
         </div>
       </div>
 
       <section className="guide-intro">
-        <div className="guide-intro__head">
+        <div
+          className="guide-intro__head"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}
+        >
           <div>
-            <h3>{ui.guideHeading}</h3>
+            <h3>{guideHeading}</h3>
             <p>{ui.guideSub}</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {translating && (
+              <span className="translating-pill" role="status">
+                <Loader2 size={13} className="spin-icon" />
+                <span>{ui.translating}</span>
+              </span>
+            )}
+            {messages.length > 0 && (
+              <button
+                type="button"
+                className="pill-btn"
+                style={{ minHeight: 38, padding: '6px 12px', fontSize: '0.82rem' }}
+                onClick={handleResetChat}
+              >
+                <RotateCcw size={14} />
+                <span>{ui.newChat}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -350,7 +504,7 @@ export function GuideTab({
             onClick={() => setSelectedMonument('')}
           >
             <Landmark size={15} />
-            {ui.allMonuments}
+            {allMonumentsLabel}
           </button>
           {monuments.map((m) => (
             <button
@@ -371,13 +525,13 @@ export function GuideTab({
             <section>
               <div className="guide-section-head">
                 <div>
-                  <h3>{ui.exploreMonumentsHeading}</h3>
+                  <h3>{exploreHeading}</h3>
                   <p>{ui.exploreMonumentsSub}</p>
                 </div>
               </div>
               <div className="guide-monument-grid">
-                {GUIDE_MONUMENT_SPOTLIGHTS.map((item) => {
-                  const media = getMonumentMedia(item.slug);
+                {spotlightMonuments.map((item) => {
+                  const media = getMonumentMedia(item.slug, destinationSlug);
                   return (
                     <button
                       key={item.slug}
@@ -431,8 +585,8 @@ export function GuideTab({
                 </div>
               </div>
               <div className="guide-topic-grid">
-                {GUIDE_TOPIC_CARDS.map((topic) => {
-                  const focusSlug = topic.id === 'musamman-burj-story' ? 'musamman-burj' : '';
+                {destConfig.topicCards.map((topic) => {
+                  const focusSlug = topic.focusMonumentSlug || '';
                   return (
                     <button
                       key={topic.id}
@@ -457,8 +611,8 @@ export function GuideTab({
               </div>
             </section>
 
-            <section className="guide-snapshot-grid" aria-label="Agra visitor quick facts">
-              {AGRA_VISITOR_SNAPSHOT.map((tile, idx) => {
+            <section className="guide-snapshot-grid" aria-label={`${destConfig.nameEn} visitor quick facts`}>
+              {destConfig.visitorSnapshot.map((tile, idx) => {
                 const Icon = idx === 0 ? Clock : idx === 1 ? Compass : ShieldCheck;
                 return (
                   <div key={tile.id} className="guide-snapshot-tile">
@@ -619,8 +773,8 @@ export function GuideTab({
             setInput(e.target.value);
             if (voiceStatus && !recording && !transcribing) setVoiceStatus('');
           }}
-          placeholder={ui.chatPlaceholder}
-          aria-label={ui.chatPlaceholder}
+          placeholder={chatPlaceholder}
+          aria-label={chatPlaceholder}
         />
         <button type="submit" className="composer__send" disabled={!input.trim() || loading} aria-label="Send question">
           <Send size={19} />

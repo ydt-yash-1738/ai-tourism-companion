@@ -43,6 +43,21 @@ export const UP_HERITAGE_CITIES: UpHeritageCity[] = [
     clickable: true,
   },
   {
+    slug: 'sarnath',
+    name: 'Sarnath',
+    nameHi: 'सारनाथ',
+    monumentLabel: 'Dhamek Stupa & Ashoka Capital',
+    monumentLabelHi: 'धमेख स्तूप एवं अशोक स्तंभ',
+    tagline: 'Buddhist pilgrimage center where the first Dharma sermon was given & Banarasi ODOP crafts.',
+    taglineHi: 'पावन बौद्ध तीर्थ जहाँ भगवान बुद्ध ने प्रथम धर्मोपदेश दिया, अशोक की लाट एवं बनारसी शिल्प।',
+    image: '/images/heritage/sarnath.webp',
+    imageAlt: 'Ancient cylindrical brick and carved stone Dhamek Stupa at Sarnath',
+    objectPosition: 'center 36%',
+    lat: 25.3808,
+    lng: 83.0245,
+    clickable: true,
+  },
+  {
     slug: 'varanasi',
     name: 'Varanasi',
     nameHi: 'वाराणसी',
@@ -118,21 +133,6 @@ export const UP_HERITAGE_CITIES: UpHeritageCity[] = [
     clickable: false,
   },
   {
-    slug: 'sarnath',
-    name: 'Sarnath',
-    nameHi: 'सारनाथ',
-    monumentLabel: 'Dhamek Stupa & Ashoka Capital',
-    monumentLabelHi: 'धमेख स्तूप एवं अशोक स्तंभ',
-    tagline: 'Buddhist pilgrimage center where the first Dharma sermon was given.',
-    taglineHi: 'बौद्ध तीर्थ स्थल जहाँ भगवान बुद्ध ने प्रथम धर्मोपदेश दिया।',
-    image: '/images/heritage/sarnath.webp',
-    imageAlt: 'Ancient cylindrical brick and carved stone Dhamek Stupa at Sarnath',
-    objectPosition: 'center 36%',
-    lat: 25.3762,
-    lng: 83.0228,
-    clickable: false,
-  },
-  {
     slug: 'fatehpur-sikri',
     name: 'Fatehpur Sikri',
     nameHi: 'फतेहपुर सीकरी',
@@ -148,6 +148,14 @@ export const UP_HERITAGE_CITIES: UpHeritageCity[] = [
     clickable: false,
   },
 ];
+
+export const LIVE_DESTINATION_SLUGS: string[] = UP_HERITAGE_CITIES.filter((c) => c.clickable).map(
+  (c) => c.slug,
+);
+
+export function isLiveDestinationSlug(slug: string): boolean {
+  return LIVE_DESTINATION_SLUGS.includes(slug);
+}
 
 export const LANGUAGE_OPTIONS: LanguageOption[] = [
   { code: 'en', label: 'English', nativeLabel: 'English', bcp47: 'en-IN' },

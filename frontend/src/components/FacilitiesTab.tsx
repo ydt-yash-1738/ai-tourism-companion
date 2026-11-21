@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getFacilities } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -44,6 +45,7 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
 };
 
 interface FacilitiesTabProps {
+  destinationSlug: string;
   language: string;
   isOnline: boolean;
   sessionHash: string;
@@ -63,6 +65,7 @@ const FACILITY_TYPE_KEYS = [
 ];
 
 export function FacilitiesTab({
+  destinationSlug,
   language,
   isOnline,
   sessionHash,
@@ -73,6 +76,7 @@ export function FacilitiesTab({
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
   const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
 
   const [facilityType, setFacilityType] = useState<string>('');
   const [accessibleOnly, setAccessibleOnly] = useState(false);
@@ -83,8 +87,8 @@ export function FacilitiesTab({
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
-  const refLat = userCoords?.lat ?? 27.1751;
-  const refLng = userCoords?.lng ?? 78.0421;
+  const refLat = userCoords?.lat ?? destConfig.center[0];
+  const refLng = userCoords?.lng ?? destConfig.center[1];
 
   const offlineFacilities = useMemo(() => {
     return (offlinePack?.facilities || [])
@@ -101,14 +105,14 @@ export function FacilitiesTab({
   }, [offlinePack, facilityType, accessibleOnly, refLat, refLng]);
 
   const reqKey = isOnline
-    ? `${facilityType}|${accessibleOnly}|${refLat}|${refLng}|${retryCount}`
+    ? `${destinationSlug}|${facilityType}|${accessibleOnly}|${refLat}|${refLng}|${retryCount}`
     : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getFacilities('agra', {
+    getFacilities(destinationSlug, {
       facilityType: facilityType || undefined,
       accessibleOnly,
       lat: refLat,
@@ -129,7 +133,7 @@ export function FacilitiesTab({
     return () => {
       active = false;
     };
-  }, [reqKey, facilityType, accessibleOnly, refLat, refLng, sessionHash, ui.serverErrorDesc]);
+  }, [reqKey, destinationSlug, facilityType, accessibleOnly, refLat, refLng, sessionHash, ui.serverErrorDesc]);
 
   const facilities = isOnline && !apiError ? liveFacilities : offlineFacilities;
 
@@ -301,7 +305,7 @@ export function FacilitiesTab({
             />
           ) : (
             <>
-              <LeafletMap center={[27.1735, 78.0421]} pins={mapPins} userCoords={userCoords} />
+              <LeafletMap center={destConfig.facilitiesCenter} pins={mapPins} userCoords={userCoords} />
 
               <div className="cards-grid">
                 {facilities.map((item) => {

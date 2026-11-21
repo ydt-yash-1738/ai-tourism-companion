@@ -161,7 +161,9 @@ def _match_strength(tok: str, strong: set[str], weak: set[str]) -> float:
 
 _GENERIC_NAME_WORDS = {
     "main", "the", "of", "and", "gate", "pavilion", "tower", "octagonal", "great", "mukhya",
+    "stupa", "ruins", "shrine", "sarnath",
     "मुख्य", "एवं", "द्वार", "शाही", "प्रवेश", "भवन", "मीनार", "अष्टकोणीय",
+    "स्तूप", "अवशेष", "सारनाथ",
 }
 _PROPER_PHRASE_RE = re.compile(r"\b([A-Z][a-z]+(?:[ -][A-Z][a-z]+)+)\b")
 
@@ -345,8 +347,45 @@ def _format_context_block(chunks: list[KnowledgeChunk], monument_map: dict[int, 
     return "\n".join(lines)
 
 
+def _gap_follow_ups(destination_slug: str, is_hi: bool) -> list[str]:
+    if destination_slug == "sarnath":
+        return (
+            [
+                "बुद्ध ने सारनाथ में पहला उपदेश कहाँ दिया था?",
+                "अशोक का सिंह स्तंभ और सारनाथ संग्रहालय कब खुलता है?",
+                "धमेख स्तूप के पास शौचालय और पेयजल कहाँ है?",
+            ]
+            if is_hi
+            else [
+                "Where did Gautama Buddha deliver his first sermon?",
+                "How did the Sarnath Lion Capital become India's National Emblem?",
+                "Tell me the Golden Deer Jataka story of Sarnath",
+            ]
+        )
+    if destination_slug == "agra":
+        return (
+            ["ताजमहल क्यों बनाया गया?", "काले ताजमहल की कहानी सच है या लोककथा?", "पास का शौचालय कहाँ है?"]
+            if is_hi
+            else [
+                "Why was the Taj Mahal built?",
+                "Is the Black Taj Mahal story history or folklore?",
+                "What does Pietra Dura stone inlay mean?",
+            ]
+        )
+    return (
+        ["इस स्थान का प्रमुख इतिहास बताइए", "यहाँ की प्रसिद्ध लोककथाएँ क्या हैं?", "पास की सुविधाएँ कहाँ हैं?"]
+        if is_hi
+        else [
+            "What is the verified history of this heritage site?",
+            "What local folklore or traditions are linked here?",
+            "What accessible routes and facilities are nearby?",
+        ]
+    )
+
+
 def _build_local_fallback_chat(
     req: ChatRequest,
+    destination: Destination,
     chunks: list[KnowledgeChunk],
     best_score: float,
     monument_map: dict[int, Monument],
@@ -364,15 +403,7 @@ def _build_local_fallback_chat(
                 "I have flagged this question for the Tourism Department so official details can be added."
             )
         )
-        follow_ups = (
-            ["ताजमहल क्यों बनाया गया?", "काले ताजमहल की कहानी सच है या लोककथा?", "पास का शौचालय कहाँ है?"]
-            if is_hi
-            else [
-                "Why was the Taj Mahal built?",
-                "Is the Black Taj Mahal story history or folklore?",
-                "What does Pietra Dura stone inlay mean?",
-            ]
-        )
+        follow_ups = _gap_follow_ups(destination.slug, is_hi)
         return ChatResponse(
             answer_summary=gap_msg,
             verified_history=[],
@@ -465,11 +496,11 @@ def generate_chat_response(
     )
 
     if not chunks or best_score < GAP_THRESHOLD or not settings.has_gemini_key:
-        return _build_local_fallback_chat(req, chunks, best_score, monument_map)
+        return _build_local_fallback_chat(req, destination, chunks, best_score, monument_map)
 
     client = _get_genai_client()
     if client is None:
-        return _build_local_fallback_chat(req, chunks, best_score, monument_map)
+        return _build_local_fallback_chat(req, destination, chunks, best_score, monument_map)
 
     simple_rule = (
         "Use very simple, short everyday words suitable for low-literacy or screen-reader users. "
@@ -526,7 +557,7 @@ def generate_chat_response(
         )
     except Exception as exc:
         logger.warning("Gemini chat call failed; falling back: %s", exc)
-        return _build_local_fallback_chat(req, chunks, best_score, monument_map)
+        return _build_local_fallback_chat(req, destination, chunks, best_score, monument_map)
 
 
 def _prepare_jpeg_bytes(image_bytes: bytes) -> bytes:
