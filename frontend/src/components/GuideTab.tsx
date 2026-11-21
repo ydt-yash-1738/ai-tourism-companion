@@ -3,6 +3,7 @@ import {
   Accessibility,
   AlertTriangle,
   ArrowRight,
+  ChevronDown,
   BookOpen,
   ChevronRight,
   Clock,
@@ -14,6 +15,7 @@ import {
   RotateCcw,
   Send,
   ShieldCheck,
+  Sparkles,
   Square,
   UtensilsCrossed,
   Volume2,
@@ -50,6 +52,8 @@ interface ChatTurn {
   response?: ChatResponse;
   /** True when the answer came from the on-device offline pack, not the server */
   fromDevice?: boolean;
+  /** set when a question is re-asked after the answer style changed */
+  styleLabel?: string;
 }
 
 export function GuideTab({
@@ -72,6 +76,28 @@ export function GuideTab({
   const [selectedMonument, setSelectedMonument] = useState<string>('');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  // read synchronously (state is one render behind): is an answer on its way, and
+  // was the answer style changed meanwhile (then re-ask in it once the answer lands)
+  const loadingRef = useRef(false);
+  // answer-style menu on the search bar
+  const [styleMenuOpen, setStyleMenuOpen] = useState(false);
+  const styleMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!styleMenuOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!styleMenuRef.current?.contains(e.target as Node)) setStyleMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setStyleMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [styleMenuOpen]);
+  const pendingStyleRef = useRef<PersonaType | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [speakProgress, setSpeakProgress] = useState(0);
   const [speakPlaying, setSpeakPlaying] = useState(false);
@@ -204,12 +230,24 @@ export function GuideTab({
     return enText;
   };
 
-  const sendQuestion = async (rawQuestion: string, monumentOverride?: string) => {
+  const sendQuestion = async (
+    rawQuestion: string,
+    monumentOverride?: string,
+    /** answer in this style instead of the current one (used right after a style change) */
+    personaOverride?: PersonaType,
+  ) => {
     const question = rawQuestion.trim();
-    if (!question || loading) return;
+    if (!question || loadingRef.current) return;
+    loadingRef.current = true;
+    const activePersona = personaOverride ?? persona;
 
     clearVoiceStatus();
-    const userMsg: ChatTurn = { id: `u_${++msgSeqRef.current}`, role: 'user', text: question };
+    const userMsg: ChatTurn = {
+      id: `u_${++msgSeqRef.current}`,
+      role: 'user',
+      text: question,
+      styleLabel: personaOverride ? ui.personas[personaOverride] : undefined,
+    };
     const nextHistory = [...messages, userMsg].slice(-6).map((m) => ({
       role: m.role,
       content: m.role === 'assistant' && m.response ? m.response.answer_summary : m.text,
@@ -228,7 +266,7 @@ export function GuideTab({
             destination_slug: destinationSlug,
             question,
             language,
-            persona,
+            persona: activePersona,
             simple_language: simpleLanguage,
             monument_slug: (monumentOverride ?? selectedMonument) || null,
             session_hash: sessionHash,
@@ -239,15 +277,15 @@ export function GuideTab({
             offlinePack,
             question,
             language,
-            persona,
+            activePersona,
             simpleLanguage,
           );
         } catch {
-          res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+          res = offlineLocalChatSearch(offlinePack, question, language, activePersona, simpleLanguage);
           fromDevice = true;
         }
       } else {
-        res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+        res = offlineLocalChatSearch(offlinePack, question, language, activePersona, simpleLanguage);
         fromDevice = true;
       }
 
@@ -260,7 +298,11 @@ export function GuideTab({
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
+      const pendingStyle = pendingStyleRef.current;
+      pendingStyleRef.current = null;
+      if (pendingStyle && pendingStyle !== activePersona) void sendQuestion(question, monumentOverride, pendingStyle);
     }
   };
 
@@ -345,6 +387,43 @@ export function GuideTab({
   const askPlaceholder =
     language === 'en' ? 'Ask Raahi anything…' : isHi ? 'राही से कुछ भी पूछें…' : chatPlaceholderBase;
 
+  // What each answer style does, shown under the style tabs
+  const personaHint = (id: PersonaType): string => {
+    const hints: Record<PersonaType, [string, string]> = {
+      quick: ['Short, crisp facts.', 'छोटे, सटीक तथ्य।'],
+      kids: ['Told as a simple story for children.', 'बच्चों के लिए सरल कहानी के रूप में।'],
+      scholar: ['In depth: history, architecture and sources.', 'विस्तार से: इतिहास, स्थापत्य और स्रोत।'],
+      pilgrim: ['With the spiritual meaning and etiquette of the place.', 'स्थान के आध्यात्मिक महत्व और मर्यादा के साथ।'],
+    };
+    return isHi ? hints[id][1] : hints[id][0];
+  };
+
+  // A sample question per style about this place's main monument, asked in one tap
+  const personaExample = (id: PersonaType): string => {
+    const spot = destConfig.monumentSpotlights[0];
+    const place = spot ? (isHi ? spot.nameHi : spot.name) : isHi ? destConfig.nameHi : destConfig.nameEn;
+    const examples: Record<PersonaType, [string, string]> = {
+      quick: [`Give me the key facts about the ${place}`, `${place} के मुख्य तथ्य बताइए`],
+      kids: [`Tell me the story of the ${place} like a fairy tale`, `${place} की कहानी परी-कथा की तरह सुनाइए`],
+      scholar: [`Explain the architecture and history of the ${place}`, `${place} का स्थापत्य और इतिहास समझाइए`],
+      pilgrim: [`What is the spiritual meaning of the ${place}, and how should I visit?`, `${place} का आध्यात्मिक महत्व क्या है और वहाँ कैसे जाएँ?`],
+    };
+    return isHi ? examples[id][1] : examples[id][0];
+  };
+
+  // Changing the style re-asks the last question in it, so the change shows at once
+  const handlePersonaChange = (next: PersonaType) => {
+    if (next === persona) return;
+    onChangePersona(next);
+    if (loadingRef.current) {
+      // an answer is on its way: re-ask in the new style as soon as it arrives
+      pendingStyleRef.current = next;
+      return;
+    }
+    const lastQuestion = [...messages].reverse().find((m) => m.role === 'user');
+    if (lastQuestion) void sendQuestion(lastQuestion.text, undefined, next);
+  };
+
   return (
     <div className="guide-layout">
       <div className="photo-banner">
@@ -389,21 +468,6 @@ export function GuideTab({
               </button>
             )}
           </div>
-        </div>
-
-        <div className="segmented segmented--scroll" role="radiogroup" aria-label={ui.styleLabel}>
-          {PERSONA_OPTIONS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              role="radio"
-              aria-checked={persona === p.id}
-              className={persona === p.id ? 'is-active' : ''}
-              onClick={() => onChangePersona(p.id)}
-            >
-              {ui.personas[p.id]}
-            </button>
-          ))}
         </div>
 
         <div className="chip-rail" role="radiogroup" aria-label="Filter by monument">
@@ -514,6 +578,7 @@ export function GuideTab({
         {messages.map((turn) =>
           turn.role === 'user' ? (
             <div key={turn.id} className="chat-bubble is-user">
+              {turn.styleLabel && <span className="chat-bubble__style">{turn.styleLabel}</span>}
               {turn.text}
             </div>
           ) : (
@@ -740,6 +805,53 @@ export function GuideTab({
           sendQuestion(input);
         }}
       >
+        <div className="composer__style" ref={styleMenuRef}>
+          <button
+            type="button"
+            className="composer__style-btn"
+            aria-haspopup="true"
+            aria-expanded={styleMenuOpen}
+            onClick={() => setStyleMenuOpen((v) => !v)}
+            title={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}
+          >
+            <Sparkles size={13} aria-hidden="true" />
+            <span>{ui.personas[persona]}</span>
+            <ChevronDown size={13} aria-hidden="true" />
+          </button>
+          {styleMenuOpen && (
+            <div className="style-menu" role="radiogroup" aria-label={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}>
+              <p className="style-menu__title">{isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}</p>
+              {PERSONA_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={persona === p.id}
+                  className={`style-menu__item ${persona === p.id ? 'is-active' : ''}`}
+                  onClick={() => {
+                    handlePersonaChange(p.id);
+                    setStyleMenuOpen(false);
+                  }}
+                >
+                  <strong>{ui.personas[p.id]}</strong>
+                  <span>{personaHint(p.id)}</span>
+                </button>
+              ))}
+              {!loading && (
+                <button
+                  type="button"
+                  className="persona-try"
+                  onClick={() => {
+                    setStyleMenuOpen(false);
+                    void sendQuestion(personaExample(persona), undefined, persona);
+                  }}
+                >
+                  {isHi ? 'आज़माएँ: ' : 'Try: '}“{personaExample(persona)}” →
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <span className="composer__avatar" aria-hidden="true">
           <GuideAvatar variant="head" size={34} speaking={loading} />
         </span>

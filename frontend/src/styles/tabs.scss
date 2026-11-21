@@ -1052,3 +1052,117 @@
     border-color: var(--navy);
   }
 }
+
+// Answer style lives on the search bar (GuideTab): a small tab on the bar's top
+// edge shows the current style; it opens a menu just above the bar.
+.composer__style {
+  position: absolute;
+  left: 22px;
+  bottom: calc(100% - 1px);
+}
+
+.composer__style-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 5px;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--border-sand);
+  border-bottom: 0;
+  background: var(--surface-card);
+  color: var(--saffron-deep);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 -6px 14px rgba(11, 27, 51, 0.06);
+}
+
+.style-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: min(340px, calc(100vw - 40px));
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  border-radius: 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-sand);
+  box-shadow: 0 18px 44px rgba(11, 27, 51, 0.22);
+  z-index: 30;
+
+  &__title {
+    margin: 2px 6px 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  &__item {
+    display: grid;
+    gap: 1px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    strong {
+      font-size: 0.88rem;
+    }
+
+    span {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    &:hover {
+      background: var(--bg-parchment, #f4ede2);
+    }
+
+    &.is-active {
+      border-color: var(--saffron);
+      background: rgba(226, 105, 26, 0.07);
+
+      strong {
+        color: var(--saffron-deep);
+      }
+    }
+  }
+
+  .persona-try {
+    margin-top: 6px;
+    font-size: 0.78rem;
+  }
+}
+
+.persona-try {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--saffron);
+  background: rgba(226, 105, 26, 0.06);
+  color: var(--saffron-deep);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(226, 105, 26, 0.12);
+  }
+}
+
+// a question re-asked after the answer style changed shows that style
+.chat-bubble__style {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}

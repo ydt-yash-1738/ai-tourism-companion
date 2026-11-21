@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Accessibility,
   ArrowRight,
   BarChart3,
   Clock,
@@ -23,6 +22,7 @@ import { useReveal } from '../hooks/useReveal';
 import { UpHeritageCrest } from './HeritageSketchIcons';
 import { PHOTO_CREDITS } from '../data/photoCredits';
 import { ScrollStory } from './ScrollStory';
+import { FontSizeControl } from './FontSizeControl';
 
 interface CitySelectorViewProps {
   language: string;
@@ -57,11 +57,9 @@ function findNearestLiveCity(coords: GeoCoords) {
 
 export function CitySelectorView({
   language,
-  a11yMode,
   userCoords,
   onLocationDetected,
   onChangeLanguage,
-  onToggleA11y,
   onSelectDestination,
   onOpenAdmin,
 }: CitySelectorViewProps) {
@@ -276,16 +274,7 @@ export function CitySelectorView({
                   ))}
                 </select>
               </label>
-              <button
-                type="button"
-                className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
-                onClick={onToggleA11y}
-                aria-pressed={a11yMode}
-                aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
-                title={a11yMode ? ui.easyModeOn : ui.easyMode}
-              >
-                <Accessibility size={18} />
-              </button>
+              <FontSizeControl language={language} />
             </div>
           </header>
         }

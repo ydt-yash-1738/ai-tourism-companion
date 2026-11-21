@@ -4,15 +4,13 @@
 
 .story {
   position: relative;
-  min-height: 92svh;
+  // one full screen on every device (vh first for browsers without svh)
+  min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   background: var(--navy-ink);
   color: #fff;
   isolation: isolate;
-
-  @include m.tablet-up {
-    min-height: 96svh;
-  }
 
   &__photos {
     position: absolute;

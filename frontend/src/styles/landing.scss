@@ -878,3 +878,70 @@
     gap: 4px;
   }
 }
+
+// A− / A+ text-size control in the landing top bar (FontSizeControl.tsx)
+.font-size-ctl {
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  overflow: hidden;
+
+  &__btn {
+    min-width: 30px;
+    height: 100%;
+    padding: 0 5px;
+
+    @include m.tablet-up {
+      min-width: 40px;
+      padding: 0 8px;
+    }
+
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+
+    span {
+      font-size: 0.85em;
+      margin-left: 1px;
+    }
+
+    &.is-large {
+      font-size: 19px;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+
+  &__value {
+    // phones: just A− / A+, so the app title keeps its room
+    display: none;
+    min-width: 40px;
+
+    @include m.tablet-up {
+      display: block;
+    }
+
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.85;
+    border-inline: 1px solid rgba(255, 255, 255, 0.18);
+    line-height: 26px;
+  }
+}
