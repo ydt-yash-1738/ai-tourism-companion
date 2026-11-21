@@ -1,0 +1,166 @@
+[
+  {
+    "slug": "quick-30m",
+    "title": "30-Minute Sacred Core Walk (Step-Free)",
+    "title_hi": "30-मिनट त्वरित पावन स्तूप दर्शन (सुगम मार्ग)",
+    "duration_minutes": 30,
+    "step_free": true,
+    "description": "Ideal for visitors with half an hour or seeking a completely step-free paved route: walk from the monumental Dhamek Stupa across Dharmarajika Stupa to Emperor Ashoka's inscribed pillar.",
+    "description_hi": "कम समय वाले या सीढ़ी-रहित सुगम मार्ग चाहने वाले यात्रियों के लिए उत्तम सैर: धमेख स्तूप से प्रारंभ कर धर्मराजिका स्तूप और अशोक स्तंभ के अभिलेख तक समतल पक्का मार्ग।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "dhamek-stupa",
+        "duration_min": 10,
+        "audio_script_en": "Welcome to Dhamek Stupa in Sarnath, rising 43.6 metres above the ancient Deer Park where Gautama Buddha delivered his first sermon. Look closely at the carved Chunar sandstone band wrapping the drum—Gupta artisans carved delicate lotus scrolls and geometric swastikas over Emperor Ashoka's original Mauryan brick core.",
+        "audio_script_hi": "सारनाथ के धमेख स्तूप में आपका स्वागत है। 43.6 मीटर ऊँचा यह स्तूप उसी पावन मृगदाव में खड़ा है जहाँ भगवान बुद्ध ने प्रथम उपदेश दिया था। इसके निचले भाग पर गुप्तकालीन कलाकारों द्वारा चुनार के पत्थर पर की गई कमल, लताओं और स्वस्तिक की बारीक नक्काशी देखें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level paved circumambulation walkway with shaded lawn benches."
+      },
+      {
+        "order": 2,
+        "monument_slug": "dharmarajika-stupa",
+        "duration_min": 8,
+        "audio_script_en": "Beside the pathway lie the circular brick rings of Dharmarajika Stupa, originally erected by Emperor Ashoka to enshrine Buddha relics. In 1794, local workers dismantled its bricks and uncovered a green marble relic urn, alerting archaeologists to rediscover Sarnath.",
+        "audio_script_hi": "मार्ग के किनारे धर्मराजिका स्तूप की गोलाकार ईंटों की नींव है, जिसे सम्राट अशोक ने बुद्ध के अस्थि-अवशेषों के लिए बनवाया था। 1794 में इसकी खुदाई में मिले अस्थि-पात्र से ही सारनाथ की आधुनिक पुरातात्विक खोज की शुरुआत हुई।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Flat brick path connects directly from Dhamek Stupa with zero steps."
+      },
+      {
+        "order": 3,
+        "monument_slug": "ashoka-pillar-sarnath",
+        "duration_min": 12,
+        "audio_script_en": "Under the protective canopy stands the polished Chunar sandstone base of Emperor Ashoka's pillar, carved around 250 BCE with his Brahmi Schism Edict urging harmony in the Sangha. Its famous four-lion top—India's National Emblem—is preserved steps away in the Museum.",
+        "audio_script_hi": "सुरक्षा छतरी के नीचे सम्राट अशोक के पॉलिश किए चुनार बलुआ पत्थर के स्तंभ का मूल आधार स्थित है, जिस पर ब्राह्मी लिपि में संघ की एकता का संदेश उत्कीर्ण है। इसका प्रसिद्ध चार-सिंह शीर्ष—भारत का राष्ट्रीय प्रतीक—समीप स्थित संग्रहालय में सुरक्षित है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Step-free level approach right up to the protective viewing rail."
+      }
+    ]
+  },
+  {
+    "slug": "classic-1hr",
+    "title": "1-Hour First Sermon & National Emblem Trail (Step-Free)",
+    "title_hi": "1-घंटे की प्रथम उपदेश एवं राष्ट्रीय प्रतीक यात्रा (सुगम मार्ग)",
+    "duration_minutes": 60,
+    "step_free": true,
+    "description": "A balanced one-hour step-free circuit linking the outdoor ruins of Buddha's first sermon and the Nigrodhamiga Deer legend directly to the Lion Capital inside Sarnath Archaeological Museum (open Sat-Thu).",
+    "description_hi": "बुद्ध के प्रथम उपदेश स्थल, स्वर्ण मृग जातक कथा, अशोक स्तंभ और सारनाथ संग्रहालय में स्थित राष्ट्रीय प्रतीक (अशोक की लाट) को जोड़ने वाली एक घंटे की सीढ़ी-रहित यात्रा (संग्रहालय शुक्रवार बंद रहता है)।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "dhamek-stupa",
+        "duration_min": 15,
+        "audio_script_en": "Begin at Dhamek Stupa. Recorded history places Buddha's Dhammacakkappavattana Sutta here, while the Nigrodhamiga Jataka folklore remembers the compassionate Golden Deer King who offered his life to protect his herd, giving Sarnath its ancient name Mrigadava—the Deer Park.",
+        "audio_script_hi": "धमेख स्तूप से यात्रा प्रारंभ करें। ऐतिहासिक अभिलेख इसे बुद्ध के धर्मचक्रप्रवर्तन का केंद्र मानते हैं, वहीं निग्रोधमिग जातक लोककथा में करुणामय स्वर्ण मृगराज द्वारा अपने झुंड की रक्षा की कथा मिलती है, जिससे इसे मृगदाव नाम मिला।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Step-free garden loop with drinking water station nearby."
+      },
+      {
+        "order": 2,
+        "monument_slug": "dharmarajika-stupa",
+        "duration_min": 10,
+        "audio_script_en": "Walk past the concentric brick walls of Dharmarajika Stupa, expanded six times over 1,400 years before Jagat Singh's 1794 excavation sparked modern conservation across the park.",
+        "audio_script_hi": "धर्मराजिका स्तूप की संकेंद्रित ईंट दीवारों के पास रुकें, जिनका चौदह सौ वर्षों में छह बार विस्तार हुआ और 1794 के उत्खनन के बाद पूरे क्षेत्र का संरक्षण आरंभ हुआ।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Even brick pathway with resting benches along the lawn edge."
+      },
+      {
+        "order": 3,
+        "monument_slug": "ashoka-pillar-sarnath",
+        "duration_min": 10,
+        "audio_script_en": "Pause at Ashoka's Pillar beside the excavated Main Shrine. Notice its mirror-like Mauryan polish and deep Brahmi letters—discovered buried beside the broken lion capital by Friedrich Oertel in 1904-1905.",
+        "audio_script_hi": "मुख्य विहार अवशेषों के पास अशोक स्तंभ के दर्शन करें। इसकी दर्पण जैसी मौर्यकालीन चमक और ब्राह्मी लिपि 1904-1905 की खुदाई में खोजी गई थी।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level approach with shaded seating beside the western monastery ruins."
+      },
+      {
+        "order": 4,
+        "monument_slug": "sarnath-archaeological-museum",
+        "duration_min": 25,
+        "audio_script_en": "Cross the road to the 1910 Sarnath Archaeological Museum via its entrance ramp. Inside the main hall stands the original Lion Capital of Ashoka—adopted on 26 January 1950 as India's National Emblem—alongside the serene 5th-century Gupta Preaching Buddha. Note: closed every Friday.",
+        "audio_script_hi": "सड़क पार कर रैंप के माध्यम से 1910 में बने सारनाथ संग्रहालय में प्रवेश करें। मुख्य कक्ष में भारत का राष्ट्रीय प्रतीक—मूल सिंह स्तंभ शीर्ष—और गुप्तकालीन उपदेश मुद्रा की बुद्ध प्रतिमा सुशोभित हैं। ध्यान दें: संग्रहालय प्रत्येक शुक्रवार बंद रहता है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Wheelchair ramp at museum gate; cloakroom lockers available for cameras and bags."
+      }
+    ]
+  },
+  {
+    "slug": "half-day-3hr",
+    "title": "Half-Day Complete Sarnath Heritage & Monastery Circuit",
+    "title_hi": "अर्ध-दिवसीय संपूर्ण सारनाथ स्तूप, संग्रहालय एवं विहार परिक्रमा",
+    "duration_minutes": 180,
+    "step_free": false,
+    "description": "Experience all of Sarnath's layered eras—from Gupta & Mughal Chaukhandi Stupa and the Lion Capital Museum to the Archaeological Park and Mulagandhakuti Vihara's Japanese frescoes and Sacred Bodhi Tree.",
+    "description_hi": "चौखंडी स्तूप की मुगल मीनार, संग्रहालय के राष्ट्रीय प्रतीक, धमेख स्तूप के खंडहर और मूलगंधकुटी विहार के जापानी भित्तिचित्र व पवित्र बोधि वृक्ष तक की तीन घंटे की संपूर्ण विरासत यात्रा।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "chaukhandi-stupa",
+        "duration_min": 20,
+        "audio_script_en": "Start at Chaukhandi Stupa, half a kilometre south of the main park. Buddha reunited with his five former ascetic companions here, and in 1588 CE Govardhan built the octagonal brick Mughal tower above it to mark Emperor Humayun's overnight stay.",
+        "audio_script_hi": "मुख्य उद्यान से आधा किलोमीटर दक्षिण स्थित चौखंडी स्तूप से शुरुआत करें। यहाँ बुद्ध अपने पाँच तपस्वी साथियों से पुनः मिले थे, और इसके शीर्ष पर 1588 ई. में हुमायूँ की स्मृति में अष्टकोणीय मुगल मीनार बनाई गई।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Garden loop is level; ascending the brick terraces involves steep steps."
+      },
+      {
+        "order": 2,
+        "monument_slug": "sarnath-archaeological-museum",
+        "duration_min": 35,
+        "audio_script_en": "Next, explore the five galleries of the Sarnath Archaeological Museum. Examine the four Asiatic lions and 24-spoked Dharma wheel of India's National Emblem, plus the Gupta-era sandstone Preaching Buddha.",
+        "audio_script_hi": "अब सारनाथ संग्रहालय की पाँच दीर्घाओं का अवलोकन करें, जहाँ भारत का राष्ट्रीय प्रतीक चार-सिंह स्तंभ शीर्ष और गुप्तकालीन उपदेश मुद्रा की बुद्ध प्रतिमा स्थापित हैं।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Single-level step-free galleries; photography prohibited inside."
+      },
+      {
+        "order": 3,
+        "monument_slug": "ashoka-pillar-sarnath",
+        "duration_min": 25,
+        "audio_script_en": "Enter the Archaeological Park to stand beside the in-situ base of Ashoka's Pillar and surrounding monastic cells where generations of Buddhist scholars lived and debated.",
+        "audio_script_hi": "पुरातात्विक उद्यान में प्रवेश कर अशोक स्तंभ के मूल आधार और प्राचीन मठों के अवशेष देखें, जहाँ सदियों तक बौद्ध भिक्षुओं ने अध्ययन किया।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Shaded seating and RO drinking water near the entrance."
+      },
+      {
+        "order": 4,
+        "monument_slug": "dharmarajika-stupa",
+        "duration_min": 20,
+        "audio_script_en": "Examine the circular brickwork of Dharmarajika Stupa and surrounding votive stupas—remembering both its Mauryan relic chamber and the 1794 discovery that unveiled ancient Sarnath.",
+        "audio_script_hi": "धर्मराजिका स्तूप की गोलाकार संरचना और छोटे संकल्प-स्तूपों को देखें, जिनकी 1794 की खुदाई ने सारनाथ को विश्व पटल पर पुनः उजागर किया।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Paved loop directly connects to Dhamek Stupa."
+      },
+      {
+        "order": 5,
+        "monument_slug": "dhamek-stupa",
+        "duration_min": 35,
+        "audio_script_en": "Circumambulate Dhamek Stupa peacefully, observing the eight Buddha niches and geometric Gupta stone carvings while reflecting on the Four Noble Truths taught right here.",
+        "audio_script_hi": "धमेख स्तूप की शांत परिक्रमा करें और गुप्तकालीन ज्यामितीय व पुष्प नक्काशी को निहारते हुए यहीं दिए गए चार आर्य सत्यों का मनन करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Step-free path; accessible restrooms nearby."
+      },
+      {
+        "order": 6,
+        "monument_slug": "mulagandhakuti-vihara",
+        "duration_min": 45,
+        "audio_script_en": "Conclude at Mulagandhakuti Vihara. Step into the prayer hall (stairs required, shoes off) to view Japanese artist Kosetsu Nosu's 1930s frescoes of Buddha's life, then rest under the Sacred Bodhi Tree descended from Bodh Gaya via Sri Lanka.",
+        "audio_script_hi": "मूलगंधकुटी विहार में अपनी यात्रा पूर्ण करें। प्रार्थना कक्ष (जूते उतारकर व सीढ़ियों से) में कोसेत्सु नोसु के अद्भुत भित्तिचित्र देखें और बाहर पवित्र बोधि वृक्ष की छाया में विश्राम करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Bodhi Tree courtyard is flat; inner shrine entrance has stairs."
+      }
+    ]
+  }
+]
+

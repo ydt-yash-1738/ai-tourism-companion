@@ -11,12 +11,13 @@ export interface CarouselSlide {
   body: string;
   badge: string;
   live: boolean;
+  ctaLabel?: string;
 }
 
 interface HeritageCarouselProps {
   slides: CarouselSlide[];
   ctaLabel: string;
-  onSelectLive: () => void;
+  onSelectLive: (slideId: string) => void;
   label: string;
 }
 
@@ -98,8 +99,12 @@ export function HeritageCarousel({ slides, ctaLabel, onSelectLive, label }: Heri
               <span className="carousel__subtitle">{slide.subtitle}</span>
               <p>{slide.body}</p>
               {slide.live && (
-                <button type="button" className="btn-primary btn-primary--compact" onClick={onSelectLive}>
-                  <span>{ctaLabel}</span>
+                <button
+                  type="button"
+                  className="btn-primary btn-primary--compact"
+                  onClick={() => onSelectLive(slide.id)}
+                >
+                  <span>{slide.ctaLabel || ctaLabel}</span>
                   <ArrowRight size={18} />
                 </button>
               )}

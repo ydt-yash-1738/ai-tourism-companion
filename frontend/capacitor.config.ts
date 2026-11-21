@@ -9,6 +9,11 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
   },
   plugins: {
+    // Route fetch through Android's native HTTP stack: no CORS, so the app reaches
+    // the deployed backend regardless of the server's allowed-origins list
+    CapacitorHttp: {
+      enabled: true,
+    },
     SplashScreen: {
       launchShowDuration: 1400,
       launchAutoHide: true,

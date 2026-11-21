@@ -44,7 +44,13 @@ export async function speakText(
   text: string,
   languageCode: string,
   onStateChange?: (state: AudioPlaybackState) => void,
-  options?: { autoTranslate?: boolean },
+  options?: {
+    autoTranslate?: boolean;
+    /** Playback progress 0..1, for captions that follow the voice */
+    onProgress?: (fraction: number) => void;
+    /** Speaking speed multiplier (1 = normal) */
+    rate?: number;
+  },
 ): Promise<'sarvam' | 'device' | 'cancelled'> {
   stopSpeaking();
   if (!text.trim()) {
@@ -86,7 +92,13 @@ export async function speakText(
             onStateChange?.('playing');
           }
         };
+        audio.playbackRate = options?.rate ?? 1;
         audio.onplaying = markPlaying;
+        audio.ontimeupdate = () => {
+          if (token === activePlaybackToken && audio.duration > 0) {
+            options?.onProgress?.(audio.currentTime / audio.duration);
+          }
+        };
         audio.onended = () => {
           if (currentAudio === audio) currentAudio = null;
           if (token === activePlaybackToken) onStateChange?.('idle');
@@ -120,11 +132,18 @@ export async function speakText(
   if (isNative) {
     const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === languageCode);
     onStateChange?.('playing');
+    // Native TTS gives no word timings: estimate progress from typical speaking speed
+    const started = performance.now();
+    const expectedMs = Math.max(1500, (textForDeviceFallback.length / 14 / (options?.rate ?? 1)) * 1000);
+    const timer = window.setInterval(() => {
+      if (token === activePlaybackToken) options?.onProgress?.(Math.min(0.99, (performance.now() - started) / expectedMs));
+    }, 200);
     try {
-      await TextToSpeech.speak({ text: textForDeviceFallback, lang: langMeta?.bcp47 || 'en-IN', rate: 0.96 });
+      await TextToSpeech.speak({ text: textForDeviceFallback, lang: langMeta?.bcp47 || 'en-IN', rate: 0.96 * (options?.rate ?? 1) });
     } catch {
       // No voice for this language on the device: finish quietly
     }
+    window.clearInterval(timer);
     if (token === activePlaybackToken) onStateChange?.('idle');
     return token === activePlaybackToken ? 'device' : 'cancelled';
   }
@@ -149,7 +168,7 @@ export async function speakText(
       utterance.voice = matchedVoice;
     }
 
-    utterance.rate = 0.96;
+    utterance.rate = 0.96 * (options?.rate ?? 1);
     let started = false;
     let settled = false;
     const safetyTimer = window.setTimeout(() => {
@@ -163,6 +182,11 @@ export async function speakText(
       window.clearTimeout(safetyTimer);
     };
 
+    utterance.onboundary = (ev) => {
+      if (token === activePlaybackToken && textForDeviceFallback.length) {
+        options?.onProgress?.(ev.charIndex / textForDeviceFallback.length);
+      }
+    };
     utterance.onstart = () => {
       if (token !== activePlaybackToken) return;
       started = true;

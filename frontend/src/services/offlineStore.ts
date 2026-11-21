@@ -21,6 +21,28 @@ export const DEFAULT_AGRA_HELPLINES: HelplineItem[] = [
   { label: 'S.N. Medical College Hospital', label_hi: 'एस.एन. मेडिकल कॉलेज अस्पताल', number: '+91-562-2260353', category: 'medical' },
 ];
 
+export const DEFAULT_LUCKNOW_HELPLINES: HelplineItem[] = [
+  { label: 'National Emergency (Police / Fire / Medical)', label_hi: 'राष्ट्रीय आपातकाल', number: '112', category: 'emergency' },
+  { label: 'Medical Ambulance', label_hi: 'एम्बुलेंस सेवा', number: '108', category: 'medical' },
+  { label: 'Women Power Line (UP)', label_hi: 'महिला पावर लाइन (उ.प्र.)', number: '1090', category: 'police' },
+  { label: 'UP / Incredible India Tourist Helpline', label_hi: 'पर्यटन हेल्पलाइन', number: '1363', category: 'help_desk' },
+];
+
+export const DEFAULT_SARNATH_HELPLINES: HelplineItem[] = [
+  { label: 'National Emergency (Police / Fire / Medical)', label_hi: 'राष्ट्रीय आपातकाल', number: '112', category: 'emergency' },
+  { label: 'Medical Ambulance', label_hi: 'एम्बुलेंस सेवा', number: '108', category: 'medical' },
+  { label: 'Women Power Line (UP)', label_hi: 'महिला पावर लाइन (उ.प्र.)', number: '1090', category: 'police' },
+  { label: 'UP / Incredible India Tourist Helpline', label_hi: 'पर्यटन हेल्पलाइन', number: '1363', category: 'help_desk' },
+  { label: 'Sarnath Police Station (Varanasi)', label_hi: 'सारनाथ पुलिस थाना (वाराणसी)', number: '+91-542-2595406', category: 'police' },
+  { label: 'Pt. Deen Dayal Upadhyaya District Hospital', label_hi: 'पं. दीनदयाल उपाध्याय जिला अस्पताल', number: '+91-542-2508017', category: 'medical' },
+];
+
+export function getDefaultHelplines(slug: string): HelplineItem[] {
+  if (slug === 'sarnath') return DEFAULT_SARNATH_HELPLINES;
+  if (slug === 'lucknow') return DEFAULT_LUCKNOW_HELPLINES;
+  return DEFAULT_AGRA_HELPLINES;
+}
+
 export function getOrCreateSessionHash(): string {
   try {
     const existing = sessionStorage.getItem(SESSION_KEY);
@@ -62,6 +84,22 @@ export function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: 
   return Math.round(2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
+function getOfflineGapSuggestions(slug: string, isHi: boolean): string[] {
+  if (slug === 'lucknow') {
+    return isHi
+      ? ['बड़ा इमामबाड़ा किसने बनवाया?', 'भूलभुलैया क्या है?']
+      : ['Who built the Bara Imambara?', 'What is the Bhool Bhulaiya?'];
+  }
+  if (slug === 'sarnath') {
+    return isHi
+      ? ['बुद्ध ने पहला उपदेश कहाँ दिया था?', 'अशोक स्तंभ और सारनाथ संग्रहालय कब बंद रहता है?']
+      : ['Where did Gautama Buddha deliver his first sermon?', 'Tell me the Golden Deer Jataka story of Sarnath'];
+  }
+  return isHi
+    ? ['ताजमहल क्यों बनाया गया?', 'काले ताजमहल की कहानी सच है या लोककथा?']
+    : ['Why was the Taj Mahal built?', 'Is the Black Taj Mahal myth true?'];
+}
+
 export function offlineLocalChatSearch(
   pack: OfflinePack | null,
   question: string,
@@ -74,7 +112,7 @@ export function offlineLocalChatSearch(
     return {
       answer_summary: isHi
         ? 'ऑफ़लाइन पैक अभी डाउनलोड नहीं हुआ है। कम नेटवर्क पर उपयोग के लिए कृपया ऊपर "Offline Pack" बटन दबाएँ।'
-        : 'Offline pack is not downloaded yet. Tap "Download Offline Pack" while online to enable local answers without internet.',
+        : 'Offline pack is not downloaded yet. Tap "Offline Pack" while online to enable local answers without internet.',
       verified_history: [],
       folklore_legends: [],
       follow_up_suggestions: [],
@@ -97,7 +135,7 @@ export function offlineLocalChatSearch(
         : 'No matching verified info found in your downloaded offline pack for that query.',
       verified_history: [],
       folklore_legends: [],
-      follow_up_suggestions: ['Why was the Taj Mahal built?', 'Is the Black Taj Mahal myth true?'],
+      follow_up_suggestions: getOfflineGapSuggestions(pack.destination.slug, isHi),
       is_knowledge_gap: true,
       matched_monument_slug: null,
       language,
@@ -153,8 +191,6 @@ export function offlineLocalChatSearch(
     mode: 'local_fallback',
   };
 }
-
-
 /**
  * Offline "point the camera" fallback, mirroring the backend's GPS fallback:
  * with no server to look at the photo, name the nearest monument to the
