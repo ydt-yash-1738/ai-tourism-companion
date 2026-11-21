@@ -3,17 +3,29 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { useScrollParallax } from './hooks/useScrollParallax';
 import { CitySelectorView } from './components/CitySelectorView';
 import { CompanionShell } from './components/CompanionShell';
-import { SERVER_STATUS_EVENT, getMonuments, getOfflinePack, pingServer } from './services/api';
+import { isLiveDestinationSlug } from './data/upCities';
+import { SERVER_STATUS_EVENT, getMonuments, getOfflinePack, getServedDestinationSlugs, pingServer } from './services/api';
 import { getOrCreateSessionHash, loadOfflinePack, saveOfflinePack } from './services/offlineStore';
 import type { Monument, OfflinePack, PersonaType } from './types/api';
 
 type AppScreen = 'landing' | 'companion' | 'admin';
 
+function parseHashState(): { screen: AppScreen; slug: string } {
+  const hash = (typeof window !== 'undefined' ? window.location.hash : '').replace(/^#/, '').toLowerCase();
+  if (hash === 'admin') {
+    return { screen: 'admin', slug: 'agra' };
+  }
+  if (isLiveDestinationSlug(hash)) {
+    return { screen: 'companion', slug: hash };
+  }
+  return { screen: 'landing', slug: 'agra' };
+}
+
 export default function App() {
   useScrollParallax();
-  const [screen, setScreen] = useState<AppScreen>(() =>
-    window.location.hash === '#admin' ? 'admin' : 'landing',
-  );
+  const initial = useMemo(() => parseHashState(), []);
+  const [screen, setScreen] = useState<AppScreen>(initial.screen);
+  const [selectedSlug, setSelectedSlug] = useState<string>(initial.slug);
   const [language, setLanguage] = useState<string>('en');
   const [persona, setPersona] = useState<PersonaType>('quick');
   const [a11yMode, setA11yMode] = useState<boolean>(false);
@@ -21,9 +33,13 @@ export default function App() {
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
   const [serverReachable, setServerReachable] = useState<boolean>(true);
+  // destinations the backend has content for (null until known); others run on the bundled pack
+  const [servedSlugs, setServedSlugs] = useState<string[] | null>(null);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [monuments, setMonuments] = useState<Monument[]>([]);
-  const [offlinePack, setOfflinePack] = useState<OfflinePack | null>(() => loadOfflinePack('agra'));
+  const [offlinePack, setOfflinePack] = useState<OfflinePack | null>(() =>
+    loadOfflinePack(initial.slug),
+  );
   const [downloadingPack, setDownloadingPack] = useState(false);
 
   const sessionHash = useMemo(() => getOrCreateSessionHash(), []);
@@ -43,23 +59,23 @@ export default function App() {
     };
   }, []);
 
-  // First launch: load the content pack bundled inside the app so everything
-  // works with no network and no backend. A later online download refreshes it.
+  // First launch or destination switch: load the content pack bundled inside the app
+  // so everything works with no network and no backend. A later online download refreshes it.
   useEffect(() => {
-    if (offlinePack) return;
+    if (offlinePack && offlinePack.destination.slug === selectedSlug) return;
     let active = true;
-    fetch(`${import.meta.env.BASE_URL}packs/agra.json`)
+    fetch(`${import.meta.env.BASE_URL}packs/${selectedSlug}.json`)
       .then((res) => (res.ok ? (res.json() as Promise<OfflinePack>) : null))
       .then((pack) => {
         if (!active || !pack) return;
-        saveOfflinePack('agra', pack);
+        saveOfflinePack(selectedSlug, pack);
         setOfflinePack(pack);
       })
       .catch(() => undefined);
     return () => {
       active = false;
     };
-  }, [offlinePack]);
+  }, [offlinePack, selectedSlug]);
 
   // Track whether the API is actually reachable, not just whether the phone has a network
   useEffect(() => {
@@ -79,7 +95,7 @@ export default function App() {
   useEffect(() => {
     if (screen !== 'companion' || !isOnline) return;
     let active = true;
-    getMonuments('agra')
+    getMonuments(selectedSlug)
       .then((list) => {
         if (active) setMonuments(list);
       })
@@ -87,24 +103,48 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [screen, isOnline]);
+  }, [screen, isOnline, selectedSlug]);
+
+  useEffect(() => {
+    if (!isOnline || !serverReachable || servedSlugs) return;
+    let active = true;
+    getServedDestinationSlugs()
+      .then((slugs) => {
+        if (active) setServedSlugs(slugs);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [isOnline, serverReachable, servedSlugs]);
 
   const activeMonuments = monuments.length > 0 ? monuments : (offlinePack?.monuments ?? []);
 
-  const handleSelectAgra = (coords?: { lat: number; lng: number } | null) => {
+  const handleSelectDestination = (slug: string, coords?: { lat: number; lng: number } | null) => {
+    const targetSlug = isLiveDestinationSlug(slug) ? slug : 'agra';
     if (coords) setUserCoords(coords);
+    if (targetSlug !== selectedSlug) {
+      setSelectedSlug(targetSlug);
+      setMonuments([]);
+      setOfflinePack(loadOfflinePack(targetSlug));
+    }
     setScreen('companion');
-    window.location.hash = 'agra';
+    window.location.hash = targetSlug;
   };
 
   const handleDownloadOfflinePack = async () => {
     if (downloadingPack || !isOnline) return;
+    const slugToFetch = selectedSlug;
     setDownloadingPack(true);
     try {
-      const pack = await getOfflinePack('agra');
-      saveOfflinePack('agra', pack);
-      setOfflinePack(pack);
-      setMonuments(pack.monuments);
+      const pack = await getOfflinePack(slugToFetch);
+      saveOfflinePack(slugToFetch, pack);
+      if (slugToFetch === selectedSlug) {
+        setOfflinePack(pack);
+        setMonuments(pack.monuments);
+      }
+    } catch {
+      // Offline pack download failed; keep existing cached/bundled pack intact
     } finally {
       setDownloadingPack(false);
     }
@@ -113,6 +153,7 @@ export default function App() {
   if (screen === 'admin') {
     return (
       <AdminDashboard
+        initialDestinationSlug={selectedSlug}
         onBack={() => {
           setScreen('landing');
           window.location.hash = '';
@@ -124,11 +165,14 @@ export default function App() {
   if (screen === 'companion') {
     return (
       <CompanionShell
+        key={selectedSlug}
+        destinationSlug={selectedSlug}
         language={language}
         persona={persona}
         a11yMode={a11yMode}
         isOnline={isOnline}
         serverReachable={serverReachable}
+        serverHasDestination={!servedSlugs || servedSlugs.includes(selectedSlug)}
         sessionHash={sessionHash}
         userCoords={userCoords}
         monuments={activeMonuments}
@@ -158,7 +202,7 @@ export default function App() {
       onLocationDetected={(coords) => setUserCoords(coords)}
       onChangeLanguage={setLanguage}
       onToggleA11y={() => setA11yMode((v) => !v)}
-      onSelectAgra={handleSelectAgra}
+      onSelectDestination={handleSelectDestination}
       onOpenAdmin={() => {
         setScreen('admin');
         window.location.hash = 'admin';

@@ -13,15 +13,22 @@ import {
   Loader2,
   MapPin,
   MessageSquare,
+  Server,
   ServerCrash,
+  Footprints,
+  Play,
   ShieldAlert,
   ShieldCheck,
   Wifi,
   WifiOff,
   X,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
+import { getWalk } from '../data/walks';
+import { getApiBaseUrl, pingServer, setApiBaseUrl } from '../services/api';
 import { LANGUAGE_OPTIONS, PERSONA_OPTIONS } from '../data/upCities';
+import { translateBatchCached } from '../services/translateCache';
 import type { Monument, OfflinePack, PersonaType } from '../types/api';
 import { CameraTab } from './CameraTab';
 import { EmergencyModal } from './EmergencyModal';
@@ -30,15 +37,19 @@ import { GuideTab } from './GuideTab';
 import { PhotoHero } from './PhotoHero';
 import { NearbyTab } from './NearbyTab';
 import { TourTab } from './TourTab';
+import { WalkMode } from './WalkMode';
 
 export type CompanionTabId = 'guide' | 'camera' | 'tour' | 'nearby' | 'facilities';
 
 interface CompanionShellProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   a11yMode: boolean;
   isOnline: boolean;
   serverReachable: boolean;
+  /** false when the backend has no content for this destination yet: use the bundled pack */
+  serverHasDestination?: boolean;
   sessionHash: string;
   userCoords: { lat: number; lng: number } | null;
   monuments: Monument[];
@@ -51,13 +62,6 @@ interface CompanionShellProps {
   onBackToCities: () => void;
   onOpenAdmin: () => void;
 }
-
-const TAB_HERO_IMAGES: Record<Exclude<CompanionTabId, 'guide'>, { image: string; position: string }> = {
-  tour: { image: '/images/monuments/darwaza-i-rauza.webp', position: 'center 45%' },
-  camera: { image: '/images/nearby/parchinkari-artisan-hub.webp', position: 'center 50%' },
-  nearby: { image: '/images/nearby/itimad-ud-daulah-baby-taj.webp', position: 'center 40%' },
-  facilities: { image: '/images/taj-mahal-banner.webp', position: 'center 75%' },
-};
 
 const ONBOARDING_KEY = 'up_companion_onboarded_v1';
 
@@ -78,11 +82,13 @@ function writeOnboarded() {
 }
 
 export function CompanionShell({
+  destinationSlug,
   language,
   persona,
   a11yMode,
   isOnline,
   serverReachable,
+  serverHasDestination = true,
   sessionHash,
   userCoords,
   monuments,
@@ -96,11 +102,60 @@ export function CompanionShell({
   onOpenAdmin,
 }: CompanionShellProps) {
   const ui = getUiText(language);
+  const isHi = language.startsWith('hi');
+  const baseLang = language.toLowerCase().split('-')[0];
+  const destConfig = getDestinationConfig(destinationSlug);
   const [activeTab, setActiveTab] = useState<CompanionTabId>('guide');
   const [sosOpen, setSosOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardStep, setOnboardStep] = useState<number | null>(() => (readOnboarded() ? null : 0));
   const [scrolled, setScrolled] = useState(false);
+  const [walkOpen, setWalkOpen] = useState(false);
+  const walk = getWalk(destinationSlug);
+  const [serverDraft, setServerDraft] = useState('');
+  const [serverCheck, setServerCheck] = useState<'idle' | 'checking' | 'ok' | 'fail'>('idle');
+  const [translatedStrings, setTranslatedStrings] = useState<Record<string, string>>({});
+
+  const liveOk = isOnline && serverReachable && serverHasDestination;
+
+  useEffect(() => {
+    if (!liveOk || destinationSlug === 'agra' || baseLang === 'en' || baseLang === 'hi') {
+      return;
+    }
+    let active = true;
+    const raw = [destConfig.copy.companionTitleEn];
+    Object.values(destConfig.tabHeroes).forEach((hero) => {
+      if (hero.eyebrowEn) raw.push(hero.eyebrowEn);
+      if (hero.titleEn) raw.push(hero.titleEn);
+    });
+    const unique = Array.from(new Set(raw.filter(Boolean)));
+    translateBatchCached(unique, baseLang)
+      .then((res) => {
+        if (!active) return;
+        const next: Record<string, string> = {};
+        unique.forEach((orig, idx) => {
+          if (res[idx]) next[`${baseLang}::${orig}`] = res[idx];
+        });
+        setTranslatedStrings((prev) => ({ ...prev, ...next }));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [liveOk, destinationSlug, baseLang, destConfig]);
+
+  const trShell = (enText: string, hiText = ''): string => {
+    if (isHi && hiText) return hiText;
+    if (baseLang !== 'en' && baseLang !== 'hi') {
+      return translatedStrings[`${baseLang}::${enText}`] || enText;
+    }
+    return enText;
+  };
+
+  const companionTitle =
+    destinationSlug === 'agra'
+      ? ui.companionTitle
+      : trShell(destConfig.copy.companionTitleEn, destConfig.copy.companionTitleHi);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -112,17 +167,26 @@ export function CompanionShell({
     window.scrollTo({ top: 0 });
   }, [activeTab]);
 
-  const connection: 'online' | 'offline' | 'unreachable' = !isOnline
+  const connection: 'online' | 'offline' | 'unreachable' | 'bundled' = !isOnline
     ? 'offline'
-    : serverReachable
-      ? 'online'
-      : 'unreachable';
-  const ConnIcon = connection === 'online' ? Wifi : connection === 'offline' ? WifiOff : ServerCrash;
+    : !serverReachable
+      ? 'unreachable'
+      : serverHasDestination
+        ? 'online'
+        : 'bundled';
+  const ConnIcon =
+    connection === 'online' || connection === 'bundled' ? Wifi : connection === 'offline' ? WifiOff : ServerCrash;
   const connLabel =
-    connection === 'online' ? ui.online : connection === 'offline' ? ui.offline : ui.serverUnreachable;
+    connection === 'online'
+      ? ui.online
+      : connection === 'offline'
+        ? ui.offline
+        : connection === 'bundled'
+          ? isHi
+            ? 'ऐप में संग्रहीत गाइड'
+            : 'Built-in guide'
+          : ui.serverUnreachable;
   const workingOffline = connection !== 'online';
-  // Tabs skip live requests when the server is known to be unreachable and use the offline pack at once
-  const liveOk = isOnline && serverReachable;
 
   const tabs: Array<{ id: CompanionTabId; label: string; icon: typeof MessageSquare }> = [
     { id: 'guide', label: ui.tabs.guide, icon: MessageSquare },
@@ -148,7 +212,7 @@ export function CompanionShell({
           </button>
 
           <div className="app-header__title">
-            <span className="app-header__city">{ui.companionTitle}</span>
+            <span className="app-header__city">{companionTitle}</span>
             <span className={`conn-badge is-${connection}`} role="status">
               <ConnIcon size={12} />
               {connLabel}
@@ -211,25 +275,44 @@ export function CompanionShell({
         {workingOffline && (
           <div className="offline-banner" role="status">
             <ConnIcon size={16} />
-            <span>{offlinePack ? ui.offlineBanner : ui.gapNoticeOffline}</span>
+            <span>
+              {connection === 'bundled'
+                ? isHi
+                  ? 'यह स्थान अभी ऐप में संग्रहीत सामग्री से चल रहा है। सर्वर पर जुड़ते ही लाइव उत्तर अपने आप मिलेंगे।'
+                  : 'This place runs on content built into the app for now. Live answers switch on automatically once it is added to the server.'
+                : offlinePack
+                  ? ui.offlineBanner
+                  : ui.gapNoticeOffline}
+            </span>
           </div>
         )}
 
         <div key={activeTab} className="tab-stage">
-          {activeTab !== 'guide' && (
-            <PhotoHero
-              image={TAB_HERO_IMAGES[activeTab].image}
-              objectPosition={TAB_HERO_IMAGES[activeTab].position}
-              eyebrow={ui.tabHeroes[activeTab].eyebrow}
-              title={ui.tabHeroes[activeTab].title}
-            />
-          )}
+          {activeTab !== 'guide' && (() => {
+            const heroCfg = destConfig.tabHeroes[activeTab];
+            const heroEyebrow = heroCfg.eyebrowEn
+              ? trShell(heroCfg.eyebrowEn, heroCfg.eyebrowHi)
+              : ui.tabHeroes[activeTab].eyebrow;
+            const heroTitle = heroCfg.titleEn
+              ? trShell(heroCfg.titleEn, heroCfg.titleHi)
+              : ui.tabHeroes[activeTab].title;
+            return (
+              <PhotoHero
+                image={heroCfg.image}
+                objectPosition={heroCfg.position}
+                eyebrow={heroEyebrow}
+                title={heroTitle}
+              />
+            );
+          })()}
+
           {activeTab === 'guide' && (
             <GuideTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               simpleLanguage={a11yMode}
-              isOnline={isOnline && serverReachable}
+              isOnline={liveOk}
               sessionHash={sessionHash}
               monuments={monuments}
               offlinePack={offlinePack}
@@ -239,6 +322,7 @@ export function CompanionShell({
 
           {activeTab === 'camera' && (
             <CameraTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               simpleLanguage={a11yMode}
@@ -249,8 +333,24 @@ export function CompanionShell({
             />
           )}
 
+          {activeTab === 'tour' && walk && (
+            <button type="button" className="walk-launch" onClick={() => setWalkOpen(true)}>
+              <span className="walk-launch__icon">
+                <Footprints size={24} />
+              </span>
+              <span className="walk-launch__text">
+                <strong>{ui.walkLaunchTitle}</strong>
+                <span>{ui.walkLaunchSub}</span>
+              </span>
+              <span className="walk-launch__go">
+                <Play size={18} />
+              </span>
+            </button>
+          )}
+
           {activeTab === 'tour' && (
             <TourTab
+              destinationSlug={destinationSlug}
               language={language}
               persona={persona}
               isOnline={liveOk}
@@ -262,11 +362,18 @@ export function CompanionShell({
           )}
 
           {activeTab === 'nearby' && (
-            <NearbyTab language={language} isOnline={liveOk} userCoords={userCoords} offlinePack={offlinePack} />
+            <NearbyTab
+              destinationSlug={destinationSlug}
+              language={language}
+              isOnline={liveOk}
+              userCoords={userCoords}
+              offlinePack={offlinePack}
+            />
           )}
 
           {activeTab === 'facilities' && (
             <FacilitiesTab
+              destinationSlug={destinationSlug}
               language={language}
               isOnline={liveOk}
               sessionHash={sessionHash}
@@ -361,6 +468,39 @@ export function CompanionShell({
               <BarChart3 size={20} />
               <span>{ui.deptInsights}</span>
             </button>
+
+            <h3 className="sheet__label">{ui.serverLabel}</h3>
+            <form
+              className="server-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setApiBaseUrl(serverDraft);
+                setServerCheck('checking');
+                setServerCheck((await pingServer()) ? 'ok' : 'fail');
+              }}
+            >
+              <input
+                className="field"
+                type="url"
+                inputMode="url"
+                autoCapitalize="off"
+                autoCorrect="off"
+                placeholder={getApiBaseUrl()}
+                value={serverDraft}
+                onChange={(e) => {
+                  setServerDraft(e.target.value);
+                  setServerCheck('idle');
+                }}
+                aria-label={ui.serverLabel}
+              />
+              <button type="submit" className="soft-btn" disabled={serverCheck === 'checking'}>
+                {serverCheck === 'checking' ? <Loader2 size={16} className="spin-icon" /> : <Server size={16} />}
+                {ui.serverSave}
+              </button>
+            </form>
+            <p className={`server-form__note ${serverCheck === 'ok' ? 'is-ok' : serverCheck === 'fail' ? 'is-fail' : ''}`}>
+              {serverCheck === 'ok' ? ui.serverOk : serverCheck === 'fail' ? ui.serverFail : ui.serverHint}
+            </p>
           </section>
         </div>
       )}
@@ -407,7 +547,12 @@ export function CompanionShell({
         </div>
       )}
 
+      {walkOpen && walk && (
+        <WalkMode walk={walk} language={language} online={isOnline} onClose={() => setWalkOpen(false)} />
+      )}
+
       <EmergencyModal
+        destinationSlug={destinationSlug}
         open={sosOpen}
         onClose={() => setSosOpen(false)}
         language={language}

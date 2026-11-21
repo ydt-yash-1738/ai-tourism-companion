@@ -4,6 +4,19 @@ export interface UiStrings {
   govTag: string;
   tabHeroes: Record<'tour' | 'camera' | 'nearby' | 'facilities', { eyebrow: string; title: string }>;
   photoCreditsLabel: string;
+  facilitiesPending: string;
+  ctaBeginAt: string;
+  ctaBeginAtHi: string;
+  walkLaunchTitle: string;
+  walkLaunchSub: string;
+  avatarIdleHint: string;
+  readFullText: string;
+  askAvatar: string;
+  serverLabel: string;
+  serverHint: string;
+  serverSave: string;
+  serverOk: string;
+  serverFail: string;
   locationActive: string;
   refreshLocation: string;
   exploreMonumentsHeading: string;
@@ -40,6 +53,7 @@ export interface UiStrings {
   heroHeadline: string;
   heroSub: string;
   launchAgra: string;
+  launchSarnath: string;
   detectGps: string;
   detectingGps: string;
   locDefaultNotice: string;
@@ -183,15 +197,28 @@ export interface UiStrings {
 
 const EN: UiStrings = {
   tabHeroes: {
-    tour: { eyebrow: 'Self-guided audio tour', title: 'Walk the Taj at your own pace' },
+    tour: { eyebrow: 'Self-guided audio tour', title: 'Explore at your own pace' },
     camera: { eyebrow: 'Point and ask', title: 'What am I looking at?' },
     nearby: { eyebrow: 'Beyond the monument', title: 'Crafts, food and hidden gems nearby' },
     facilities: { eyebrow: 'Comfort and safety', title: 'Toilets, water, help and parking' },
   },
   photoCreditsLabel: 'Photo credits',
+  facilitiesPending: 'Facility locations for this destination are still being verified. For urgent help, tap SOS for emergency helplines.',
+  ctaBeginAt: 'Begin at {place}',
+  ctaBeginAtHi: '{place} से शुरू करें',
+  walkLaunchTitle: 'Watch the video tour',
+  walkLaunchSub: 'A narrated walk through real photos with Raahi, and a 360° look around at every stop',
+  avatarIdleHint: 'Tap play and Raahi will tell you the story',
+  readFullText: 'Read full text',
+  askAvatar: 'Ask Raahi about the Taj Mahal or Agra Fort...',
+  serverLabel: 'Server address',
+  serverHint: 'Address of the deployed backend, for example https://your-app.onrender.com. Leave empty for the default.',
+  serverSave: 'Save & test',
+  serverOk: 'Connected to the server.',
+  serverFail: 'Could not reach that server. The app keeps working offline.',
   locationActive: 'Location Active',
   refreshLocation: 'Refresh Location',
-  exploreMonumentsHeading: 'Explore Agra Monuments',
+  exploreMonumentsHeading: 'Explore the monuments',
   exploreMonumentsSub: 'Tap any monument to focus the AI Guide and hear its verified history & folklore.',
   askAboutMonument: 'Ask Guide',
   curatedTopicsHeading: 'History vs. Folklore & Curated Stories',
@@ -226,12 +253,13 @@ const EN: UiStrings = {
   heroSub:
     'Ask by text, voice, or camera with verified ASI history separated from local folklore, step-free audio tours, UP ODOP crafts, and offline emergency help.',
   launchAgra: 'Launch Agra Companion',
+  launchSarnath: 'Launch Sarnath Companion',
   detectGps: 'Detect My Location',
   detectingGps: 'Detecting GPS...',
-  locDefaultNotice: 'Location not provided — select an active UP heritage destination below to begin.',
+  locDefaultNotice: 'Location not provided — select an active UP heritage destination (Agra, Lucknow or Sarnath) below to begin.',
   citiesHeading: 'Heritage Destinations Across Uttar Pradesh',
-  citiesSub: 'Agra (Taj Mahal & Agra Fort) is live right now; additional UP heritage circuits are pre-mapped below.',
-  liveBadge: '1 Destination Live',
+  citiesSub: 'Agra (Taj Mahal & Agra Fort), Lucknow (Bara Imambara & Rumi Darwaza) and Sarnath (Dhamek Stupa & Ashoka Pillar) are live right now; additional UP heritage circuits are pre-mapped below.',
+  liveBadge: '3 Destinations Live',
   liveNow: 'Live Now',
   comingSoon: 'Coming Soon',
   exploreFeatures: 'Explore 9/9 Companion Features',
@@ -266,9 +294,9 @@ const EN: UiStrings = {
     pilgrim: 'Devotional',
   },
 
-  guideHeading: 'Ask Anything About Agra Heritage',
+  guideHeading: 'Ask anything about this place',
   guideSub: 'Answers ground in ASI/UNESCO sources and separate recorded history from folklore.',
-  allMonuments: 'All Agra Monuments',
+  allMonuments: 'All monuments',
   recordedHistory: 'Recorded History',
   localFolklore: 'Local Folklore & Tradition',
   sourceLabel: 'Source: ',
@@ -300,11 +328,11 @@ const EN: UiStrings = {
       body: 'Stories, walking tours, facilities and one-tap SOS keep working when the network drops.',
     },
   ],
-  finalKicker: 'Agra is live today',
+  finalKicker: 'Agra, Lucknow & Sarnath are live today',
   finalTitle: 'Begin your visit.',
   photoAlt: 'The Taj Mahal in Agra, seen across its gardens',
   sourceAi: 'Verified sources · AI narrated',
-  heroKicker: 'AI heritage companion · Agra is live',
+  heroKicker: 'AI heritage companion · Agra, Lucknow & Sarnath are live',
   heroTitleA: 'Every monument has a story.',
   heroTitleB: 'Hear it in your language.',
   heroLead:
@@ -346,7 +374,7 @@ const EN: UiStrings = {
     'Religious and cultural sentiments are respected at every site',
   ],
   destHeading: 'Built for every UP heritage destination',
-  destSub: 'Agra is live today. Each new destination is a content pack, not a new app.',
+  destSub: 'Agra, Lucknow and Sarnath are live today. Each new destination is a content pack, not a new app.',
   deptHeading: 'Insights for UP Tourism',
   deptSub:
     'An anonymised dashboard shows what visitors ask, which languages they use, the facilities they look for, and where information is missing.',
@@ -354,7 +382,7 @@ const EN: UiStrings = {
   footerSources: 'Content from public sources: ASI, UNESCO World Heritage Centre, UP Tourism, UP ODOP. Analytics use synthetic test data only.',
   settingsTitle: 'Your preferences',
   languageLabel: 'Language',
-  greeting: 'Namaste! Welcome to Agra',
+  greeting: "Namaste! I'm Raahi, your guide to Agra",
   greetingSub: 'Taj Mahal · Agra Fort · UNESCO World Heritage',
   onboarding: [
     { title: 'Your guide, in your language', body: 'Ask by voice, text or camera in Hindi, English and 8 more languages.' },
@@ -446,15 +474,26 @@ const EN: UiStrings = {
 const HI: UiStrings = {
   ...EN,
   tabHeroes: {
-    tour: { eyebrow: 'ऑडियो पैदल यात्रा', title: 'अपनी गति से ताज घूमें' },
+    tour: { eyebrow: 'ऑडियो पैदल यात्रा', title: 'अपनी गति से घूमें' },
     camera: { eyebrow: 'दिखाएँ और पूछें', title: 'मैं क्या देख रहा हूँ?' },
     nearby: { eyebrow: 'स्मारक के आगे', title: 'आस-पास के शिल्प, व्यंजन और स्थल' },
     facilities: { eyebrow: 'सुविधा और सुरक्षा', title: 'शौचालय, पानी, सहायता और पार्किंग' },
   },
   photoCreditsLabel: 'फ़ोटो श्रेय',
+  facilitiesPending: 'इस गंतव्य की सुविधाओं के स्थान अभी सत्यापित किए जा रहे हैं। तुरंत सहायता के लिए SOS दबाएँ।',
+  walkLaunchTitle: 'वीडियो टूर देखें',
+  walkLaunchSub: 'राही के साथ असली तस्वीरों में कथा-यात्रा, हर पड़ाव पर 360° दृश्य',
+  avatarIdleHint: 'प्ले दबाएँ, राही आपको कहानी सुनाएगा',
+  readFullText: 'पूरा पाठ पढ़ें',
+  askAvatar: 'राही से ताजमहल या आगरा किले के बारे में पूछें...',
+  serverLabel: 'सर्वर पता',
+  serverHint: 'डिप्लॉय किए गए बैकएंड का पता, जैसे https://your-app.onrender.com। डिफ़ॉल्ट के लिए खाली छोड़ें।',
+  serverSave: 'सहेजें और जाँचें',
+  serverOk: 'सर्वर से जुड़ गया।',
+  serverFail: 'यह सर्वर नहीं मिला। ऐप ऑफ़लाइन चलता रहेगा।',
   locationActive: 'स्थान सक्रिय है',
   refreshLocation: 'स्थान रीफ़्रेश करें',
-  exploreMonumentsHeading: 'आगरा के प्रमुख स्मारक देखें',
+  exploreMonumentsHeading: 'प्रमुख स्मारक देखें',
   exploreMonumentsSub: 'किसी भी स्मारक पर टैप करें और उसका प्रमाणित इतिहास व लोककथा जानें।',
   askAboutMonument: 'गाइड से पूछें',
   curatedTopicsHeading: 'इतिहास बनाम लोककथा एवं विशेष विषय',
@@ -488,12 +527,13 @@ const HI: UiStrings = {
   heroHeadline: 'उत्तर प्रदेश की जीवंत विरासत को अपनी भाषा में जानें।',
   heroSub: 'सत्यापित इतिहास व लोककथा का अंतर, कैमरा पहचान, ऑडियो टूर, ODOP शिल्प और 1-टैप आपातकालीन सहायता।',
   launchAgra: 'आगरा विरासत साथी खोलें',
+  launchSarnath: 'सारनाथ विरासत साथी खोलें',
   detectGps: 'मेरा स्थान पहचानें',
   detectingGps: 'लोकेशन जाँच जारी...',
-  locDefaultNotice: 'स्थान उपलब्ध नहीं होने पर नीचे उत्तर प्रदेश के विरासत शहरों में से आगरा चुनें।',
+  locDefaultNotice: 'स्थान उपलब्ध नहीं होने पर नीचे उत्तर प्रदेश के सक्रिय विरासत स्थलों (आगरा, लखनऊ या सारनाथ) में से चुनें।',
   citiesHeading: 'उत्तर प्रदेश के प्रमुख विरासत शहर',
-  citiesSub: 'वर्तमान में आगरा सक्रिय है; अन्य शहर आगामी चरण में जुड़ेंगे।',
-  liveBadge: '1 स्थल सक्रिय',
+  citiesSub: 'वर्तमान में आगरा, लखनऊ और सारनाथ सक्रिय हैं; अन्य शहर आगामी चरण में जुड़ेंगे।',
+  liveBadge: '2 स्थल सक्रिय',
   liveNow: 'सक्रिय',
   comingSoon: 'शीघ्र उपलब्ध',
   exploreFeatures: 'सभी 9 सुविधाएँ देखें',
@@ -517,7 +557,7 @@ const HI: UiStrings = {
 
   guideHeading: 'अपना विरासत प्रश्न पूछें',
   guideSub: 'प्रत्येक उत्तर में प्रमाणित इतिहास और लोककथाएँ अलग-अलग दिखाई जाती हैं।',
-  allMonuments: 'पूरा आगरा क्षेत्र',
+  allMonuments: 'सभी स्मारक',
   recordedHistory: 'प्रमाणित इतिहास',
   localFolklore: 'लोककथा एवं परंपरा',
   sourceLabel: 'स्रोत: ',
@@ -549,11 +589,11 @@ const HI: UiStrings = {
       body: 'नेटवर्क जाने पर भी कहानियाँ, पैदल यात्रा, सुविधाएँ और एक-टैप SOS चलते रहते हैं।',
     },
   ],
-  finalKicker: 'आगरा आज उपलब्ध',
+  finalKicker: 'आगरा, लखनऊ और सारनाथ आज उपलब्ध',
   finalTitle: 'अपनी यात्रा शुरू करें।',
   photoAlt: 'आगरा में ताजमहल, उद्यानों के पार से',
   sourceAi: 'सत्यापित स्रोत · एआई द्वारा वर्णित',
-  heroKicker: 'एआई विरासत साथी · आगरा अब उपलब्ध',
+  heroKicker: 'एआई विरासत साथी · आगरा, लखनऊ व सारनाथ अब उपलब्ध',
   heroTitleA: 'हर स्मारक की एक कहानी है।',
   heroTitleB: 'सुनिए अपनी भाषा में।',
   heroLead:
@@ -594,7 +634,7 @@ const HI: UiStrings = {
     'हर स्थल की धार्मिक व सांस्कृतिक भावनाओं का सम्मान',
   ],
   destHeading: 'उत्तर प्रदेश के हर विरासत गंतव्य के लिए',
-  destSub: 'आगरा आज उपलब्ध है। हर नया गंतव्य एक सामग्री पैक है, नया ऐप नहीं।',
+  destSub: 'आगरा, लखनऊ और सारनाथ आज उपलब्ध हैं। हर नया गंतव्य एक सामग्री पैक है, नया ऐप नहीं।',
   deptHeading: 'यूपी पर्यटन के लिए अंतर्दृष्टि',
   deptSub:
     'गुमनाम डैशबोर्ड दिखाता है कि पर्यटक क्या पूछते हैं, कौन सी भाषाएँ उपयोग करते हैं, कौन सी सुविधाएँ खोजते हैं और कहाँ जानकारी कम है।',
@@ -602,7 +642,7 @@ const HI: UiStrings = {
   footerSources: 'सामग्री सार्वजनिक स्रोतों से: ASI, यूनेस्को, यूपी पर्यटन, यूपी ओडीओपी। विश्लेषण में केवल कृत्रिम परीक्षण डेटा।',
   settingsTitle: 'आपकी पसंद',
   languageLabel: 'भाषा',
-  greeting: 'नमस्ते! आगरा में आपका स्वागत है',
+  greeting: 'नमस्ते! मैं राही, आगरा में आपका गाइड',
   greetingSub: 'ताजमहल · आगरा किला · यूनेस्को विश्व धरोहर',
   onboarding: [
     { title: 'आपका गाइड, आपकी भाषा में', body: 'हिंदी, अंग्रेज़ी और 8 अन्य भाषाओं में बोलकर, लिखकर या कैमरे से पूछें।' },
@@ -681,18 +721,18 @@ const MR: UiStrings = {
   heroHeadline: 'उत्तर प्रदेशातील ऐतिहासिक वारसा तुमच्या भाषेत जाणून घ्या.',
   heroSub: 'अधिकृत इतिहास आणि लोककथा वेगळ्या स्वरूपात, कॅमेरा ओळख, ऑडिओ टूर, ODOP कला व आपत्कालीन मदत.',
   launchAgra: 'आग्रा सोबती उघडा',
+  launchSarnath: 'सारनाथ सोबती उघडा',
   detectGps: 'माझे स्थान शोधा',
   detectingGps: 'GPS शोधत आहे...',
-  locDefaultNotice: 'स्थान उपलब्ध नाही — सुरू करण्यासाठी खालील आग्रा पर्याय निवडा.',
+  locDefaultNotice: 'स्थान उपलब्ध नाही — सुरू करण्यासाठी खालील आग्रा किंवा सारनाथ निवडा.',
   citiesHeading: 'उत्तर प्रदेशातील वारसा शहरे',
-  citiesSub: 'सध्या आग्रा कार्यरत आहे; इतर शहरे लवकरच जोडली जातील.',
-  liveBadge: '१ शहर सक्रिय',
+  citiesSub: 'सध्या आग्रा आणि सारनाथ कार्यरत आहेत; इतर शहरे लवकरच जोडली जातील.',
+  liveBadge: '२ शहरे सक्रिय',
   liveNow: 'सक्रिय',
   comingSoon: 'लवकरच',
   exploreFeatures: '९/९ सुविधा पहा',
   packPlanned: 'नियोजित',
 
-  companionTitle: 'आग्रा वारसा सोबती',
   upTourismLabel: 'यूपी पर्यटन',
   online: 'ऑनलाइन',
   offline: 'ऑफलाइन',
@@ -707,9 +747,7 @@ const MR: UiStrings = {
   tabs: { guide: 'मार्गदर्शक', camera: 'कॅमेरा', tour: 'टूर', nearby: 'जवळपास', facilities: 'सुविधा' },
   personas: { quick: 'संक्षिप्त', kids: 'मुलांची गोष्ट', scholar: 'इतिहास', pilgrim: 'भक्तीभाव' },
 
-  guideHeading: 'आग्रा वारशाबद्दल काहीही विचारा',
   guideSub: 'अधिकृत इतिहास आणि लोककथा स्पष्टपणे वेगळ्या दाखवल्या जातात.',
-  allMonuments: 'संपूर्ण आग्रा परिसर',
   recordedHistory: 'नोंदलेला इतिहास',
   localFolklore: 'लोककथा व परंपरा',
   sourceLabel: 'स्रोत: ',
@@ -718,7 +756,6 @@ const MR: UiStrings = {
   stopAudio: 'थांबवा',
   gapNotice: 'हा प्रश्न पर्यटन विभागाच्या डॅशबोर्डवर नोंदवला गेला आहे.',
   searchingRecords: 'ऐतिहासिक नोंदी शोधत आहे...',
-  chatPlaceholder: 'ताजमहाल किंवा आग्रा किल्ल्याबद्दल विचारा किंवा बोला...',
   starters: [
     'ताजमहाल का बांधला गेला आणि काळ्या ताजमहालची गोष्ट खरी आहे का?',
     'भिंतीवरील फुलांच्या नक्षीकामाचा (पर्चिनकारी) अर्थ काय?',
@@ -783,18 +820,18 @@ const TA: UiStrings = {
   heroHeadline: 'ஒவ்வொரு நினைவுச்சின்னத்தின் கதையையும் உங்கள் மொழியில் அறியுங்கள்.',
   heroSub: 'சரிபார்க்கப்பட்ட வரலாறும் நாட்டுப்புறக் கதைகளும் தனித்தனியாக, கேமரா அடையாளம், ஆடியோ சுற்றுலா & அவசர உதவி.',
   launchAgra: 'ஆக்ரா தோழனைத் திற',
+  launchSarnath: 'சாரநாத் தோழனைத் திற',
   detectGps: 'என் இடத்தைக் கண்டறி',
   detectingGps: 'GPS கண்டறியப்படுகிறது...',
-  locDefaultNotice: 'இடம் கிடைக்கவில்லை — தொடங்க கீழே உள்ள ஆக்ராவைத் தேர்ந்தெடுக்கவும்.',
+  locDefaultNotice: 'இடம் கிடைக்கவில்லை — தொடங்க கீழே உள்ள ஆக்ரா அல்லது சாரநாத்தைத் தேர்ந்தெடுக்கவும்.',
   citiesHeading: 'உத்தரப் பிரதேச பாரம்பரிய நகரங்கள்',
-  citiesSub: 'தற்போது ஆக்ரா நேரலையில் உள்ளது; பிற நகரங்கள் விரைவில் இணையும்.',
-  liveBadge: '1 இடம் நேரலையில்',
+  citiesSub: 'தற்போது ஆக்ரா மற்றும் சாரநாத் நேரலையில் உள்ளன; பிற நகரங்கள் விரைவில் இணையும்.',
+  liveBadge: '2 இடங்கள் நேரலையில்',
   liveNow: 'நேரலை',
   comingSoon: 'விரைவில்',
   exploreFeatures: '9/9 அம்சங்களைக் காண்க',
   packPlanned: 'திட்டமிடப்பட்டது',
 
-  companionTitle: 'ஆக்ரா பாரம்பரிய தோழன்',
   upTourismLabel: 'உ.பி. சுற்றுலா',
   online: 'ஆன்லைன்',
   offline: 'ஆஃப்லைன்',
@@ -809,9 +846,7 @@ const TA: UiStrings = {
   tabs: { guide: 'வழிகாட்டி', camera: 'கேமரா', tour: 'சுற்றுலா', nearby: 'அருகில்', facilities: 'வசதிகள்' },
   personas: { quick: 'சுருக்கம்', kids: 'சிறுவர் கதை', scholar: 'வரலாறு', pilgrim: 'ஆன்மீகம்' },
 
-  guideHeading: 'ஆக்ரா பாரம்பரியம் பற்றி எதையும் கேளுங்கள்',
   guideSub: 'ASI ஆதாரங்களின் அடிப்படையில் வரலாறும் நாட்டுப்புறக் கதைகளும் தனித்தனியாக வழங்கப்படுகின்றன.',
-  allMonuments: 'அனைத்து ஆக்ரா தளங்கள்',
   recordedHistory: 'பதிவுசெய்யப்பட்ட வரலாறு',
   localFolklore: 'நாட்டுப்புறக் கதை & மரபு',
   sourceLabel: 'ஆதாரம்: ',
@@ -820,7 +855,6 @@ const TA: UiStrings = {
   stopAudio: 'நிறுத்து',
   gapNotice: 'இது சுற்றுலாத் துறை உள்ளடக்கக் குழுவுக்குப் பதிவு செய்யப்பட்டது.',
   searchingRecords: 'ஆவணங்கள் தேடப்படுகின்றன...',
-  chatPlaceholder: 'தாஜ்மஹால் அல்லது ஆக்ரா கோட்டை பற்றி கேளுங்கள்...',
   starters: [
     'தாஜ்மஹால் ஏன் கட்டப்பட்டது, கருப்பு தாஜ்மஹால் கதை உண்மையா?',
     'பளிங்குச் சுவர்களில் உள்ள பர்ச்சின்காரி பூ வேலைப்பாடுகளின் பொருள் என்ன?',
@@ -884,12 +918,12 @@ const BN: UiStrings = {
   eyebrow: 'ডিজিটাল ইন্ডিয়া উদ্যোগ · বহুভাষিক গাইড',
   heroHeadline: 'উত্তর প্রদেশের জীবন্ত ঐতিহ্য জানুন আপনার নিজের ভাষায়।',
   launchAgra: 'আগ্রা সঙ্গী খুলুন',
+  launchSarnath: 'সারনাথ সঙ্গী খুলুন',
   detectGps: 'আমার অবস্থান খুঁজুন',
   citiesHeading: 'উত্তর প্রদেশের ঐতিহ্যবাহী শহরসমূহ',
-  liveBadge: '১টি শহর সক্রিয়',
+  liveBadge: '২টি শহর সক্রিয়',
   liveNow: 'সক্রিয়',
   comingSoon: 'শীঘ্রই আসছে',
-  companionTitle: 'আগ্রা ঐতিহ্য সঙ্গী',
   tabs: { guide: 'গাইড', camera: 'ক্যামেরা', tour: 'ট্যুর', nearby: 'কাছাকাছি', facilities: 'সুবিধা' },
   personas: { quick: 'সংক্ষিপ্ত', kids: 'ছোটদের গল্প', scholar: 'ইতিহাস', pilgrim: 'আধ্যাত্মিক' },
   recordedHistory: 'নথিভুক্ত ইতিহাস',
@@ -899,7 +933,6 @@ const BN: UiStrings = {
   playAudioStory: 'অডিও শুনুন',
   prevStop: 'পূর্ববর্তী',
   nextStop: 'পরবর্তী',
-  chatPlaceholder: 'তাজমহল বা আগ্রা দুর্গ সম্পর্কে প্রশ্ন করুন...',
   starters: [
     'তাজমহল কেন তৈরি হয়েছিল এবং কালো তাজমহলের গল্প কি সত্যি?',
     'মার্বেল পাথরের ওপর পারচিনকারি ফুলের কাজের অর্থ কী?',
@@ -919,12 +952,12 @@ const TE: UiStrings = {
   eyebrow: 'డిజిటల్ ఇండియా · బహుభాషా వారసత్వ మార్గదర్శి',
   heroHeadline: 'ప్రతి కట్టడం కథను మీ స్వంత భాషలో తెలుసుకోండి.',
   launchAgra: 'ఆగ్రా సహాయకుడిని తెరవండి',
+  launchSarnath: 'సారనాథ్ సహాయకుడిని తెరవండి',
   detectGps: 'నా స్థానాన్ని గుర్తించు',
   citiesHeading: 'ఉత్తర ప్రదేశ్ వారసత్వ నగరాలు',
-  liveBadge: '1 నగరం సిద్ధం',
+  liveBadge: '2 నగరాలు సిద్ధం',
   liveNow: 'సిద్ధం',
   comingSoon: 'త్వరలో',
-  companionTitle: 'ఆగ్రా వారసత్వ సహాయకుడు',
   tabs: { guide: 'గైడ్', camera: 'కెమెరా', tour: 'టూర్', nearby: 'సమీపంలో', facilities: 'సౌకర్యాలు' },
   personas: { quick: 'సంక్షిప్తం', kids: 'పిల్లల కథ', scholar: 'చరిత్ర', pilgrim: 'ఆధ్యాత్మికం' },
   recordedHistory: 'నమోదైన చరిత్ర',
@@ -934,7 +967,6 @@ const TE: UiStrings = {
   playAudioStory: 'ఆడియో కథ వినండి',
   prevStop: 'ముందు',
   nextStop: 'తర్వాత',
-  chatPlaceholder: 'తాజ్ మహల్ లేదా ఆగ్రా కోట గురించి అడగండి...',
   starters: [
     'తాజ్ మహల్ ఎందుకు నిర్మించారు? నల్ల తాజ్ మహల్ కథ నిజమా?',
     'పాలరాతిపై పర్చినకారి పూల చెక్కడాల ప్రత్యేకత ఏమిటి?',
@@ -954,11 +986,11 @@ const UR: UiStrings = {
   eyebrow: 'ڈیجیٹل انڈیا · کثیر لسانی رہنما',
   heroHeadline: 'اتر پردیش کے تاریخی ورثے کی کہانی اپنی زبان میں جانیں۔',
   launchAgra: 'آگرہ ساتھی کھولیں',
+  launchSarnath: 'سارناتھ ساتھی کھولیں',
   detectGps: 'میرا مقام تلاش کریں',
   citiesHeading: 'اتر پردیش کے تاریخی شہر',
   liveNow: 'دستیاب',
   comingSoon: 'جلد آرہا ہے',
-  companionTitle: 'آگرہ ورثہ ساتھی',
   tabs: { guide: 'رہنما', camera: 'کیمرہ', tour: 'سفر', nearby: 'قریبی', facilities: 'سہولیات' },
   personas: { quick: 'مختصر', kids: 'بچوں کی کہانی', scholar: 'تاریخ', pilgrim: 'روحانی' },
   recordedHistory: 'مستند تاریخ',
@@ -966,7 +998,6 @@ const UR: UiStrings = {
   readAloud: 'سنیں',
   stopAudio: 'روکیں',
   playAudioStory: 'آڈیو کہانی سنیں',
-  chatPlaceholder: 'تاج محل یا آگرہ قلعہ کے بارے میں پوچھیں...',
   starters: [
     'تاج محل کیوں بنایا گیا اور کالے تاج محل کی کہانی کی حقیقت کیا ہے؟',
     'سنگ مرمر پر پرچین کاری کے پھولوں کا کیا مطلب ہے؟',
@@ -985,11 +1016,11 @@ const FR: UiStrings = {
   deptInsights: 'Analytique',
   heroHeadline: "L'histoire de chaque monument, racontée dans votre langue.",
   launchAgra: "Ouvrir le Guide d'Agra",
+  launchSarnath: 'Ouvrir le Guide de Sarnath',
   detectGps: 'Détecter ma position',
   citiesHeading: "Villes Patrimoniales de l'Uttar Pradesh",
   liveNow: 'Actif',
   comingSoon: 'Bientôt',
-  companionTitle: "Compagnon d'Agra",
   tabs: { guide: 'Guide', camera: 'Caméra', tour: 'Visite', nearby: 'À proximité', facilities: 'Services' },
   personas: { quick: 'Rapide', kids: 'Enfants', scholar: 'Histoire', pilgrim: 'Spirituel' },
   recordedHistory: 'Histoire documentée',
@@ -999,7 +1030,6 @@ const FR: UiStrings = {
   playAudioStory: "Écouter l'audio",
   prevStop: 'Précédent',
   nextStop: 'Suivant',
-  chatPlaceholder: 'Posez une question sur le Taj Mahal ou le Fort d’Agra...',
   starters: [
     "Pourquoi le Taj Mahal a-t-il été construit et le Taj Noir est-il un mythe ?",
     'Que signifient les incrustations florales Pietra Dura ?',
@@ -1018,11 +1048,11 @@ const JA: UiStrings = {
   deptInsights: '観光統計',
   heroHeadline: 'すべての歴史遺産の物語を、あなたの言葉で。',
   launchAgra: 'アグラ案内を開始',
+  launchSarnath: 'サールナート案内を開始',
   detectGps: '現在地を検出',
   citiesHeading: 'ウッタル・プラデーシュ州の遺産都市',
   liveNow: '公開中',
   comingSoon: '近日公開',
-  companionTitle: 'アグラ遺産ガイド',
   tabs: { guide: 'ガイド', camera: 'カメラ', tour: 'ツアー', nearby: '周辺', facilities: '施設' },
   personas: { quick: '簡潔', kids: '子ども向け', scholar: '歴史・建築', pilgrim: '巡礼' },
   recordedHistory: '記録された歴史',
@@ -1032,7 +1062,6 @@ const JA: UiStrings = {
   playAudioStory: '音声ガイド再生',
   prevStop: '前へ',
   nextStop: '次へ',
-  chatPlaceholder: 'タージ・マハルやアグラ城について質問してください...',
   starters: [
     'タージ・マハルはなぜ建てられましたか？黒いタージ伝説は本当ですか？',
     '大理石の花の象嵌（ピエトラ・ドゥーラ）の意味は何ですか？',
@@ -1051,11 +1080,11 @@ const ES: UiStrings = {
   deptInsights: 'Estadísticas',
   heroHeadline: 'La historia de cada monumento, explicada en tu propio idioma.',
   launchAgra: 'Abrir Guía de Agra',
+  launchSarnath: 'Abrir Guía de Sarnath',
   detectGps: 'Detectar mi ubicación',
   citiesHeading: 'Ciudades Patrimoniales de Uttar Pradesh',
   liveNow: 'Activo',
   comingSoon: 'Próximamente',
-  companionTitle: 'Guía de Agra',
   tabs: { guide: 'Guía', camera: 'Cámara', tour: 'Tour', nearby: 'Cerca', facilities: 'Servicios' },
   personas: { quick: 'Rápido', kids: 'Niños', scholar: 'Historia', pilgrim: 'Devocional' },
   recordedHistory: 'Historia documentada',
@@ -1065,7 +1094,6 @@ const ES: UiStrings = {
   playAudioStory: 'Reproducir audio',
   prevStop: 'Anterior',
   nextStop: 'Siguiente',
-  chatPlaceholder: 'Pregunta sobre el Taj Mahal o el Fuerte de Agra...',
   starters: [
     '¿Por qué se construyó el Taj Mahal y es real la leyenda del Taj Negro?',
     '¿Qué significan los mosaicos florales Pietra Dura?',

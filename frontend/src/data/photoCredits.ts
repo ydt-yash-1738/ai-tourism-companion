@@ -127,5 +127,59 @@ export const PHOTO_CREDITS: PhotoCredit[] = [
     "author": "Ravi Talwar",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Papri_Pakori_Chat.JPG"
+  },
+  {
+    "subject": "Bara Imambara",
+    "author": "Harsh13596",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Imambara_of_Asaf-ud-daula_.jpg"
+  },
+  {
+    "subject": "Asfi Mosque",
+    "author": "Kumud Kant",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Asfi_Mosque,_Lucknow,_Uttar_Pradesh,_India_(2013)_2.jpg"
+  },
+  {
+    "subject": "Ashoka Pillar",
+    "author": "Paramanu Sarkar",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ashokan_Pillar,_Sarnath,_Varanasi,_Uttar_Pradesh.jpg"
+  },
+  {
+    "subject": "Mulagandha Kuti Vihara",
+    "author": "MaximusPrasad",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mulagandha_Kuti_Vihara_%E2%80%93_Sarnath.jpg"
+  },
+  {
+    "subject": "Imambara Rooftop",
+    "author": "Nikhil2789",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Imambara_of_Asaf-ud-daula_Bara_imambara_9.JPG"
+  },
+  {
+    "subject": "Taj Mahal West Gate (facilities)",
+    "author": "Gary Todd from Xinzheng, China",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_West_Gate_(22587783413).jpg"
+  },
+  {
+    "subject": "Taj Mahal West Gate entry (facilities)",
+    "author": "Gary Todd from Xinzheng, China",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_Queue_at_West_Gate_(23188620776).jpg"
+  },
+  {
+    "subject": "Taj Mahal South Gate, Taj Ganj (facilities)",
+    "author": "Divya Gupta",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:South_Gate_of_The_Taj_Mahal_opening_in_from_Taj_Ganj.jpg"
+  },
+  {
+    "subject": "Jilaukhana forecourt, Taj Mahal (facilities)",
+    "author": "Edmund Gall",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Jilaukhana_at_the_Taj_Mahal,_India,_2013-03_(11551324674).jpg"
   }
 ];

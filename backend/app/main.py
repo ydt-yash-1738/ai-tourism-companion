@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+APP_ORIGINS = {"https://localhost", "http://localhost", "capacitor://localhost"}
+
 from app.core.config import settings
 from app.db.session import init_db
 from app.routers import (
@@ -37,7 +39,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    # The Android app (Capacitor WebView) always calls from these origins, so allow them
+    # regardless of the deployment's CORS_ORIGINS setting.
+    allow_origins=sorted(set(settings.cors_origins_list) | APP_ORIGINS),
+    # Local testing from any port (vite dev, a static server) on this machine
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

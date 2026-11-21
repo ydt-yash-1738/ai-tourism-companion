@@ -26,6 +26,8 @@ function resolveApiBaseUrl(): string {
     window.location.port !== '';
 
   const configured = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
+  // 'same-origin': the page's own server forwards /api (scripts/serve.py for local testing)
+  if (configured === 'same-origin' && typeof window !== 'undefined') return window.location.origin;
   const isConfiguredLocal = configured.includes('127.0.0.1') || configured.includes('localhost');
 
   if (configured && (isLocalDevHost || !isConfiguredLocal)) {
@@ -34,7 +36,32 @@ function resolveApiBaseUrl(): string {
   return isLocalDevHost ? 'http://127.0.0.1:8000' : DEFAULT_PROD_API;
 }
 
-const BASE_URL = resolveApiBaseUrl();
+const API_OVERRIDE_KEY = 'up_companion_api_base';
+
+function readOverride(): string {
+  try {
+    return (window.localStorage.getItem(API_OVERRIDE_KEY) || '').trim().replace(/\/$/, '');
+  } catch {
+    return '';
+  }
+}
+
+// A server address saved in the app's settings wins over the address built into the app,
+// so the APK can be pointed at any deployed backend without rebuilding.
+let BASE_URL = readOverride() || resolveApiBaseUrl();
+
+/** Save (or clear, with an empty string) the backend address used by this device. */
+export function setApiBaseUrl(url: string): string {
+  const clean = url.trim().replace(/\/$/, '');
+  try {
+    if (clean) window.localStorage.setItem(API_OVERRIDE_KEY, clean);
+    else window.localStorage.removeItem(API_OVERRIDE_KEY);
+  } catch {
+    // storage unavailable: the address still applies until the app closes
+  }
+  BASE_URL = clean || resolveApiBaseUrl();
+  return BASE_URL;
+}
 
 export const SERVER_STATUS_EVENT = 'companion:server-status';
 
@@ -86,6 +113,12 @@ export async function pingServer(): Promise<boolean> {
 
 export function getApiBaseUrl(): string {
   return BASE_URL;
+}
+
+/** Slugs of the destinations the backend has content for */
+export async function getServedDestinationSlugs(): Promise<string[]> {
+  const list = await requestJson<Array<{ slug: string }>>('/api/destinations', undefined, 20000);
+  return list.map((d) => d.slug);
 }
 
 export function getDestination(slug: string): Promise<Destination> {
