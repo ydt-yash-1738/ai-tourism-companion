@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { PERSONA_OPTIONS } from '../data/upCities';
-import { ParallaxScene } from './ParallaxScene';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
 import { offlineLocalChatSearch } from '../services/offlineStore';
@@ -288,7 +287,8 @@ export function GuideTab({
 
   return (
     <div className="guide-layout">
-      <ParallaxScene variant="banner">
+      <div className="photo-banner">
+        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" />
         <div className="guide-banner">
           <span className="guide-banner__eyebrow">
             <span className="dot-live" />
@@ -296,7 +296,7 @@ export function GuideTab({
           </span>
           <h2>{ui.greeting}</h2>
         </div>
-      </ParallaxScene>
+      </div>
 
       <section className="guide-intro">
         <div className="guide-intro__head">

@@ -84,6 +84,13 @@ export interface UiStrings {
   serverUnreachable: string;
   answeredOnDevice: string;
   sourceVerified: string;
+  introKicker: string;
+  introTitle: string;
+  introCue: string;
+  storyPanels: Array<{ kicker: string; title: string; body: string }>;
+  finalKicker: string;
+  finalTitle: string;
+  photoAlt: string;
   sourceAi: string;
   heroKicker: string;
   heroTitleA: string;
@@ -263,6 +270,29 @@ const EN: UiStrings = {
   serverUnreachable: 'Server unreachable',
   answeredOnDevice: 'Answered on this device from the offline pack',
   sourceVerified: 'Verified sources',
+  introKicker: 'Agra · UNESCO World Heritage',
+  introTitle: 'Taj Mahal',
+  introCue: 'Scroll to begin',
+  storyPanels: [
+    {
+      kicker: 'Every monument has a story',
+      title: 'Hear it in your language.',
+      body: 'Ask by voice, text or camera, in Hindi, English and eight more languages, standing right in front of it.',
+    },
+    {
+      kicker: 'Trust by design',
+      title: 'History, kept apart from legend.',
+      body: 'Every answer shows what is recorded history and what is folklore, with its source. If it does not know, it says so.',
+    },
+    {
+      kicker: 'Works anywhere on site',
+      title: 'Ready without signal.',
+      body: 'Stories, walking tours, facilities and one-tap SOS keep working when the network drops.',
+    },
+  ],
+  finalKicker: 'Agra is live today',
+  finalTitle: 'Begin your visit.',
+  photoAlt: 'The Taj Mahal in Agra, seen across its gardens',
   sourceAi: 'Verified sources · AI narrated',
   heroKicker: 'AI heritage companion · Agra is live',
   heroTitleA: 'Every monument has a story.',
@@ -481,6 +511,29 @@ const HI: UiStrings = {
   serverUnreachable: 'सर्वर उपलब्ध नहीं',
   answeredOnDevice: 'ऑफ़लाइन पैक से इसी फ़ोन पर उत्तर',
   sourceVerified: 'सत्यापित स्रोत',
+  introKicker: 'आगरा · यूनेस्को विश्व धरोहर',
+  introTitle: 'ताजमहल',
+  introCue: 'शुरू करने के लिए नीचे स्क्रॉल करें',
+  storyPanels: [
+    {
+      kicker: 'हर स्मारक की एक कहानी है',
+      title: 'सुनिए अपनी भाषा में।',
+      body: 'स्मारक के सामने खड़े होकर हिंदी, अंग्रेज़ी और आठ अन्य भाषाओं में बोलकर, लिखकर या कैमरे से पूछें।',
+    },
+    {
+      kicker: 'भरोसे के साथ',
+      title: 'इतिहास और किंवदंती, अलग-अलग।',
+      body: 'हर उत्तर बताता है कि क्या दर्ज इतिहास है और क्या लोककथा, स्रोत सहित। जानकारी न हो तो साफ़ बताता है।',
+    },
+    {
+      kicker: 'स्थल पर कहीं भी',
+      title: 'बिना नेटवर्क भी तैयार।',
+      body: 'नेटवर्क जाने पर भी कहानियाँ, पैदल यात्रा, सुविधाएँ और एक-टैप SOS चलते रहते हैं।',
+    },
+  ],
+  finalKicker: 'आगरा आज उपलब्ध',
+  finalTitle: 'अपनी यात्रा शुरू करें।',
+  photoAlt: 'आगरा में ताजमहल, उद्यानों के पार से',
   sourceAi: 'सत्यापित स्रोत · एआई द्वारा वर्णित',
   heroKicker: 'एआई विरासत साथी · आगरा अब उपलब्ध',
   heroTitleA: 'हर स्मारक की एक कहानी है।',
