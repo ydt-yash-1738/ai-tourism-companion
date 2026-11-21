@@ -36,6 +36,8 @@ _STOPWORDS = {
     "real", "true", "actually", "really", "story", "stories", "see", "visit", "like", "any",
     "some", "so", "very", "also", "called", "name", "named", "find", "get", "go", "should",
     "could", "would", "much", "many", "here", "there", "kind", "type", "is", "was", "ka", "ke", "ki", "ko", "kya", "kaise",
+    "verified", "makes", "special", "including", "features", "feature", "inside", "vs", "versus", "tell", "describe", "show", "important", "famous", "about",
+    "बताइए", "बताएं", "बताएँ", "बताइये", "प्रमाणित", "विशेषता", "विशेषताएँ", "कारण", "तथा", "रहने", "लिए", "या", "दें", "दीजिए", "सच", "जानकारी", "कहानी",
     "kyon", "hai", "hain", "था", "थी", "थे", "है", "हैं", "क्या", "क्यों",
     "कैसे", "के", "की", "को", "में", "से", "और", "का", "पर", "यह", "वह",
     "किसने", "कौन", "कब", "कहाँ", "कहां", "गया", "गई", "गए", "बताइए", "बताओ", "बारे",
@@ -123,7 +125,8 @@ def embed_text(text: str) -> list[float] | None:
         return None
 
 
-_TOKEN_RE = re.compile(r"[\wऀ-ॿ؀-ۿ]+", flags=re.UNICODE)
+# Devanagari letters and vowel signs (excluding the danda marks U+0964/U+0965) and Urdu script
+_TOKEN_RE = re.compile(r"[\w\u0900-\u0963\u0966-\u097F\u0600-\u06FF]+", flags=re.UNICODE)
 
 
 def _tokenize(text: str) -> list[str]:
@@ -212,7 +215,8 @@ def _keyword_rank_chunks(
         indexed.append((chunk, strong, weak))
 
     corpus_lower = " ".join(
-        f"{c.title} {c.content} {' '.join(c.tags or [])}" for c in chunks
+        [f"{c.title} {c.content} {' '.join(c.tags or [])}" for c in chunks]
+        + [m.name for m in (monuments or [])]
     ).lower()
     if _unknown_proper_phrase(query, corpus_lower):
         return [], 0.0
@@ -231,6 +235,14 @@ def _keyword_rank_chunks(
         tok: math.log((n + 1) / (sum(1 for s in strengths[tok] if s > 0) + 0.5))
         for tok in query_tokens
     }
+    # A word found nowhere in the content still signals "off-topic", but cap its pull
+    # so one stray word cannot sink an otherwise well-covered question.
+    known = [idf[t] for t in query_tokens if any(strengths[t])]
+    unknown_cap = max(known) if known else None
+    if unknown_cap is not None:
+        for tok in query_tokens:
+            if not any(strengths[tok]):
+                idf[tok] = min(idf[tok], max(1.2, unknown_cap))
     if named_monuments:
         # The monument the visitor names is the subject of the question: weigh it like the rarest word
         top_idf = max(idf.values())
@@ -263,7 +275,11 @@ def _keyword_rank_chunks(
     best_rank = scored[0][0]
     # Keep only chunks reasonably close to the best one so unrelated text is not mixed in
     kept = [item for item in scored if item[0] >= 0.5 * best_rank][:top_k]
-    best_coverage = max(item[1] for item in kept)
+    # Multi-part questions are answered by several chunks together: measure how much
+    # of the question the top three chunks cover between them.
+    top_idx = [next(i for i, (c, _, _) in enumerate(indexed) if c is chunk) for _, _, chunk in kept[:3]]
+    union = sum(idf[tok] * max(strengths[tok][i] for i in top_idx) for tok in query_tokens) / total_weight
+    best_coverage = max(max(item[1] for item in kept), union)
     return [c for _, _, c in kept], round(min(1.0, best_coverage), 4)
 
 

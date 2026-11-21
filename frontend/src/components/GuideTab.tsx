@@ -1,20 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Accessibility,
   AlertTriangle,
+  ArrowRight,
   BookOpen,
   ChevronRight,
+  Clock,
+  Compass,
   Landmark,
   Loader2,
   Mic,
   Send,
   ShieldCheck,
-  Sparkles,
   Square,
   Volume2,
   WifiOff,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { PERSONA_OPTIONS } from '../data/upCities';
+import {
+  AGRA_VISITOR_SNAPSHOT,
+  GUIDE_MONUMENT_SPOTLIGHTS,
+  GUIDE_TOPIC_CARDS,
+  getMonumentMedia,
+} from '../data/agraMedia';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
 import { offlineLocalChatSearch } from '../services/offlineStore';
@@ -87,7 +96,7 @@ export function GuideTab({
     };
   }, []);
 
-  const sendQuestion = async (rawQuestion: string) => {
+  const sendQuestion = async (rawQuestion: string, monumentOverride?: string) => {
     const question = rawQuestion.trim();
     if (!question || loading) return;
 
@@ -113,7 +122,7 @@ export function GuideTab({
             language,
             persona,
             simple_language: simpleLanguage,
-            monument_slug: selectedMonument || null,
+            monument_slug: (monumentOverride ?? selectedMonument) || null,
             session_hash: sessionHash,
             conversation_history: nextHistory,
           });
@@ -191,6 +200,23 @@ export function GuideTab({
               setVoiceStatus('');
               return;
             }
+            if (stt.fallback_to_device) {
+              // Server has no cloud speech service: listen again with the device recogniser
+              const device = startBrowserSpeechFallback(
+                language,
+                (transcript) => {
+                  setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+                  setVoiceStatus('');
+                },
+                () => setRecording(false),
+              );
+              if (device) {
+                browserSpeechRef.current = device;
+                setRecording(true);
+                setVoiceStatus(isHi ? 'कृपया दोबारा बोलें...' : 'Please say that once more...');
+                return;
+              }
+            }
             setVoiceStatus(
               stt.transcript.trim() === '' && !stt.fallback_to_device
                 ? isHi
@@ -264,12 +290,14 @@ export function GuideTab({
     await speakText(
       fullText,
       language,
-      (active) => {
-        if (!active) setSpeakingId(null);
+      (state) => {
+        if (state === 'idle') setSpeakingId(null);
       },
       { autoTranslate: needsAutoTranslate },
     );
   };
+
+  const tr = (en: string, hi: string) => (isHi && hi ? hi : en);
 
   const monumentName = (slug: string | null | undefined) => {
     const m = monuments.find((x) => x.slug === slug);
@@ -280,7 +308,7 @@ export function GuideTab({
   return (
     <div className="guide-layout">
       <div className="photo-banner">
-        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" />
+        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" data-parallax="0.2" />
         <div className="guide-banner">
           <span className="guide-banner__eyebrow">
             <span className="dot-live" />
@@ -339,20 +367,110 @@ export function GuideTab({
         </div>
 
         {messages.length === 0 && (
-          <div className="starter-grid">
-            {ui.starters.map((q, i) => (
-              <button
-                key={q}
-                type="button"
-                className="starter-card"
-                style={{ ['--i' as string]: i }}
-                onClick={() => sendQuestion(q)}
-              >
-                <Sparkles size={16} aria-hidden="true" />
-                <span>{q}</span>
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
-            ))}
+          <div className="guide-discovery">
+            <section>
+              <div className="guide-section-head">
+                <div>
+                  <h3>{ui.exploreMonumentsHeading}</h3>
+                  <p>{ui.exploreMonumentsSub}</p>
+                </div>
+              </div>
+              <div className="guide-monument-grid">
+                {GUIDE_MONUMENT_SPOTLIGHTS.map((item) => {
+                  const media = getMonumentMedia(item.slug);
+                  return (
+                    <button
+                      key={item.slug}
+                      type="button"
+                      className={`guide-monument-card ${selectedMonument === item.slug ? 'is-selected' : ''}`}
+                      onClick={() => {
+                        setSelectedMonument(item.slug);
+                        void sendQuestion(tr(item.promptEn, item.promptHi), item.slug);
+                      }}
+                    >
+                      <div className="guide-monument-card__media">
+                        <img
+                          data-parallax="0.1"
+                          className="guide-monument-card__img is-loaded"
+                          src={media.image}
+                          alt={media.alt}
+                          style={{ objectPosition: media.objectPosition }}
+                          loading="lazy"
+                        />
+                        <div className="guide-monument-card__scrim" aria-hidden="true" />
+                        <div className="guide-monument-card__top">
+                          <span className="guide-monument-card__pill">
+                            <Clock size={11} />
+                            <span>~{item.visitDurationMin} min</span>
+                          </span>
+                          <span className={`guide-monument-card__pill ${item.stepFree ? 'is-step-free' : 'is-stairs'}`}>
+                            <Accessibility size={11} />
+                            <span>{item.stepFree ? ui.stepFreeBadge : ui.stairsBadge}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="guide-monument-card__body">
+                        <h4>{tr(item.name, item.nameHi)}</h4>
+                        <p>{tr(item.shortSummary, item.shortSummaryHi)}</p>
+                        <div className="guide-monument-card__cta">
+                          <span>{ui.askAboutMonument}</span>
+                          <ArrowRight size={14} />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <div className="guide-section-head">
+                <div>
+                  <h3>{ui.curatedTopicsHeading}</h3>
+                  <p>{ui.curatedTopicsSub}</p>
+                </div>
+              </div>
+              <div className="guide-topic-grid">
+                {GUIDE_TOPIC_CARDS.map((topic) => {
+                  const focusSlug = topic.id === 'musamman-burj-story' ? 'musamman-burj' : '';
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      className={`guide-topic-card is-${topic.accent}`}
+                      disabled={loading}
+                      onClick={() => {
+                        setSelectedMonument(focusSlug);
+                        void sendQuestion(tr(topic.questionEn, topic.questionHi), focusSlug);
+                      }}
+                    >
+                      <span className="guide-topic-card__badge">{tr(topic.badgeEn, topic.badgeHi)}</span>
+                      <h4>{tr(topic.titleEn, topic.titleHi)}</h4>
+                      <p>{tr(topic.descEn, topic.descHi)}</p>
+                      <span className="guide-topic-card__ask">
+                        <span>{ui.askAboutMonument}</span>
+                        <ArrowRight size={14} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="guide-snapshot-grid" aria-label="Agra visitor quick facts">
+              {AGRA_VISITOR_SNAPSHOT.map((tile, idx) => {
+                const Icon = idx === 0 ? Clock : idx === 1 ? Compass : ShieldCheck;
+                return (
+                  <div key={tile.id} className="guide-snapshot-tile">
+                    <div className="guide-snapshot-tile__head">
+                      <Icon size={15} color="var(--saffron-deep)" />
+                      <span>{tr(tile.titleEn, tile.titleHi)}</span>
+                    </div>
+                    <p>{tr(tile.bodyEn, tile.bodyHi)}</p>
+                  </div>
+                );
+              })}
+            </section>
           </div>
         )}
       </section>

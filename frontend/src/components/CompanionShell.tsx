@@ -27,6 +27,7 @@ import { CameraTab } from './CameraTab';
 import { EmergencyModal } from './EmergencyModal';
 import { FacilitiesTab } from './FacilitiesTab';
 import { GuideTab } from './GuideTab';
+import { PhotoHero } from './PhotoHero';
 import { NearbyTab } from './NearbyTab';
 import { TourTab } from './TourTab';
 
@@ -50,6 +51,13 @@ interface CompanionShellProps {
   onBackToCities: () => void;
   onOpenAdmin: () => void;
 }
+
+const TAB_HERO_IMAGES: Record<Exclude<CompanionTabId, 'guide'>, { image: string; position: string }> = {
+  tour: { image: '/images/monuments/darwaza-i-rauza.webp', position: 'center 45%' },
+  camera: { image: '/images/nearby/parchinkari-artisan-hub.webp', position: 'center 50%' },
+  nearby: { image: '/images/nearby/itimad-ud-daulah-baby-taj.webp', position: 'center 40%' },
+  facilities: { image: '/images/taj-mahal-banner.webp', position: 'center 75%' },
+};
 
 const ONBOARDING_KEY = 'up_companion_onboarded_v1';
 
@@ -113,6 +121,8 @@ export function CompanionShell({
   const connLabel =
     connection === 'online' ? ui.online : connection === 'offline' ? ui.offline : ui.serverUnreachable;
   const workingOffline = connection !== 'online';
+  // Tabs skip live requests when the server is known to be unreachable and use the offline pack at once
+  const liveOk = isOnline && serverReachable;
 
   const tabs: Array<{ id: CompanionTabId; label: string; icon: typeof MessageSquare }> = [
     { id: 'guide', label: ui.tabs.guide, icon: MessageSquare },
@@ -206,6 +216,14 @@ export function CompanionShell({
         )}
 
         <div key={activeTab} className="tab-stage">
+          {activeTab !== 'guide' && (
+            <PhotoHero
+              image={TAB_HERO_IMAGES[activeTab].image}
+              objectPosition={TAB_HERO_IMAGES[activeTab].position}
+              eyebrow={ui.tabHeroes[activeTab].eyebrow}
+              title={ui.tabHeroes[activeTab].title}
+            />
+          )}
           {activeTab === 'guide' && (
             <GuideTab
               language={language}
@@ -224,9 +242,10 @@ export function CompanionShell({
               language={language}
               persona={persona}
               simpleLanguage={a11yMode}
-              isOnline={isOnline}
+              isOnline={liveOk}
               sessionHash={sessionHash}
               userCoords={userCoords}
+              offlinePack={offlinePack}
             />
           )}
 
@@ -234,7 +253,7 @@ export function CompanionShell({
             <TourTab
               language={language}
               persona={persona}
-              isOnline={isOnline}
+              isOnline={liveOk}
               sessionHash={sessionHash}
               userCoords={userCoords}
               monuments={monuments}
@@ -243,13 +262,13 @@ export function CompanionShell({
           )}
 
           {activeTab === 'nearby' && (
-            <NearbyTab language={language} isOnline={isOnline} userCoords={userCoords} offlinePack={offlinePack} />
+            <NearbyTab language={language} isOnline={liveOk} userCoords={userCoords} offlinePack={offlinePack} />
           )}
 
           {activeTab === 'facilities' && (
             <FacilitiesTab
               language={language}
-              isOnline={isOnline}
+              isOnline={liveOk}
               sessionHash={sessionHash}
               userCoords={userCoords}
               offlinePack={offlinePack}

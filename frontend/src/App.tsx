@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminDashboard } from './components/AdminDashboard';
+import { useScrollParallax } from './hooks/useScrollParallax';
 import { CitySelectorView } from './components/CitySelectorView';
 import { CompanionShell } from './components/CompanionShell';
 import { SERVER_STATUS_EVENT, getMonuments, getOfflinePack, pingServer } from './services/api';
@@ -9,6 +10,7 @@ import type { Monument, OfflinePack, PersonaType } from './types/api';
 type AppScreen = 'landing' | 'companion' | 'admin';
 
 export default function App() {
+  useScrollParallax();
   const [screen, setScreen] = useState<AppScreen>(() =>
     window.location.hash === '#admin' ? 'admin' : 'landing',
   );

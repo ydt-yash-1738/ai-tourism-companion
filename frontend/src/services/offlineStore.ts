@@ -5,6 +5,7 @@ import type {
   HistoryFactItem,
   OfflinePack,
   PersonaType,
+  VisionResponse,
 } from '../types/api';
 import { GAP_THRESHOLD, rankChunks } from './offlineSearch';
 
@@ -108,8 +109,11 @@ export function offlineLocalChatSearch(
 
   const verified: HistoryFactItem[] = [];
   const folklore: FolkloreItem[] = [];
+  // UC-7 / UC-8: shorter text for Quick, Kids and simple-language modes; full text for scholars
+  const brief = simpleLanguage || persona === 'quick' || persona === 'kids';
+  const trim = (t: string) => (brief ? t.split(/(?<=[.।])\s+/).slice(0, 2).join(' ') : t);
   for (const { chunk } of scored) {
-    const text = isHi && chunk.content_hi ? chunk.content_hi : chunk.content;
+    const text = trim(isHi && chunk.content_hi ? chunk.content_hi : chunk.content);
     if (chunk.content_type === 'RECORDED_HISTORY') {
       verified.push({ text, source: chunk.source_name });
     } else {
@@ -120,11 +124,19 @@ export function offlineLocalChatSearch(
   const lead = scored[0].chunk;
   const leadText = isHi && lead.content_hi ? lead.content_hi : lead.content;
   const leadSentences = leadText.split(/(?<=[.।])\s+/).filter(Boolean);
-  let summary = leadSentences[0] || leadText;
+  let summary =
+    persona === 'scholar' && !simpleLanguage
+      ? leadSentences.slice(0, 2).join(' ') || leadText
+      : leadSentences[0] || leadText;
   if (lead.content_type !== 'RECORDED_HISTORY') {
     summary = isHi
       ? `स्थानीय परंपरा के अनुसार (यह दर्ज इतिहास नहीं है): ${summary}`
       : `According to local tradition (this is not recorded history): ${summary}`;
+  }
+  if (persona === 'kids') {
+    summary = (isHi ? 'चलो, एक कहानी सुनते हैं! ' : "Here's the story! ") + summary;
+  } else if (persona === 'pilgrim') {
+    summary = (isHi ? 'आस्था और सम्मान के साथ: ' : 'With respect for the faith and traditions of this place: ') + summary;
   }
   const leadMonument = pack.monuments?.find((m) => m.id === lead.monument_id);
 
@@ -142,3 +154,50 @@ export function offlineLocalChatSearch(
   };
 }
 
+
+/**
+ * Offline "point the camera" fallback, mirroring the backend's GPS fallback:
+ * with no server to look at the photo, name the nearest monument to the
+ * visitor and show its verified history and folklore from the offline pack.
+ */
+export function offlineVisionFallback(
+  pack: OfflinePack | null,
+  coords: { lat: number; lng: number } | null,
+  language: string,
+  persona: PersonaType,
+): VisionResponse | null {
+  if (!pack || !pack.monuments.length || !coords) return null;
+  const isHi = language.toLowerCase().startsWith('hi');
+  const ranked = [...pack.monuments].sort(
+    (a, b) =>
+      haversineMeters(coords.lat, coords.lng, a.lat, a.lng) -
+      haversineMeters(coords.lat, coords.lng, b.lat, b.lng),
+  );
+  const nearest = ranked[0];
+  const distance = haversineMeters(coords.lat, coords.lng, nearest.lat, nearest.lng);
+  const name = isHi && nearest.name_hi ? nearest.name_hi : nearest.name;
+  const chunks = pack.knowledge_chunks.filter((c) => c.monument_id === nearest.id).slice(0, 3);
+  const verified: HistoryFactItem[] = [];
+  const folklore: FolkloreItem[] = [];
+  for (const chunk of chunks) {
+    const text = isHi && chunk.content_hi ? chunk.content_hi : chunk.content;
+    if (chunk.content_type === 'RECORDED_HISTORY') verified.push({ text, source: chunk.source_name });
+    else folklore.push({ text, attribution: chunk.source_name });
+  }
+  return {
+    identified_name: name,
+    confidence: distance <= 150 ? 'medium' : 'low',
+    architectural_features: nearest.visual_cues.slice(0, 4),
+    answer_summary: isHi
+      ? `ऑफ़लाइन: फ़ोटो की पहचान के लिए नेटवर्क चाहिए। आपकी लोकेशन के अनुसार सबसे निकट स्मारक '${name}' है (~${distance} मी)।`
+      : `Offline: photo recognition needs a network. Based on your location, the nearest monument is ${name} (about ${distance} m away).`,
+    verified_history: verified,
+    folklore_legends: folklore,
+    matched_monument_slug: nearest.slug,
+    candidate_monuments: ranked.slice(0, 3).map((m) => (isHi && m.name_hi ? m.name_hi : m.name)),
+    is_knowledge_gap: false,
+    language,
+    persona,
+    mode: 'local_fallback',
+  };
+}

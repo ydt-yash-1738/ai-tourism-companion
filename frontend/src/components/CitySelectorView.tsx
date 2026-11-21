@@ -28,7 +28,9 @@ import {
 import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
 import { useReveal } from '../hooks/useReveal';
-import { CityHeritageSketch, UpHeritageCrest } from './HeritageSketchIcons';
+import { UpHeritageCrest } from './HeritageSketchIcons';
+import { PHOTO_CREDITS } from '../data/photoCredits';
+import { HeritageCarousel } from './HeritageCarousel';
 import { ScrollStory } from './ScrollStory';
 
 interface CitySelectorViewProps {
@@ -309,50 +311,27 @@ export function CitySelectorView({
           <h2>{ui.destHeading}</h2>
           <p>{ui.destSub}</p>
         </header>
-        <div className="dest-rail" role="list">
-          {UP_HERITAGE_CITIES.map((city) => {
-            const baseLang = language.toLowerCase().split('-')[0];
-            const tr = baseLang !== 'en' && baseLang !== 'hi' ? translatedCities[city.slug] : null;
-            const cityName = isHi ? city.nameHi : tr?.name || city.name;
-            const monumentLabel = isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel;
-            const tagline = isHi ? city.taglineHi : tr?.tagline || city.tagline;
-            const body = (
-              <>
-                <div className="dest-card__art">
-                  <CityHeritageSketch city={city.slug} />
-                  <span className={`dest-card__badge ${city.clickable ? 'is-live' : ''}`}>
-                    {city.clickable ? ui.liveNow : ui.comingSoon}
-                  </span>
-                </div>
-                <div className="dest-card__body">
-                  <h3>{cityName}</h3>
-                  <span className="dest-card__monument">{monumentLabel}</span>
-                  <p>{tagline}</p>
-                  {city.clickable && (
-                    <span className="dest-card__go">
-                      {ui.exploreFeatures}
-                      <ArrowRight size={15} />
-                    </span>
-                  )}
-                </div>
-              </>
-            );
-            return city.clickable ? (
-              <button
-                key={city.slug}
-                type="button"
-                role="listitem"
-                className="dest-card is-live"
-                onClick={() => onSelectAgra(userCoords)}
-              >
-                {body}
-              </button>
-            ) : (
-              <div key={city.slug} role="listitem" className="dest-card" aria-label={`${city.name}, ${ui.comingSoon}`}>
-                {body}
-              </div>
-            );
-          })}
+        <div data-reveal>
+          <HeritageCarousel
+            label={ui.destHeading}
+            ctaLabel={ui.ctaBegin}
+            onSelectLive={() => onSelectAgra(userCoords)}
+            slides={UP_HERITAGE_CITIES.map((city) => {
+              const baseLang = language.toLowerCase().split('-')[0];
+              const tr = baseLang !== 'en' && baseLang !== 'hi' ? translatedCities[city.slug] : null;
+              return {
+                id: city.slug,
+                image: city.image,
+                imageAlt: city.imageAlt,
+                objectPosition: city.objectPosition,
+                title: isHi ? city.nameHi : tr?.name || city.name,
+                subtitle: isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel,
+                body: isHi ? city.taglineHi : tr?.tagline || city.tagline,
+                badge: city.clickable ? ui.liveNow : ui.comingSoon,
+                live: city.clickable,
+              };
+            })}
+          />
         </div>
       </section>
 
@@ -376,17 +355,22 @@ export function CitySelectorView({
         <div className="tricolour-bar" />
         <p>{ui.footerSources}</p>
         <p className="landing-footer__fine">{ui.footerText}</p>
-        <p className="landing-footer__fine">
-          Taj Mahal photo: Yann, edited by Jim Carter, via{' '}
-          <a href="https://commons.wikimedia.org/wiki/File:Taj_Mahal_(Edited).jpeg" target="_blank" rel="noreferrer">
-            Wikimedia Commons
-          </a>
-          ,{' '}
-          <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
-            CC BY-SA 4.0
-          </a>
-          .
-        </p>
+        <details className="credits">
+          <summary>
+            {ui.photoCreditsLabel} ({PHOTO_CREDITS.length})
+          </summary>
+          <ul>
+            {PHOTO_CREDITS.map((c) => (
+              <li key={c.source}>
+                <strong>{c.subject}</strong>: {c.author},{' '}
+                <a href={c.source} target="_blank" rel="noreferrer">
+                  Wikimedia Commons
+                </a>
+                , {c.license}
+              </li>
+            ))}
+          </ul>
+        </details>
       </footer>
     </div>
   );

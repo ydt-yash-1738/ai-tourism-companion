@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BookOpen,
   Camera,
@@ -10,9 +10,11 @@ import {
   Volume2,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
+import { offlineVisionFallback } from '../services/offlineStore';
 import { postVisionAsk } from '../services/api';
-import { speakText, stopSpeaking } from '../services/speech';
-import type { PersonaType, VisionResponse } from '../types/api';
+import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
+import type { PersonaType, VisionResponse, OfflinePack } from '../types/api';
+import { ErrorStateCard, LoadingStateCard, SkeletonCards } from './ApiStateCard';
 
 interface CameraTabProps {
   language: string;
@@ -21,6 +23,7 @@ interface CameraTabProps {
   isOnline: boolean;
   sessionHash: string;
   userCoords: { lat: number; lng: number } | null;
+  offlinePack: OfflinePack | null;
 }
 
 export function CameraTab({
@@ -30,6 +33,7 @@ export function CameraTab({
   isOnline,
   sessionHash,
   userCoords,
+  offlinePack,
 }: CameraTabProps) {
   const ui = getUiText(language);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -39,13 +43,21 @@ export function CameraTab({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<VisionResponse | null>(null);
-  const [speaking, setSpeaking] = useState(false);
+  const [audioStatus, setAudioStatus] = useState<AudioPlaybackState>('idle');
 
   const effectiveCoords = useDemoGps ? { lat: 27.1802, lng: 78.0226 } : userCoords;
+
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, []);
 
   const handleFileChange = (file: File | undefined) => {
     if (!file) return;
     if (previewUrl) URL.revokeObjectURL(previewUrl);
+    stopSpeaking();
+    setAudioStatus('idle');
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setResult(null);
@@ -54,11 +66,22 @@ export function CameraTab({
 
   const handleIdentify = async () => {
     if (!imageFile || loading) return;
+    const tryOffline = () => {
+      const local = offlineVisionFallback(offlinePack, effectiveCoords, language, persona);
+      if (local) {
+        setResult(local);
+        setError('');
+        return true;
+      }
+      return false;
+    };
     if (!isOnline) {
-      setError(ui.offlineCameraErr);
+      if (!tryOffline()) setError(ui.offlineCameraErr);
       return;
     }
 
+    stopSpeaking();
+    setAudioStatus('idle');
     setLoading(true);
     setError('');
     try {
@@ -75,7 +98,9 @@ export function CameraTab({
       });
       setResult(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Vision identification failed.');
+      if (!tryOffline()) {
+        setError(err instanceof Error ? err.message : 'Vision identification failed.');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,18 +108,15 @@ export function CameraTab({
 
   const handleSpeakResult = async () => {
     if (!result) return;
-    if (speaking) {
+    if (audioStatus !== 'idle') {
       stopSpeaking();
-      setSpeaking(false);
+      setAudioStatus('idle');
       return;
     }
-    setSpeaking(true);
     await speakText(
       `${result.identified_name}. ${result.answer_summary}`,
       language,
-      (on) => {
-        if (!on) setSpeaking(false);
-      },
+      (state) => setAudioStatus(state),
       { autoTranslate: result.language !== language },
     );
   };
@@ -164,12 +186,26 @@ export function CameraTab({
               <span>{loading ? ui.identifyingBtn : ui.identifyBtn}</span>
             </button>
           </div>
-
-          {error && <div className="gap-notice">{error}</div>}
         </div>
       </div>
 
-      {result && (
+      {loading && (
+        <div style={{ display: 'grid', gap: 12 }}>
+          <LoadingStateCard message={ui.analyzingPhoto} subMessage={ui.searchingRecords} compact />
+          <SkeletonCards count={1} variant="card" />
+        </div>
+      )}
+
+      {!loading && error && (
+        <ErrorStateCard
+          title={ui.serverErrorTitle}
+          message={error}
+          retryLabel={ui.retry}
+          onRetry={imageFile ? handleIdentify : undefined}
+        />
+      )}
+
+      {!loading && result && (
         <article className="section-card" style={{ animation: 'fadeSlideUp 0.25s ease' }}>
           <div className="chat-bubble__meta">
             <span>
@@ -178,12 +214,30 @@ export function CameraTab({
             </span>
             <button
               type="button"
-              className={`pill-btn ${speaking ? 'is-saffron' : ''}`}
+              className={`pill-btn ${
+                audioStatus === 'playing'
+                  ? 'is-saffron'
+                  : audioStatus === 'loading'
+                    ? 'is-audio-loading'
+                    : ''
+              }`}
               style={{ minHeight: 34, padding: '4px 10px', fontSize: '0.8rem' }}
               onClick={handleSpeakResult}
             >
-              {speaking ? <Square size={13} /> : <Volume2 size={14} />}
-              <span>{speaking ? ui.stopAudio : ui.readAloud}</span>
+              {audioStatus === 'loading' ? (
+                <Loader2 size={14} className="spin-icon" />
+              ) : audioStatus === 'playing' ? (
+                <Square size={13} />
+              ) : (
+                <Volume2 size={14} />
+              )}
+              <span>
+                {audioStatus === 'loading'
+                  ? ui.loadingAudio
+                  : audioStatus === 'playing'
+                    ? ui.stopAudio
+                    : ui.readAloud}
+              </span>
             </button>
           </div>
 

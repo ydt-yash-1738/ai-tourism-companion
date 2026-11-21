@@ -1,15 +1,41 @@
+import { Capacitor } from '@capacitor/core';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { LANGUAGE_OPTIONS } from '../data/upCities';
+
+// Android's WebView has no Web Speech engine, so the installed app uses the
+// phone's native text-to-speech and speech recogniser, which also work offline
+// when the language pack is on the device.
+const isNative = Capacitor.isNativePlatform();
 import { postVoiceTTS } from './api';
 
-let currentAudio: HTMLAudioElement | null = null;
+export type AudioPlaybackState = 'idle' | 'loading' | 'playing';
 
-export function stopSpeaking(): void {
+let currentAudio: HTMLAudioElement | null = null;
+let activePlaybackToken = 0;
+let activeTtsAbort: AbortController | null = null;
+
+function clearCurrentAudio(): void {
   if (currentAudio) {
+    currentAudio.onplaying = null;
+    currentAudio.onended = null;
+    currentAudio.onerror = null;
     currentAudio.pause();
     currentAudio.src = '';
     currentAudio = null;
   }
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+}
+
+export function stopSpeaking(): void {
+  activePlaybackToken += 1;
+  if (activeTtsAbort) {
+    activeTtsAbort.abort();
+    activeTtsAbort = null;
+  }
+  clearCurrentAudio();
+  if (isNative) {
+    void TextToSpeech.stop().catch(() => undefined);
+  } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
 }
@@ -17,44 +43,95 @@ export function stopSpeaking(): void {
 export async function speakText(
   text: string,
   languageCode: string,
-  onSpeakingChange?: (speaking: boolean) => void,
+  onStateChange?: (state: AudioPlaybackState) => void,
   options?: { autoTranslate?: boolean },
-): Promise<'sarvam' | 'device'> {
+): Promise<'sarvam' | 'device' | 'cancelled'> {
   stopSpeaking();
-  if (!text.trim()) return 'device';
+  if (!text.trim()) {
+    onStateChange?.('idle');
+    return 'cancelled';
+  }
 
-  onSpeakingChange?.(true);
+  const token = ++activePlaybackToken;
+  onStateChange?.('loading');
   let textForDeviceFallback = text;
 
   // Try cloud Sarvam AI / Bhashini TTS first; automatically translate if text isn't in target language
   try {
     if (navigator.onLine) {
-      const res = await postVoiceTTS(text, languageCode, Boolean(options?.autoTranslate));
+      const controller = new AbortController();
+      activeTtsAbort = controller;
+      const res = await postVoiceTTS(
+        text,
+        languageCode,
+        Boolean(options?.autoTranslate),
+        controller.signal,
+      );
+      if (activeTtsAbort === controller) {
+        activeTtsAbort = null;
+      }
+      if (token !== activePlaybackToken) {
+        return 'cancelled';
+      }
       if (res.spoken_text && res.spoken_text.trim()) {
         textForDeviceFallback = res.spoken_text;
       }
       if (!res.fallback_to_device && res.audio_base64) {
         const audio = new Audio(`data:${res.content_type};base64,${res.audio_base64}`);
         currentAudio = audio;
+        let markedPlaying = false;
+        const markPlaying = () => {
+          if (!markedPlaying && token === activePlaybackToken) {
+            markedPlaying = true;
+            onStateChange?.('playing');
+          }
+        };
+        audio.onplaying = markPlaying;
         audio.onended = () => {
-          currentAudio = null;
-          onSpeakingChange?.(false);
+          if (currentAudio === audio) currentAudio = null;
+          if (token === activePlaybackToken) onStateChange?.('idle');
         };
         audio.onerror = () => {
-          currentAudio = null;
-          onSpeakingChange?.(false);
+          if (currentAudio === audio) currentAudio = null;
+          if (token === activePlaybackToken) onStateChange?.('idle');
         };
         await audio.play();
+        if (token !== activePlaybackToken) {
+          clearCurrentAudio();
+          return 'cancelled';
+        }
+        markPlaying();
         return 'sarvam';
       }
     }
   } catch {
+    activeTtsAbort = null;
+    clearCurrentAudio();
+    if (token !== activePlaybackToken) {
+      return 'cancelled';
+    }
     // Silent failover to device speech
   }
 
-  return new Promise<'device'>((resolve) => {
+  if (token !== activePlaybackToken) {
+    return 'cancelled';
+  }
+
+  if (isNative) {
+    const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === languageCode);
+    onStateChange?.('playing');
+    try {
+      await TextToSpeech.speak({ text: textForDeviceFallback, lang: langMeta?.bcp47 || 'en-IN', rate: 0.96 });
+    } catch {
+      // No voice for this language on the device: finish quietly
+    }
+    if (token === activePlaybackToken) onStateChange?.('idle');
+    return token === activePlaybackToken ? 'device' : 'cancelled';
+  }
+
+  return new Promise<'device' | 'cancelled'>((resolve) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      onSpeakingChange?.(false);
+      if (token === activePlaybackToken) onStateChange?.('idle');
       resolve('device');
       return;
     }
@@ -73,13 +150,37 @@ export async function speakText(
     }
 
     utterance.rate = 0.96;
+    let started = false;
+    let settled = false;
+    const safetyTimer = window.setTimeout(() => {
+      if (!started && !settled && token === activePlaybackToken && window.speechSynthesis.speaking) {
+        started = true;
+        onStateChange?.('playing');
+      }
+    }, 250);
+
+    const cleanup = () => {
+      window.clearTimeout(safetyTimer);
+    };
+
+    utterance.onstart = () => {
+      if (token !== activePlaybackToken) return;
+      started = true;
+      onStateChange?.('playing');
+    };
     utterance.onend = () => {
-      onSpeakingChange?.(false);
-      resolve('device');
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (token === activePlaybackToken) onStateChange?.('idle');
+      resolve(token === activePlaybackToken ? 'device' : 'cancelled');
     };
     utterance.onerror = () => {
-      onSpeakingChange?.(false);
-      resolve('device');
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (token === activePlaybackToken) onStateChange?.('idle');
+      resolve(token === activePlaybackToken ? 'device' : 'cancelled');
     };
     window.speechSynthesis.speak(utterance);
   });
@@ -117,6 +218,35 @@ export function startBrowserSpeechFallback(
     SpeechRecognition?: new () => SpeechRecognitionInstanceLike;
     webkitSpeechRecognition?: new () => SpeechRecognitionInstanceLike;
   };
+  if (isNative) {
+    const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === languageCode);
+    let stopped = false;
+    void (async () => {
+      try {
+        const perm = await SpeechRecognition.requestPermissions();
+        if (perm.speechRecognition !== 'granted') return;
+        const res = await SpeechRecognition.start({
+          language: langMeta?.bcp47 || 'en-IN',
+          maxResults: 1,
+          partialResults: false,
+          popup: true,
+        });
+        const first = res?.matches?.[0] || '';
+        if (!stopped && first.trim()) onTranscript(first.trim());
+      } catch {
+        // recogniser unavailable or cancelled
+      } finally {
+        onDone();
+      }
+    })();
+    return {
+      stop: () => {
+        stopped = true;
+        void SpeechRecognition.stop().catch(() => undefined);
+      },
+    };
+  }
+
   const Ctor = win.SpeechRecognition || win.webkitSpeechRecognition;
   if (!Ctor) return null;
 

@@ -45,12 +45,21 @@ def export_pack(slug: str, out_path: Path) -> dict:
                 res = client.get(f"/api/destinations/{slug}/offline-pack")
                 res.raise_for_status()
                 pack = res.json()
+                # Synthetic-only insights, so the department dashboard can demo offline
+                ins = client.get(
+                    "/api/analytics/summary",
+                    params={"destination_slug": slug, "include_synthetic": "true"},
+                )
+                ins.raise_for_status()
+                insights = ins.json()
         finally:
             app.dependency_overrides.clear()
             engine.dispose()
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(pack, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    insights_path = out_path.with_name(f"{slug}-insights.json")
+    insights_path.write_text(json.dumps(insights, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     return pack
 
 

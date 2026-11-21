@@ -299,3 +299,15 @@ def test_out_of_scope_questions_are_gaps(client):
         data = _ask(test_client, question)
         assert data["is_knowledge_gap"] is True, question
         assert data["verified_history"] == []
+
+
+def test_curated_monument_prompts_are_answered(client):
+    """The Guide's monument cards and topic cards must never land on a knowledge gap."""
+    test_client, _ = client
+    for question, lang in (
+        ("Tell me the verified history, architecture, and folklore of the Taj Mahal Main Mausoleum.", "en"),
+        ("Why were the Taj Mosque and Jawab Pavilion built as twins, and why is the Taj Mahal closed on Fridays?", "en"),
+        ("क्या काले ताजमहल और कारीगरों के हाथ काटने की कहानी सच है या लोककथा?", "hi"),
+        ("ताजमहल खुलने का समय, शुक्रवार नियम, शू-कवर और व्हीलचेयर सुगम मार्ग की जानकारी दें।", "hi"),
+    ):
+        assert _ask(test_client, question, lang)["is_knowledge_gap"] is False, question

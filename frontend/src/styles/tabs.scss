@@ -732,67 +732,6 @@
   }
 }
 
-.info-card {
-  @include m.card-surface;
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  @include m.tablet-up {
-    padding: 16px;
-  }
-
-  &__badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  &__tag {
-    padding: 3px 9px;
-    border-radius: var(--radius-pill);
-    font-size: 0.72rem;
-    font-weight: 700;
-    background: var(--bg-parchment);
-    color: var(--navy-deep);
-
-    &.is-odop {
-      background: var(--emerald-tint);
-      color: var(--emerald-deep);
-      border: 1px solid rgba(20, 122, 75, 0.3);
-    }
-
-    &.is-saffron {
-      background: var(--saffron-tint);
-      color: var(--saffron-deep);
-    }
-
-    &.is-emergency {
-      background: var(--sos-tint);
-      color: var(--sos-red);
-    }
-  }
-
-  &__meta-list {
-    margin: 4px 0 0;
-    padding: 9px 0 0;
-    border-top: 1px solid var(--border-sand);
-    font-size: calc(0.84rem * var(--text-scale));
-    color: var(--text-secondary);
-    display: grid;
-    gap: 4px;
-  }
-
-  &__actions {
-    margin-top: auto;
-    padding-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-}
 
 // Fields and result meta shared by the camera and other tabs
 .chat-composer__input,

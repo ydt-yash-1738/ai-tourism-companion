@@ -13,6 +13,10 @@ const STOPWORDS = new Set([
   'ka', 'ke', 'ki', 'ko', 'kya', 'kaise', 'kyon', 'hai', 'hain',
   'था', 'थी', 'थे', 'है', 'हैं', 'क्या', 'क्यों', 'कैसे', 'के', 'की', 'को', 'में', 'से', 'और', 'का',
   'पर', 'यह', 'वह', 'किसने', 'कौन', 'कब', 'कहाँ', 'कहां', 'गया', 'गई', 'गए', 'बताइए', 'बताओ', 'बारे',
+  'verified', 'makes', 'special', 'including', 'features', 'feature', 'inside', 'vs', 'versus', 'tell',
+  'describe', 'show', 'important', 'famous', 'about',
+  'बताएं', 'बताएँ', 'बताइये', 'प्रमाणित', 'विशेषता', 'विशेषताएँ', 'कारण', 'तथा', 'रहने', 'लिए', 'या',
+  'दें', 'दीजिए', 'सच', 'जानकारी', 'कहानी',
 ]);
 
 const GENERIC_NAME_WORDS = new Set([
@@ -74,8 +78,10 @@ export function rankChunks(
   const queryTokens = [...new Set(tokenize(query))];
   if (!queryTokens.length || !chunks.length) return { chunks: [], coverage: 0 };
 
-  const corpusLower = chunks
-    .map((c) => `${c.title} ${c.content} ${c.tags.join(' ')}`)
+  const corpusLower = [
+    ...chunks.map((c) => `${c.title} ${c.content} ${c.tags.join(' ')}`),
+    ...monuments.map((m) => m.name),
+  ]
     .join(' ')
     .toLowerCase();
   if (unknownProperPhrase(query, corpusLower)) return { chunks: [], coverage: 0 };
@@ -105,6 +111,14 @@ export function rankChunks(
     strengths.set(tok, s);
     idf.set(tok, Math.log((n + 1) / (s.filter((v) => v > 0).length + 0.5)));
   }
+  // Cap the pull of words found nowhere in the content (see backend for rationale)
+  const known = queryTokens.filter((t) => strengths.get(t)!.some((v) => v > 0)).map((t) => idf.get(t)!);
+  if (known.length) {
+    const cap = Math.max(1.2, Math.max(...known));
+    for (const tok of queryTokens) {
+      if (!strengths.get(tok)!.some((v) => v > 0)) idf.set(tok, Math.min(idf.get(tok)!, cap));
+    }
+  }
   if (named.size) {
     const top = Math.max(...idf.values());
     for (const tok of queryTokens) if (entities.has(tok)) idf.set(tok, Math.max(idf.get(tok)!, top));
@@ -128,8 +142,13 @@ export function rankChunks(
   if (!scored.length) return { chunks: [], coverage: 0 };
   scored.sort((a, b) => b.rank - a.rank);
   const kept = scored.filter((s) => s.rank >= 0.5 * scored[0].rank).slice(0, topK);
+  // Multi-part questions: coverage of the top three chunks together
+  const topIdx = kept.slice(0, 3).map((k) => indexed.findIndex((x) => x.chunk === k.chunk));
+  const union =
+    queryTokens.reduce((acc, tok) => acc + idf.get(tok)! * Math.max(...topIdx.map((i) => strengths.get(tok)![i])), 0) /
+    totalWeight;
   return {
     chunks: kept.map((s) => s.chunk),
-    coverage: Math.min(1, Math.max(...kept.map((s) => s.coverage))),
+    coverage: Math.min(1, Math.max(union, ...kept.map((s) => s.coverage))),
   };
 }
