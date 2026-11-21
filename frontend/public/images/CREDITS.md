@@ -25,3 +25,22 @@ They were resized and converted to WebP; adapted files are shared under the same
 | nearby/mehtab-bagh.webp | [Aks The Reflection Taj Mahal.jpg](https://commons.wikimedia.org/wiki/File:Aks_The_Reflection_Taj_Mahal.jpg) | Antrix3 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | nearby/parchinkari-artisan-hub.webp | [Art Work inside Taj Mahal 01.JPG](https://commons.wikimedia.org/wiki/File:Art_Work_inside_Taj_Mahal_01.JPG) | Rajesnewdelhi | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
 | nearby/sadar-bazaar-chaat-gali.webp | [Papri Pakori Chat.JPG](https://commons.wikimedia.org/wiki/File:Papri_Pakori_Chat.JPG) | Ravi Talwar | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| monuments/bara-imambara.webp | [Imambara of Asaf-ud-daula .jpg](https://commons.wikimedia.org/wiki/File:Imambara_of_Asaf-ud-daula_.jpg) | Harsh13596 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| monuments/asfi-mosque.webp | [Asfi Mosque, Lucknow, Uttar Pradesh, India (2013) 2.jpg](https://commons.wikimedia.org/wiki/File:Asfi_Mosque,_Lucknow,_Uttar_Pradesh,_India_(2013)_2.jpg) | Kumud Kant | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| monuments/ashoka-pillar.webp | [Ashokan Pillar, Sarnath, Varanasi, Uttar Pradesh.jpg](https://commons.wikimedia.org/wiki/File:Ashokan_Pillar,_Sarnath,_Varanasi,_Uttar_Pradesh.jpg) | Paramanu Sarkar | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| monuments/mulagandha-kuti-vihara.webp | [Mulagandha Kuti Vihara – Sarnath.jpg](https://commons.wikimedia.org/wiki/File:Mulagandha_Kuti_Vihara_%E2%80%93_Sarnath.jpg) | MaximusPrasad | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) |
+| monuments/imambara-rooftop.webp | [Imambara of Asaf-ud-daula Bara imambara 9.JPG](https://commons.wikimedia.org/wiki/File:Imambara_of_Asaf-ud-daula_Bara_imambara_9.JPG) | Nikhil2789 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| facilities/agra-taj-west-gate.webp | [Taj Mahal West Gate (22587783413).jpg](https://commons.wikimedia.org/wiki/File:Taj_Mahal_West_Gate_(22587783413).jpg) | Gary Todd from Xinzheng, China | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) |
+| facilities/agra-taj-west-gate-entry.webp | [Taj Mahal Queue at West Gate (23188620776).jpg](https://commons.wikimedia.org/wiki/File:Taj_Mahal_Queue_at_West_Gate_(23188620776).jpg) | Gary Todd from Xinzheng, China | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) |
+| facilities/agra-taj-south-gate-tajganj.webp | [South Gate of The Taj Mahal opening in from Taj Ganj.jpg](https://commons.wikimedia.org/wiki/File:South_Gate_of_The_Taj_Mahal_opening_in_from_Taj_Ganj.jpg) | Divya Gupta | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| facilities/agra-taj-jilaukhana-forecourt.webp | [The Jilaukhana at the Taj Mahal, India, 2013-03 (11551324674).jpg](https://commons.wikimedia.org/wiki/File:The_Jilaukhana_at_the_Taj_Mahal,_India,_2013-03_(11551324674).jpg) | Edmund Gall | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0) |
+
+Facility photos supplied by the project team (not from Wikimedia Commons). Confirm the
+right to use each one before any public release:
+
+| file | shows |
+| --- | --- |
+| facilities/agra-sn-medical-college.webp | S.N. Medical College gate, Agra |
+| facilities/agra-chaupati-food-court.webp | Agra Chaupati food court |
+| facilities/agra-taj-locker-room.webp | Taj Mahal locker room (Agra Development Authority) |
+| facilities/agra-taj-western-gate-parking-sign.webp | Taj Mahal Western Gate parking sign |

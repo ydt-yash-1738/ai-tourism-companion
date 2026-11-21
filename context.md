@@ -35,10 +35,12 @@
 
 ---
 
-## 3. Flagship Destination & Multi-Destination Architecture
+## 3. Multi-Destination Heritage Architecture
 
-* **Starter Destination (`agra`):** **Agra Heritage Zone (Taj Mahal & Agra Fort)**, stored in `data/destinations/agra/`.
-* **Scalability:** Every database table and API endpoint is scoped by `destination_id` / `destination_slug`. Onboarding Lucknow, Varanasi, Sarnath, Ayodhya, or Mathura-Vrindavan only requires adding a new folder under `data/destinations/<slug>/` and running the idempotent seed script—zero backend code changes.
+* **Live Destinations (`agra` & `sarnath`):**
+  * **Agra Heritage Zone (`data/destinations/agra/`):** Taj Mahal & Agra Fort, 6 monuments, 16 knowledge chunks, 3 audio tours, 10 facilities, 8 nearby/ODOP items, 25 synthetic events.
+  * **Sarnath Buddhist Heritage Zone (`data/destinations/sarnath/`):** Dhamek Stupa, Ashoka Pillar & Lion Capital Museum, Dharmarajika Stupa, Mulagandhakuti Vihara, Chaukhandi Stupa — 6 monuments, 16 knowledge chunks, 3 audio tours, 10 facilities, 8 nearby/Varanasi ODOP items (Banarasi Silk & Wooden Lacquerware Toys), 25 synthetic events.
+* **Scalability:** Every database table and API endpoint is scoped by `destination_id` / `destination_slug`. Onboarding Lucknow, Varanasi, Ayodhya, or Mathura-Vrindavan only requires adding a new folder under `data/destinations/<slug>/`, registering its media/config in `frontend/src/data/destinationMedia.ts` & `upCities.ts`, and running the idempotent seed script—zero backend code changes.
 
 ---
 
@@ -62,8 +64,8 @@
 - [x] **Phase 2A — Cloud Services Activated & Live Verified:**
   - [x] Free **Neon PostgreSQL (`pgvector 0.8.7`)** project connected via `backend/.env` (unused Neon boilerplate vars removed)
   - [x] Google AI Studio `GEMINI_API_KEY` configured (`gemini-3.5-flash-lite` + `gemini-embedding-001`); `backend/.env.example` sanitized
-  - [x] `agra` destination pack seeded into Neon with **16/16 knowledge chunks embedded (`VECTOR(768)`)** and verified via live `<=>` cosine similarity search
-  - [x] Live RAG generation verified across `scholar` (EN), `kids` (EN), and `quick` + `simple_language` (HI) modes (`mode: "gemini"`, strict `verified_history` vs `folklore_legends` split)
+  - [x] `agra` and `sarnath` destination packs seeded into Neon PostgreSQL with **16/16 knowledge chunks embedded (`VECTOR(768)`) per destination (32 total)** and verified via live `<=>` cosine similarity search
+  - [x] Live RAG generation verified across `agra` and `sarnath` (`mode: "gemini"`, strict `verified_history` vs `folklore_legends` split)
   - [x] **Sarvam AI** (`SARVAM_API_KEY`) configured in `backend/.env` and live-verified via Hindi TTS (`bulbul:v3`) + STT (`saaras:v4`) roundtrip *(Bhashini ULCA adapter pre-wired & unit-tested; keys left blank since ULCA is gated for institutional/startup registration)*
 
 ### What Needs To Be Done
@@ -72,21 +74,21 @@
   - [ ] *(Optional enhancement)* Pre-generate static Hindi/English MP3 audio files for `tour_routes.json` stops
 - [ ] **Phase 3 — Frontend & Capacitor Android App (`frontend/`):**
   - [x] React + Vite + TypeScript + modular SCSS UI (`frontend/src/styles/`) themed around Uttar Pradesh Government & Digital India heritage (no Tailwind)
-  - [x] Location-aware UP Heritage Cities landing view (`CitySelectorView.tsx`) with custom hand-sketched SVG monument icons (only Agra clickable; 7 UP heritage cities as placeholders)
+  - [x] Location-aware UP Heritage Cities landing view (`CitySelectorView.tsx`) with proximity matching across live destinations (`agra` & `sarnath` clickable; 6 UP heritage cities as upcoming placeholders)
   - [x] Build core Companion UI: Multilingual Chat (`UC-1`), Fact vs Folklore cards (`UC-3`), Persona selector (`UC-7`), Accessibility Mode `Aa+` & Sarvam/Web Speech Read Aloud (`UC-8`)
   - [x] Photo Point & Ask UI (`CameraTab.tsx`, `UC-2`) with live/demo GPS attachment
   - [x] Build Leaflet map + Audio Tour player with GPS proximity + manual controls (`TourTab.tsx`, `UC-4`)
   - [x] Build Facilities filter view + persistent offline 1-Tap SOS modal (`FacilitiesTab.tsx` + `EmergencyModal.tsx`, `UC-6`)
   - [x] Build Personalised Nearby & UP ODOP finder (`NearbyTab.tsx`, `UC-5`)
-  - [x] Implement "Download Offline Pack" (`localStorage` cache + online/offline failover + local keyword search)
-  - [x] Build Tourism Department Analytics Dashboard (`#admin`, `AdminDashboard.tsx`) with Recharts (`UC-9`)
-  - [x] Full 10-language UI i18n (`frontend/src/data/i18n.ts`) + cached batch translation (`translateCache.ts`) + auto-translated Sarvam AI / Web Speech TTS across `en, hi, mr, ta, bn, te, ur, fr, ja, es`
+  - [x] Implement "Download Offline Pack" (`localStorage` cache per destination + online/offline failover + local keyword search)
+  - [x] Build Tourism Department Analytics Dashboard (`#admin`, `AdminDashboard.tsx`) with Recharts & live destination switcher (`UC-9`)
+  - [x] Full 10-language UI i18n (`frontend/src/data/i18n.ts`) + chunked cached batch translation (`translateCache.ts`) + auto-translated Sarvam AI / Web Speech TTS across `en, hi, mr, ta, bn, te, ur, fr, ja, es`
   - [x] Readable typography (`Outfit` + `Inter` + Indic `Noto Sans` scripts) and Android/mobile-optimized SCSS layouts (swipeable filter bars, non-zooming 16px inputs, compact featured city grid, safe-area bottom nav)
-  - [x] Capacitor 8 Android project (`frontend/android`), status bar + splash plugins, camera/mic/location permissions, bundled Agra offline pack, custom icon & splash (see `frontend/ANDROID.md`)
+  - [x] Capacitor 8 Android project (`frontend/android`), status bar + splash plugins, camera/mic/location permissions, bundled Agra & Sarnath offline packs, custom icon & splash (see `frontend/ANDROID.md`)
 - [ ] **Phase 4 — Verification & Demo Readiness:**
   - [x] Debug and signed release APKs built from the command line (`npm run android:debug` / `android:release`)
   - [ ] Test Airplane Mode offline fallback on Android device
-  - [ ] Add a second UP destination pack (e.g., `lucknow` or `varanasi`) if time permits to demonstrate multi-site scalability
+  - [x] Added **Sarnath (`sarnath`)** as a full second UP destination pack to demonstrate multi-site scalability across Neon `pgvector`, backend APIs, and frontend UI
 
 ---
 

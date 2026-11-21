@@ -21,7 +21,9 @@ const STOPWORDS = new Set([
 
 const GENERIC_NAME_WORDS = new Set([
   'main', 'the', 'of', 'and', 'gate', 'pavilion', 'tower', 'octagonal', 'great',
+  'stupa', 'ruins', 'shrine', 'sarnath',
   'मुख्य', 'एवं', 'द्वार', 'शाही', 'प्रवेश', 'भवन', 'मीनार', 'अष्टकोणीय',
+  'स्तूप', 'अवशेष', 'सारनाथ',
 ]);
 
 const TOKEN_RE = /[\p{L}\p{M}\p{N}]+/gu;

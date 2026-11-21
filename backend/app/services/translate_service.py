@@ -81,7 +81,7 @@ def translate_texts(texts: list[str], target_language: str) -> tuple[list[str], 
             "for an Uttar Pradesh Heritage Tourism app.\n"
             "Rules:\n"
             f"1. Use ONLY natural {lang_name} grammar and vocabulary (never substitute Hindi when translating into Marathi or another language).\n"
-            f"2. Write ALL words—including monument names like Taj Mahal—cleanly in the native script of {lang_name} so Text-to-Speech pronounces every word properly.\n"
+            f"2. Write ALL words—including monument names like Taj Mahal or Dhamek Stupa—cleanly in the native script of {lang_name} so Text-to-Speech pronounces every word properly.\n"
             "3. Return `translations` as a JSON array with the EXACT SAME length and order as the input items.\n\n"
             f"INPUT STRINGS ({len(missing_texts)} items):\n{numbered}"
         )

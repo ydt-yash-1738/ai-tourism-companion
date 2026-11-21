@@ -59,3 +59,15 @@ If Gradle fails with "429 Too Many Requests" from Maven Central, run it again wi
 ## Install on a phone
 
 Copy the APK to the phone, open it, and allow "Install unknown apps" for your file manager when Android asks.
+
+## Optional: Google Maps key for the 360° walk
+
+The 360° walk shows Google Street View at each stop. It works without a key using Google's
+public Street View embed. For Google's official, supported embed, create a free
+"Maps Embed API" key in Google Cloud and build with it:
+
+```bash
+echo "VITE_GOOGLE_MAPS_EMBED_KEY=your-key" >> .env.production.local
+```
+
+Restrict the key to the Maps Embed API. Without internet, each stop falls back to a photo.

@@ -124,6 +124,12 @@
     background: var(--brass-tint);
     color: var(--brass);
   }
+
+  // online, but this place runs on the content bundled in the app
+  &.is-bundled {
+    background: var(--emerald-tint);
+    color: var(--navy);
+  }
 }
 
 .compact-mobile-hide {
@@ -769,6 +775,34 @@
       color: #ffffff;
       font-weight: 700;
       flex-shrink: 0;
+    }
+  }
+}
+
+.server-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .field {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__note {
+    margin: 8px 2px 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+
+    &.is-ok {
+      color: var(--emerald-deep);
+      font-weight: 600;
+    }
+
+    &.is-fail {
+      color: var(--terracotta);
+      font-weight: 600;
     }
   }
 }

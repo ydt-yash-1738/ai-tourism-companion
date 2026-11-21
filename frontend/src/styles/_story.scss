@@ -17,11 +17,27 @@
     isolation: isolate;
   }
 
+  &__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    will-change: opacity;
+  }
+
   &__topbar {
     position: absolute;
     inset: 0 0 auto;
     z-index: 6;
     background: linear-gradient(180deg, rgba(7, 17, 31, 0.55), transparent);
+
+    // No backdrop blur over the moving photo: it forces a repaint every frame on Android
+    .glass-select,
+    .glass-icon-btn,
+    .landing-topbar__crest {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(7, 17, 31, 0.5);
+    }
   }
 
   &__frame {
@@ -32,16 +48,97 @@
     transform-origin: 50% 50%;
     will-change: transform;
     z-index: 1;
+    // Fixed shadow and radius: drawn once into the layer, never repainted while scrolling
+    box-shadow: 0 50px 110px rgba(0, 0, 0, 0.45);
+    transition: border-radius 0.25s ease;
+
+    &.is-card {
+      border-radius: 64px;
+    }
 
     img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       object-fit: cover;
       object-position: 50% 62%;
-      transform: scale(1.12);
-      will-change: transform;
+      opacity: 0;
+      transition: opacity 1s ease;
+
+      &.is-active {
+        opacity: 1;
+      }
     }
+  }
+
+  &__photos {
+    position: absolute;
+    inset: 0;
+    transform: scale(1.12);
+    will-change: transform;
+  }
+
+  &__picker {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    pointer-events: auto;
+
+    button {
+      position: relative;
+      overflow: hidden;
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(7, 17, 31, 0.45);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+
+      &.is-active {
+        background: #fff;
+        color: var(--navy-deep);
+        border-color: #fff;
+      }
+    }
+  }
+
+  &__intro-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    pointer-events: auto;
+
+    .btn-glass {
+      min-height: 44px;
+    }
+
+    .story__intro-note {
+      max-width: 34ch;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.78rem;
+      text-align: center;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  &__picker-fill {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--saffron);
+    transform-origin: left;
+    animation: dotFill 6.5s linear forwards;
   }
 
   &__scrim {
@@ -58,6 +155,7 @@
 
   &__intro {
     position: absolute;
+    will-change: opacity, transform;
     left: 0;
     right: 0;
     bottom: calc(9svh + env(safe-area-inset-bottom, 0px));
@@ -83,6 +181,9 @@
 
   &__intro-kicker {
     display: inline-block;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(7, 17, 31, 0.55);
     font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.22em;
@@ -141,6 +242,9 @@
     top: 54svh;
     bottom: calc(26px + env(safe-area-inset-bottom, 0px));
     display: grid;
+    // The layer is invisible until a panel fades in: let taps reach the place chips
+    // beneath it; each visible panel switches its own pointer events back on.
+    pointer-events: none;
 
     @include m.tablet-up {
       left: 40px;
@@ -388,4 +492,1091 @@
 
 .photo-banner img[data-parallax] {
   animation: none;
+}
+
+// --- Raahi, the guide avatar (GuideAvatar.tsx) -------------------------------
+// Transform-only animations so they stay on the compositor and cost almost nothing.
+
+.guide-avatar {
+  display: block;
+  // resting hands sit below the frame; clip them so they never spill onto nearby buttons
+  overflow: hidden;
+  animation: raahiBreathe 4.2s ease-in-out infinite;
+
+  &__head {
+    transform-box: fill-box;
+    transform-origin: 50% 92%;
+    animation: raahiIdleTilt 7s ease-in-out infinite;
+  }
+
+  &__eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: raahiBlink 5.2s infinite;
+  }
+
+  &__talk {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: 50% 20%;
+  }
+
+  &__talk-inner {
+    transform-box: fill-box;
+    transform-origin: 50% 20%;
+  }
+
+  &__brows {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  // hands hinge at the elbow, just below the frame
+  &__hand {
+    transform-box: view-box;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    &--left {
+      transform-origin: 46px 292px;
+      transform: translateY(96px) rotate(-14deg);
+    }
+
+    &--right {
+      transform-origin: 194px 292px;
+      transform: translateY(96px) rotate(14deg);
+      animation: raahiWave 11s ease-in-out 2s infinite;
+    }
+  }
+
+  &.is-speaking {
+    .guide-avatar__head {
+      animation: raahiNod 2.6s ease-in-out infinite;
+    }
+
+    .guide-avatar__smile {
+      opacity: 0;
+    }
+
+    .guide-avatar__talk {
+      opacity: 1;
+      animation: raahiTalk 0.26s ease-in-out infinite alternate;
+    }
+
+    // a second, slower rhythm on top makes the mouth movement feel less mechanical
+    .guide-avatar__talk-inner {
+      animation: raahiTalk2 0.71s ease-in-out infinite alternate;
+    }
+
+    .guide-avatar__brows {
+      animation: raahiBrows 3.1s ease-in-out infinite;
+    }
+
+    .guide-avatar__hand--left {
+      animation: raahiGestureLeft 2.4s ease-in-out infinite;
+    }
+
+    .guide-avatar__hand--right {
+      animation: raahiGestureRight 3.3s ease-in-out 0.4s infinite;
+    }
+  }
+}
+
+@keyframes raahiBreathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes raahiIdleTilt {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-1.6deg);
+  }
+  70% {
+    transform: rotate(1.2deg);
+  }
+}
+
+@keyframes raahiBlink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes raahiNod {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-2.5deg) translateY(1px);
+  }
+  65% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes raahiTalk {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes raahiTalk2 {
+  from {
+    transform: scale(0.8, 0.7);
+  }
+  to {
+    transform: scale(1.05, 1);
+  }
+}
+
+@keyframes raahiBrows {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  80% {
+    transform: translateY(-2.5px);
+  }
+}
+
+// idle: the right hand rises for a short wave, then rests
+@keyframes raahiWave {
+  0%,
+  14%,
+  100% {
+    transform: translateY(96px) rotate(14deg);
+  }
+  3% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  5.5% {
+    transform: translateY(0) rotate(8deg);
+  }
+  8% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  10.5% {
+    transform: translateY(0) rotate(6deg);
+  }
+}
+
+// speaking: open palm explains, the other hand points, out of step with each other
+@keyframes raahiGestureLeft {
+  0%,
+  100% {
+    transform: translateY(4px) rotate(-4deg);
+  }
+  30% {
+    transform: translateY(-6px) rotate(6deg);
+  }
+  55% {
+    transform: translateY(2px) rotate(-8deg);
+  }
+  80% {
+    transform: translateY(-3px) rotate(2deg);
+  }
+}
+
+@keyframes raahiGestureRight {
+  0%,
+  100% {
+    transform: translateY(16px) rotate(6deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-4deg);
+  }
+  45% {
+    transform: translateY(-2px) rotate(3deg);
+  }
+  70% {
+    transform: translateY(20px) rotate(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-avatar,
+  .guide-avatar__head,
+  .guide-avatar__hand,
+  .guide-avatar.is-speaking .guide-avatar__head,
+  .guide-avatar.is-speaking .guide-avatar__hand--left,
+  .guide-avatar.is-speaking .guide-avatar__hand--right {
+    animation: none;
+  }
+}
+
+// Raahi speaking with a caption bubble (AvatarCaption.tsx)
+.avatar-caption {
+  &__row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    margin-bottom: -6px;
+  }
+
+  &__bubble {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 34px;
+    padding: 12px 14px;
+    border-radius: 18px 18px 18px 6px;
+    background: #fff;
+    border: 1px solid var(--border-sand);
+    box-shadow: var(--shadow-card);
+
+    // tail pointing at Raahi's mouth
+    &::before {
+      content: '';
+      position: absolute;
+      left: -9px;
+      bottom: 16px;
+      width: 16px;
+      height: 16px;
+      background: inherit;
+      border-left: 1px solid var(--border-sand);
+      border-bottom: 1px solid var(--border-sand);
+      transform: rotate(45deg) skew(10deg, 10deg);
+    }
+  }
+
+  &__line {
+    margin: 0;
+    font-size: calc(1rem * var(--text-scale));
+    line-height: 1.55;
+    color: var(--text-primary);
+    animation: captionIn 0.35s var(--ease-out) both;
+  }
+
+  &__meta {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  &__dots {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+
+    i {
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-sand);
+      transition: width 0.3s var(--ease-out), background 0.3s ease;
+
+      &.is-done {
+        background: var(--gold);
+      }
+
+      &.is-now {
+        width: 18px;
+        background: var(--saffron);
+      }
+    }
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 0;
+    background: none;
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 0.74rem;
+    padding: 4px 0;
+    white-space: nowrap;
+  }
+
+  &__full {
+    margin: 10px 0 0;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: calc(0.92rem * var(--text-scale));
+    line-height: 1.6;
+  }
+
+  &.is-dark &__bubble {
+    background: rgba(255, 255, 255, 0.96);
+  }
+}
+
+.photo-banner .guide-banner__raahi {
+  position: absolute;
+  right: 6px;
+  bottom: -14px;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+
+  @include m.tablet-up {
+    right: 24px;
+  }
+}
+
+.composer__avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin-left: 2px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: end center;
+  background: linear-gradient(160deg, #fde7cf, #f3d3ae);
+
+  .guide-avatar {
+    animation: none;
+  }
+}
+
+// 3D Raahi (avatar3d/raahiEngine.ts): fades in once the model is ready
+.guide-avatar--3d {
+  animation: none;
+  transition: opacity 0.4s ease;
+
+  &.is-loading {
+    opacity: 0;
+  }
+
+  &.is-ready {
+    opacity: 1;
+  }
+}
+
+// --- 360° walk (WalkMode.tsx) -------------------------------------------------
+
+.walk {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  background: var(--navy-ink);
+  color: #fff;
+  animation: fadeIn 0.25s ease;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px;
+    background: var(--navy-deep);
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.02rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__times {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.1);
+
+    button {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 255, 255, 0.75);
+      background: transparent;
+
+      &.is-active {
+        background: var(--gold-soft);
+        color: var(--navy-deep);
+      }
+    }
+  }
+
+  &__close {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &__view {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #0b1b33;
+  }
+
+  &__frame,
+  &__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    transition: filter 0.6s ease;
+    animation: fadeIn 0.6s ease;
+  }
+
+  &__photo {
+    cursor: grab;
+    touch-action: pan-y;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+      transform: scale(1.08);
+      transition: object-position 0.08s linear;
+    }
+  }
+
+  &__mode {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    background: rgba(7, 17, 31, 0.75);
+
+    button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 700;
+      font-size: 0.76rem;
+
+      &.is-active {
+        background: #fff;
+        color: var(--navy-deep);
+      }
+    }
+  }
+
+  &__offline {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: rgba(7, 17, 31, 0.7);
+  }
+
+  // time-of-day looks
+  &.is-sunrise &__frame,
+  &.is-sunrise &__photo {
+    filter: sepia(0.25) saturate(1.25) hue-rotate(-12deg) brightness(1.03);
+  }
+
+  &.is-sunset &__frame,
+  &.is-sunset &__photo {
+    filter: sepia(0.4) saturate(1.45) hue-rotate(-22deg) brightness(0.92);
+  }
+
+  &.is-night &__frame,
+  &.is-night &__photo {
+    filter: brightness(0.42) saturate(0.55) contrast(1.1) hue-rotate(185deg);
+  }
+
+  &__tint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: background 0.6s ease;
+  }
+
+  &.is-sunrise &__tint {
+    background: linear-gradient(180deg, rgba(255, 170, 120, 0.25), transparent 55%);
+  }
+
+  &.is-sunset &__tint {
+    background: linear-gradient(180deg, rgba(255, 110, 60, 0.28), transparent 60%);
+  }
+
+  &.is-night &__tint {
+    background: radial-gradient(120% 70% at 50% 0%, rgba(40, 60, 120, 0.35), rgba(5, 10, 25, 0.35));
+  }
+
+  &__label {
+    position: absolute;
+    left: 50%;
+    top: 16px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 32px);
+    padding: 6px 14px 6px 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--navy-deep);
+    font-weight: 700;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+
+    b {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: #fff;
+      font-size: 0.74rem;
+    }
+  }
+
+  &__view.is-offline &__label {
+    top: 62px;
+  }
+
+  &__view:has(&__mode) &__hint {
+    left: 12px;
+    transform: none;
+  }
+
+  &__hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(7, 17, 31, 0.65);
+    font-size: 0.76rem;
+    pointer-events: none;
+  }
+
+  &__walking {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(7, 17, 31, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+
+    &.is-on {
+      opacity: 1;
+
+      svg {
+        animation: walkStep 0.45s ease-in-out infinite alternate;
+      }
+    }
+  }
+
+  &__panel {
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: var(--navy-deep);
+    border-top: 3px solid var(--saffron);
+  }
+
+  &__status {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+  }
+
+  &__stop-title {
+    margin: 2px 0 4px;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+
+  .avatar-caption__bubble {
+    margin-bottom: 26px;
+  }
+
+  .avatar-caption__full {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &__steps {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 6px 0 10px;
+    scrollbar-width: none;
+
+    button {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: transparent;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+
+      &.is-done {
+        background: var(--emerald);
+        border-color: var(--emerald);
+      }
+
+      &.is-now {
+        background: var(--saffron);
+        border-color: var(--saffron);
+      }
+    }
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    button {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 0;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 800;
+
+      &:disabled {
+        opacity: 0.35;
+      }
+
+      &.is-on {
+        background: var(--emerald);
+      }
+    }
+  }
+
+  &__play {
+    width: 62px !important;
+    height: 62px !important;
+    background: linear-gradient(135deg, #f08a2c, var(--saffron-deep)) !important;
+    box-shadow: 0 8px 22px rgba(226, 105, 26, 0.45);
+  }
+}
+
+@keyframes walkPan {
+  from {
+    transform: scale(1.15) translateX(-4%);
+  }
+  to {
+    transform: scale(1.15) translateX(4%);
+  }
+}
+
+@keyframes walkStep {
+  from {
+    transform: translateY(-4px) rotate(-6deg);
+  }
+  to {
+    transform: translateY(4px) rotate(6deg);
+  }
+}
+
+.walk-launch {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  text-align: left;
+  color: #fff;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(226, 105, 26, 0.45), transparent 55%),
+    linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  box-shadow: var(--shadow-lift);
+
+  &__icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  &__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+
+    span {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+    }
+  }
+
+  &__go {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #f08a2c, var(--saffron-deep));
+  }
+}
+
+// --- Video-style tour shots (WalkMode.tsx) --------------------------------------
+
+.walk__timeline {
+  display: flex;
+  gap: 4px;
+  padding: 6px 12px 8px;
+  background: var(--navy-deep);
+
+  span {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.22);
+    overflow: hidden;
+  }
+
+  i {
+    display: block;
+    height: 100%;
+    background: var(--gold-soft);
+    transform-origin: left;
+    transition: transform 0.35s linear;
+  }
+}
+
+.cine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: filter 0.6s ease;
+
+  &__shot {
+    position: absolute;
+    inset: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: 50% 55%;
+      transform: scale(1.06);
+      will-change: transform;
+      user-select: none;
+    }
+
+    // the camera move only rolls while the tour is playing
+    &.is-rolling img {
+      animation: var(--move) var(--shot, 14s) linear forwards;
+    }
+
+    &.move-push-left {
+      --move: camPushLeft;
+    }
+    &.move-push-right {
+      --move: camPushRight;
+    }
+    &.move-rise {
+      --move: camRise;
+    }
+    &.move-push-center {
+      --move: camPushCenter;
+    }
+
+    // walking: the old shot rushes past while the new one settles in
+    &.is-prev {
+      z-index: 1;
+      animation: walkOut 2.2s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+    }
+
+    &.is-now {
+      z-index: 2;
+      animation: walkIn 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+  }
+
+  &__vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  }
+
+  &__big-play {
+    position: absolute;
+    z-index: 6;
+    left: 50%;
+    top: 50%;
+    width: 84px;
+    height: 84px;
+    margin: -42px 0 0 -42px;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(226, 105, 26, 0.92);
+    box-shadow: 0 0 0 10px rgba(226, 105, 26, 0.25), 0 14px 34px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.walk {
+  &.is-sunrise .cine {
+    filter: sepia(0.25) saturate(1.25) hue-rotate(-12deg) brightness(1.03);
+  }
+  &.is-sunset .cine {
+    filter: sepia(0.4) saturate(1.45) hue-rotate(-22deg) brightness(0.92);
+  }
+  &.is-night .cine {
+    filter: brightness(0.42) saturate(0.55) contrast(1.1) hue-rotate(185deg);
+  }
+
+  &__walking {
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(180deg, transparent 30%, rgba(7, 17, 31, 0.55) 50%, transparent 70%);
+
+    span {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+    }
+
+    strong {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  &__label {
+    z-index: 5;
+  }
+
+  &__route {
+    position: absolute;
+    z-index: 5;
+    left: 12px;
+    bottom: 12px;
+    width: 86px;
+    height: 86px;
+    padding: 4px;
+    border-radius: 16px;
+    background: rgba(7, 17, 31, 0.6);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+
+    polyline {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.45);
+      stroke-width: 2;
+      stroke-dasharray: 3 3;
+    }
+
+    circle {
+      fill: rgba(255, 255, 255, 0.55);
+
+      &.is-done {
+        fill: var(--emerald);
+      }
+    }
+  }
+
+  &__route-me {
+    fill: var(--saffron) !important;
+    stroke: #fff;
+    stroke-width: 1.5;
+    transition: cx 2.2s ease-in-out, cy 2.2s ease-in-out;
+  }
+
+  &__look {
+    position: absolute;
+    z-index: 5;
+    right: 12px;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--navy-deep);
+    font-weight: 800;
+    font-size: 0.8rem;
+
+    &.is-on {
+      background: var(--saffron);
+      color: #fff;
+    }
+  }
+}
+
+@keyframes camPushLeft {
+  from {
+    transform: scale(1.06) translate3d(2%, 0, 0);
+  }
+  to {
+    transform: scale(1.28) translate3d(-3%, -1%, 0);
+  }
+}
+
+@keyframes camPushRight {
+  from {
+    transform: scale(1.06) translate3d(-2%, 0, 0);
+  }
+  to {
+    transform: scale(1.28) translate3d(3%, -1%, 0);
+  }
+}
+
+@keyframes camRise {
+  from {
+    transform: scale(1.18) translate3d(0, 4%, 0);
+  }
+  to {
+    transform: scale(1.22) translate3d(0, -4%, 0);
+  }
+}
+
+@keyframes camPushCenter {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes walkOut {
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+@keyframes walkIn {
+  from {
+    transform: scale(1.35);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+// 360° stage: the live panorama, with the next stop preloading underneath
+.walk__sv {
+  position: absolute;
+  inset: 0;
+
+  .walk__frame {
+    animation: none;
+  }
+
+  .is-preload {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.walk__mode {
+  z-index: 5;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.walk__view .walk__hint {
+  z-index: 5;
+  bottom: 60px;
+}
+
+// the walking card fully covers the panorama swap
+.walk__sv ~ .walk__walking {
+  background: linear-gradient(180deg, rgba(7, 17, 31, 0.92), rgba(7, 17, 31, 0.8));
 }

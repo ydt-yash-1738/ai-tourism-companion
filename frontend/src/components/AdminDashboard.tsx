@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { UP_HERITAGE_CITIES } from '../data/upCities';
 import { getAnalyticsSummary } from '../services/api';
 import type { AnalyticsSummary } from '../types/api';
 import {
@@ -22,12 +23,15 @@ import {
 } from './ApiStateCard';
 
 interface AdminDashboardProps {
+  initialDestinationSlug?: string;
   onBack: () => void;
 }
 
 const CHART_COLORS = ['#12346b', '#e86f1f', '#147a4b', '#b88420', '#9b3d2c', '#4e596f'];
 
-export function AdminDashboard({ onBack }: AdminDashboardProps) {
+export function AdminDashboard({ initialDestinationSlug = 'agra', onBack }: AdminDashboardProps) {
+  const liveCities = UP_HERITAGE_CITIES.filter((c) => c.clickable);
+  const [selectedSlug, setSelectedSlug] = useState<string>(initialDestinationSlug || 'agra');
   const [includeSynthetic, setIncludeSynthetic] = useState(true);
   const [refreshCount, setRefreshCount] = useState(0);
   const [settledKey, setSettledKey] = useState<string | null>(null);
@@ -35,12 +39,14 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [usingBundledDemo, setUsingBundledDemo] = useState(false);
 
-  const reqKey = `${includeSynthetic}|${refreshCount}`;
+  const reqKey = `${selectedSlug}|${includeSynthetic}|${refreshCount}`;
   const loading = settledKey !== reqKey;
+  const activeCityName =
+    liveCities.find((c) => c.slug === selectedSlug)?.name || selectedSlug;
 
   useEffect(() => {
     let active = true;
-    getAnalyticsSummary('agra', includeSynthetic)
+    getAnalyticsSummary(selectedSlug, includeSynthetic)
       .then((res) => {
         if (!active) return;
         setSummary(res);
@@ -52,7 +58,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
         if (!active) return;
         // Server unreachable: fall back to the synthetic demo summary bundled with the app
         try {
-          const res = await fetch(`${import.meta.env.BASE_URL}packs/agra-insights.json`);
+          const res = await fetch(`${import.meta.env.BASE_URL}packs/${selectedSlug}-insights.json`);
           if (res.ok && active) {
             setSummary((await res.json()) as AnalyticsSummary);
             setUsingBundledDemo(true);
@@ -70,7 +76,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
     return () => {
       active = false;
     };
-  }, [reqKey, includeSynthetic]);
+  }, [reqKey, selectedSlug, includeSynthetic]);
 
   return (
     <div className="admin-shell">
@@ -81,11 +87,22 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
           <div>
             <h1>UP Tourism Department — Visitor Insights</h1>
             <p>
-              Privacy-first aggregated telemetry for Agra (zero PII) · Synthetic test baseline + live interactions
+              Privacy-first aggregated telemetry for {activeCityName} (zero PII) · Synthetic test baseline + live interactions
             </p>
           </div>
 
           <div className="admin-actions">
+            {liveCities.map((city) => (
+              <button
+                key={city.slug}
+                type="button"
+                className={`pill-btn ${selectedSlug === city.slug ? 'is-emerald' : ''}`}
+                onClick={() => setSelectedSlug(city.slug)}
+              >
+                {city.name}
+              </button>
+            ))}
+
             <button
               type="button"
               className={`pill-btn ${includeSynthetic ? 'is-active' : ''}`}

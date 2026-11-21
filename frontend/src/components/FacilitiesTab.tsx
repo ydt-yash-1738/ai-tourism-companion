@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
+import { FACILITY_PHOTOS, getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getFacilities } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -30,8 +31,8 @@ import {
 } from './ApiStateCard';
 import { LeafletMap, type MapPinItem } from './LeafletMap';
 
-// Facilities are shown with clear type icons rather than photos, so a visitor
-// in need is never shown a picture of the wrong building.
+// Every facility shows a clear type icon. Where a verified photo of its location
+// exists, the photo sits behind the icon with a caption naming the area it shows.
 const FACILITY_ICONS: Record<string, LucideIcon> = {
   toilet: Toilet,
   drinking_water: Droplets,
@@ -44,6 +45,7 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
 };
 
 interface FacilitiesTabProps {
+  destinationSlug: string;
   language: string;
   isOnline: boolean;
   sessionHash: string;
@@ -63,6 +65,7 @@ const FACILITY_TYPE_KEYS = [
 ];
 
 export function FacilitiesTab({
+  destinationSlug,
   language,
   isOnline,
   sessionHash,
@@ -73,6 +76,7 @@ export function FacilitiesTab({
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
   const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
 
   const [facilityType, setFacilityType] = useState<string>('');
   const [accessibleOnly, setAccessibleOnly] = useState(false);
@@ -83,8 +87,8 @@ export function FacilitiesTab({
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
-  const refLat = userCoords?.lat ?? 27.1751;
-  const refLng = userCoords?.lng ?? 78.0421;
+  const refLat = userCoords?.lat ?? destConfig.center[0];
+  const refLng = userCoords?.lng ?? destConfig.center[1];
 
   const offlineFacilities = useMemo(() => {
     return (offlinePack?.facilities || [])
@@ -101,14 +105,14 @@ export function FacilitiesTab({
   }, [offlinePack, facilityType, accessibleOnly, refLat, refLng]);
 
   const reqKey = isOnline
-    ? `${facilityType}|${accessibleOnly}|${refLat}|${refLng}|${retryCount}`
+    ? `${destinationSlug}|${facilityType}|${accessibleOnly}|${refLat}|${refLng}|${retryCount}`
     : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getFacilities('agra', {
+    getFacilities(destinationSlug, {
       facilityType: facilityType || undefined,
       accessibleOnly,
       lat: refLat,
@@ -129,7 +133,7 @@ export function FacilitiesTab({
     return () => {
       active = false;
     };
-  }, [reqKey, facilityType, accessibleOnly, refLat, refLng, sessionHash, ui.serverErrorDesc]);
+  }, [reqKey, destinationSlug, facilityType, accessibleOnly, refLat, refLng, sessionHash, ui.serverErrorDesc]);
 
   const facilities = isOnline && !apiError ? liveFacilities : offlineFacilities;
 
@@ -295,22 +299,42 @@ export function FacilitiesTab({
 
           {facilities.length === 0 ? (
             <EmptyStateCard
-              message={ui.noFacilitiesMatched}
+              message={hasActiveFilters ? ui.noFacilitiesMatched : ui.facilitiesPending}
               actionLabel={hasActiveFilters ? ui.resetFilters : undefined}
               onAction={hasActiveFilters ? resetFilters : undefined}
             />
           ) : (
             <>
-              <LeafletMap center={[27.1735, 78.0421]} pins={mapPins} userCoords={userCoords} />
+              <LeafletMap center={destConfig.facilitiesCenter} pins={mapPins} userCoords={userCoords} />
 
               <div className="cards-grid">
                 {facilities.map((item) => {
                   const Icon = FACILITY_ICONS[item.facility_type] ?? MapPin;
+                  const photo = FACILITY_PHOTOS[item.slug];
 
                   return (
                     <article key={item.slug} className="info-card has-media">
-                      <div className={`info-card__media facility-art is-${item.facility_type}`}>
-                        <Icon className="facility-art__icon" size={46} aria-hidden="true" />
+                      <div className={`info-card__media facility-art is-${item.facility_type} ${photo ? 'has-photo' : ''}`}>
+                        {photo ? (
+                          <>
+                            <img
+                              className="facility-art__photo"
+                              src={`${import.meta.env.BASE_URL}${photo.image.replace(/^\//, '')}`}
+                              alt={language.startsWith('hi') ? photo.captionHi : photo.captionEn}
+                              style={{ objectPosition: photo.position }}
+                              loading="lazy"
+                            />
+                            <span className="facility-art__badge" aria-hidden="true">
+                              <Icon size={22} />
+                            </span>
+                            <span className="facility-art__caption">
+                              {language.startsWith('hi') ? 'फ़ोटो: ' : 'Photo: '}
+                              {language.startsWith('hi') ? photo.captionHi : photo.captionEn}
+                            </span>
+                          </>
+                        ) : (
+                          <Icon className="facility-art__icon" size={46} aria-hidden="true" />
+                        )}
                         <div className="info-card__media-scrim" aria-hidden="true" />
                         <div className="info-card__media-top">
                           <div className="info-card__media-badges">

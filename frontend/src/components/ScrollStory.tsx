@@ -15,15 +15,26 @@ export interface StoryPanel {
   body?: string;
 }
 
+export interface StorySlide {
+  id: string;
+  photo: string;
+  alt: string;
+  kicker: string;
+  title: string;
+}
+
 interface ScrollStoryProps {
-  photoSrc: string;
-  photoAlt: string;
-  introKicker: string;
-  introTitle: string;
+  slides: StorySlide[];
+  active: number;
+  onActiveChange: (index: number) => void;
+  /** cycle through slides while the visitor is still at the top of the page */
+  autoplay: boolean;
   introCue: string;
   panels: StoryPanel[];
   finalPanel: ReactNode;
   topbar: ReactNode;
+  /** shown on the first screen under the place picker (e.g. a location button) */
+  introAction?: ReactNode;
 }
 
 // Night navy -> Mughal sandstone -> dawn saffron -> garden emerald
@@ -42,52 +53,73 @@ const smooth = (a: number, b: number, v: number) => {
 };
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-function colorAt(p: number): string {
-  for (let i = 1; i < STOPS.length; i++) {
-    const [p1, c1] = STOPS[i];
-    const [p0, c0] = STOPS[i - 1];
-    if (p <= p1) {
-      const t = smooth(p0, p1, p);
-      return `rgb(${c0.map((c, k) => Math.round(lerp(c, c1[k], t))).join(',')})`;
-    }
-  }
-  const last = STOPS[STOPS.length - 1][1];
-  return `rgb(${last.join(',')})`;
-}
+const rgb = (c: [number, number, number]) => `rgb(${c.join(',')})`;
 
 export function ScrollStory({
-  photoSrc,
-  photoAlt,
-  introKicker,
-  introTitle,
+  slides,
+  active,
+  onActiveChange,
+  autoplay,
   introCue,
   panels,
   finalPanel,
   topbar,
+  introAction,
 }: ScrollStoryProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [staticMode] = useState(
     () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   );
   const allPanels = panels.length + 1;
+  const atTopRef = useRef(true);
+  const slide = slides[active] ?? slides[0];
+
+  // Auto-advance the places only while the page sits at the top; once the visitor
+  // scrolls into the story, the place they were looking at stays put.
+  // The first place gets longer: its title is still animating in when the page opens.
+  const [firstShown, setFirstShown] = useState(false);
+  const dwellMs = firstShown ? 6500 : 9000;
+  useEffect(() => {
+    if (!autoplay || slides.length < 2) return;
+    const timer = window.setTimeout(() => {
+      setFirstShown(true);
+      if (atTopRef.current) onActiveChange((active + 1) % slides.length);
+    }, dwellMs);
+    return () => window.clearTimeout(timer);
+  }, [autoplay, active, slides.length, onActiveChange, dwellMs]);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root || staticMode) return;
-    const stage = root.querySelector<HTMLElement>('.story__stage')!;
+    const bgLayers = Array.from(root.querySelectorAll<HTMLElement>('.story__bg'));
     const frame = root.querySelector<HTMLElement>('.story__frame')!;
-    const img = root.querySelector<HTMLElement>('.story__frame img')!;
+    const img = root.querySelector<HTMLElement>('.story__photos')!;
     const scrim = root.querySelector<HTMLElement>('.story__scrim')!;
     const intro = root.querySelector<HTMLElement>('.story__intro')!;
     const panelEls = Array.from(root.querySelectorAll<HTMLElement>('.story__panel'));
     const dots = Array.from(root.querySelectorAll<HTMLElement>('.story__dots span'));
 
     let raf = 0;
+    let lastY = -1;
+    let idleFrames = 0;
+    // Runs every frame while the page is moving (including Android fling), then stops
+    const tick = () => {
+      const y = window.scrollY;
+      if (y !== lastY) {
+        lastY = y;
+        idleFrames = 0;
+        render();
+      } else if (++idleFrames > 12) {
+        raf = 0;
+        return;
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
     const render = () => {
-      raf = 0;
       const rect = root.getBoundingClientRect();
       const travel = rect.height - window.innerHeight;
       const p = clamp(-rect.top / Math.max(1, travel));
+      atTopRef.current = p < 0.02;
       const wide = window.innerWidth >= 900;
 
       // Photo: full-bleed -> framed card (right on desktop, top on phones)
@@ -97,14 +129,17 @@ export function ScrollStory({
       const scale = wide ? lerp(1, 0.5, t) : lerp(lerp(1, 0.56, t), 0.44, t2);
       const tx = wide ? lerp(0, window.innerWidth * 0.225, t) : 0;
       const ty = wide ? 0 : lerp(lerp(0, -window.innerHeight * 0.12, t), -window.innerHeight * 0.21, t2);
+      // Only transform and opacity change per frame, so the GPU moves pre-drawn layers
       frame.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
-      frame.style.borderRadius = `${lerp(0, 34, t) / scale}px`;
-      frame.style.boxShadow = `0 ${lerp(0, 40, t)}px ${lerp(0, 90, t)}px rgba(0,0,0,${lerp(0, 0.45, t)})`;
+      frame.classList.toggle('is-card', t > 0.01);
       img.style.transform = `scale(${lerp(1.12, 1, p)})`;
       scrim.style.opacity = `${lerp(1, 0.15, t)}`;
       intro.style.opacity = `${1 - smooth(0.02, 0.16, p)}`;
       intro.style.transform = `translate3d(0, ${-smooth(0.02, 0.16, p) * 40}px, 0)`;
-      stage.style.backgroundColor = colorAt(p);
+      bgLayers.forEach((layer, k) => {
+        if (k === 0) return;
+        layer.style.opacity = `${smooth(STOPS[k - 1][0], STOPS[k][0], p)}`;
+      });
 
       // Panels: each owns a window of the scroll; the last one stays
       const start = 0.28;
@@ -123,7 +158,10 @@ export function ScrollStory({
       dots.forEach((d, i) => d.classList.toggle('is-active', i === active));
     };
     const schedule = () => {
-      if (!raf) raf = window.requestAnimationFrame(render);
+      if (!raf) {
+        idleFrames = 0;
+        raf = window.requestAnimationFrame(tick);
+      }
     };
     render();
     window.addEventListener('scroll', schedule, { passive: true });
@@ -142,16 +180,55 @@ export function ScrollStory({
       style={{ ['--panels' as string]: allPanels }}
     >
       <div className="story__stage">
+        {STOPS.map(([, color], k) => (
+          <div key={k} className="story__bg" style={{ backgroundColor: rgb(color), opacity: k === 0 ? 1 : 0 }} aria-hidden="true" />
+        ))}
         <div className="story__topbar">{topbar}</div>
 
         <figure className="story__frame">
-          <img src={photoSrc} alt={photoAlt} decoding="async" fetchPriority="high" />
+          <div className="story__photos">
+            {slides.map((sl, i) => (
+              <img
+                key={sl.id}
+                src={sl.photo}
+                alt={i === active ? sl.alt : ''}
+                aria-hidden={i !== active}
+                className={i === active ? 'is-active' : ''}
+                decoding="async"
+                fetchPriority={i === 0 ? 'high' : 'auto'}
+              />
+            ))}
+          </div>
           <div className="story__scrim" aria-hidden="true" />
         </figure>
 
         <div className="story__intro">
-          <span className="story__intro-kicker">{introKicker}</span>
-          <h1 className="story__intro-title">{introTitle}</h1>
+          <span key={`k-${slide.id}`} className="story__intro-kicker">
+            {slide.kicker}
+          </span>
+          <h1 key={`t-${slide.id}`} className="story__intro-title">
+            {slide.title}
+          </h1>
+          {slides.length > 1 && (
+            <div className="story__picker" role="tablist" aria-label="Choose a place">
+              {slides.map((sl, i) => (
+                <button
+                  key={sl.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === active}
+                  className={i === active ? 'is-active' : ''}
+                  onClick={() => onActiveChange(i)}
+                >
+                  {sl.title}
+                  {autoplay && i === active && (
+                    <span className="story__picker-fill" style={{ animationDuration: `${dwellMs}ms` }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+          {introAction && <div className="story__intro-action">{introAction}</div>}
           <span className="story__cue" aria-hidden="true">
             <span className="story__mouse" />
             {introCue}

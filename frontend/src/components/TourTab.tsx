@@ -11,6 +11,7 @@ import {
   Play,
   Square,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getTours, postAnalyticsEvent } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -24,9 +25,11 @@ import {
   LoadingStateCard,
   SkeletonCards,
 } from './ApiStateCard';
+import { AvatarCaption } from './AvatarCaption';
 import { LeafletMap, type MapPinItem } from './LeafletMap';
 
 interface TourTabProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   isOnline: boolean;
@@ -37,6 +40,7 @@ interface TourTabProps {
 }
 
 export function TourTab({
+  destinationSlug,
   language,
   persona,
   isOnline,
@@ -49,6 +53,7 @@ export function TourTab({
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
   const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
 
   const [maxMinutes, setMaxMinutes] = useState<number | undefined>(undefined);
   const [stepFreeOnly, setStepFreeOnly] = useState(false);
@@ -59,6 +64,7 @@ export function TourTab({
   const [selectedSlug, setSelectedSlug] = useState<string>('');
   const [activeStopIdx, setActiveStopIdx] = useState<number>(0);
   const [audioStatus, setAudioStatus] = useState<AudioPlaybackState>('idle');
+  const [audioProgress, setAudioProgress] = useState(0);
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
@@ -76,13 +82,13 @@ export function TourTab({
     });
   }, [offlinePack, maxMinutes, stepFreeOnly]);
 
-  const reqKey = isOnline ? `${maxMinutes ?? 'all'}|${stepFreeOnly}|${retryCount}` : null;
+  const reqKey = isOnline ? `${destinationSlug}|${maxMinutes ?? 'all'}|${stepFreeOnly}|${retryCount}` : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getTours('agra', { maxMinutes, stepFreeOnly })
+    getTours(destinationSlug, { maxMinutes, stepFreeOnly })
       .then((res) => {
         if (!active) return;
         setLiveRoutes(res);
@@ -97,7 +103,7 @@ export function TourTab({
     return () => {
       active = false;
     };
-  }, [reqKey, maxMinutes, stepFreeOnly, ui.serverErrorDesc]);
+  }, [reqKey, destinationSlug, maxMinutes, stepFreeOnly, ui.serverErrorDesc]);
 
   const routes = isOnline && !apiError ? liveRoutes : offlineRoutes;
 
@@ -188,7 +194,7 @@ export function TourTab({
     setActiveStopIdx(0);
     if (isOnline) {
       postAnalyticsEvent({
-        destination_slug: 'agra',
+        destination_slug: destinationSlug,
         event_type: 'tour_start',
         session_hash: sessionHash,
         language,
@@ -205,7 +211,7 @@ export function TourTab({
     const stop = stops[idx];
     if (stop && isOnline) {
       postAnalyticsEvent({
-        destination_slug: 'agra',
+        destination_slug: destinationSlug,
         event_type: 'spot_visit',
         session_hash: sessionHash,
         language,
@@ -227,11 +233,12 @@ export function TourTab({
     const notTranslatedYet =
       needsDynamicTranslate && localizedScript === currentStop.audio_script_en;
 
+    setAudioProgress(0);
     await speakText(
       localizedScript,
       language,
       (state) => setAudioStatus(state),
-      { autoTranslate: notTranslatedYet },
+      { autoTranslate: notTranslatedYet, onProgress: setAudioProgress },
     );
   };
 
@@ -419,7 +426,7 @@ export function TourTab({
           {activeRoute ? (
             <>
               <LeafletMap
-                center={[27.1751, 78.0421]}
+                center={destConfig.center}
                 pins={mapPins}
                 polyline={polyline}
                 userCoords={userCoords}
@@ -495,9 +502,15 @@ export function TourTab({
                     {tr(currentStop.monument_name, currentStop.monument_name_hi)}
                   </h3>
 
-                  <p style={{ margin: '8px 0 12px', lineHeight: 1.62 }}>
-                    {tr(currentStop.audio_script_en, currentStop.audio_script_hi)}
-                  </p>
+                  <div style={{ margin: '10px 0 12px' }}>
+                    <AvatarCaption
+                      text={tr(currentStop.audio_script_en, currentStop.audio_script_hi)}
+                      status={audioStatus}
+                      progress={audioProgress}
+                      idleHint={ui.avatarIdleHint}
+                      fullTextLabel={ui.readFullText}
+                    />
+                  </div>
 
                   <div className="filter-row" style={{ marginBottom: 0 }}>
                     <button
