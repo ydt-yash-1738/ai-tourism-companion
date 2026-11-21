@@ -165,7 +165,7 @@ export const NEARBY_MEDIA_MAP: Record<string, LocationMediaItem> = {
   'thai-temple-giant-buddha': {
     image: '/images/nearby/thai-temple-giant-buddha.jpg',
     alt: 'Wat Thai Sarnath monastery gardens and 80-foot standing Buddha statue',
-    objectPosition: 'center 35%',
+    objectPosition: 'center 18%',
   },
   'sarnath-deer-park-isipatana': {
     image: '/images/nearby/sarnath-deer-park-isipatana.jpg',
@@ -246,9 +246,9 @@ export const MONUMENT_MEDIA_MAP: Record<string, LocationMediaItem> = {
     objectPosition: 'center 40%',
   },
   'asfi-mosque': {
-    image: '/images/monuments/bara-imambara.webp',
-    alt: 'The Bara Imambara complex, home of the Asfi Mosque',
-    objectPosition: 'center 55%',
+    image: '/images/monuments/asfi-mosque.webp',
+    alt: 'The white-domed Asfi Mosque within the Bara Imambara complex in Lucknow',
+    objectPosition: 'center 45%',
   },
   'dhamek-stupa': DEFAULT_SARNATH_MEDIA,
   'ashoka-pillar-sarnath': {
@@ -264,7 +264,7 @@ export const MONUMENT_MEDIA_MAP: Record<string, LocationMediaItem> = {
   'sarnath-archaeological-museum': {
     image: '/images/monuments/sarnath-archaeological-museum.jpg',
     alt: 'Original four-lion Capital of Ashoka at Sarnath Archaeological Museum',
-    objectPosition: 'center 32%',
+    objectPosition: 'center 18%',
   },
   'mulagandhakuti-vihara': {
     image: '/images/monuments/mulagandhakuti-vihara.jpg',
@@ -490,6 +490,30 @@ export const GUIDE_TOPIC_CARDS: GuideTopicCard[] = [
     questionHi: 'ताजमहल खुलने का समय, शुक्रवार नियम, शू-कवर और व्हीलचेयर सुगम मार्ग की जानकारी दें।',
     accent: 'emerald',
   },
+  {
+    id: 'agra-street-food',
+    badgeEn: 'Street Food',
+    badgeHi: 'स्ट्रीट फ़ूड',
+    titleEn: 'Chaat Gali, Bedai-Jalebi & Agra Petha',
+    titleHi: 'चाट गली, बेड़ई-जलेबी और आगरा पेठा',
+    descEn: 'Explore Sadar Bazaar Chaat Gali, Belanganj morning Bedai, Noori Darwaza Petha, and Taj Ganj food stops.',
+    descHi: 'सदर बाजार चाट गली, बेलनगंज की सुबह की बेड़ई, नूरी दरवाज़ा का पेठा और ताजगंज भोजन स्थल देखें।',
+    questionEn: 'What is the best street food in Agra and where can I eat chaat or petha?',
+    questionHi: 'आगरा में सबसे अच्छा स्ट्रीट फ़ूड, चाट और पेठा कहाँ मिलता है?',
+    accent: 'saffron',
+  },
+  {
+    id: 'agra-step-free-plan',
+    badgeEn: 'Smart Itinerary',
+    badgeHi: 'यात्रा योजना',
+    titleEn: '3-Hour Step-Free Family Travel Plan',
+    titleHi: '3-घंटे की सुगम पारिवारिक यात्रा योजना',
+    descEn: 'Build a wheelchair-accessible, low-budget schedule pairing monuments, Parchinkari crafts, and street food.',
+    descHi: 'स्मारक, पर्चिनकारी शिल्प और स्ट्रीट फ़ूड को जोड़ने वाली व्हीलचेयर-सुगम व किफायती योजना बनाएँ।',
+    questionEn: 'Create a 3-hour wheelchair-accessible Agra travel plan for a family on a low budget including food and crafts',
+    questionHi: 'आगरा में परिवार के लिए 3 घंटे की व्हीलचेयर-सुगम और कम बजट की यात्रा योजना बनाएं जिसमें भोजन और शिल्प भी शामिल हों',
+    accent: 'navy',
+  },
 ];
 
 export const SARNATH_TOPIC_CARDS: GuideTopicCard[] = [
@@ -543,6 +567,30 @@ export const SARNATH_TOPIC_CARDS: GuideTopicCard[] = [
     questionEn: 'What are the Sarnath monument timings, ticket prices, Friday museum closure, and visitor rules?',
     questionHi: 'सारनाथ स्मारक व संग्रहालय खुलने का समय, टिकट शुल्क, शुक्रवार अवकाश और प्रवेश नियम बताइए।',
     accent: 'emerald',
+  },
+  {
+    id: 'sarnath-street-food',
+    badgeEn: 'Local Cuisine',
+    badgeHi: 'स्थानीय व्यंजन',
+    titleEn: 'Banarasi Kachori-Lassi & Monastery Cafes',
+    titleHi: 'बनारसी कचौड़ी-लस्सी और मठ मार्ग कैफे',
+    descEn: 'Find Sarnath Chowk kachori-sabzi, kulhad lassi, Tibetan momos & thukpa, and clean vegetarian thalis.',
+    descHi: 'सारनाथ चौराहे की कचौड़ी-सब्ज़ी, कुल्हड़ लस्सी, मठ मार्ग के मोमोज़-थुकपा और सात्विक थाली खोजें।',
+    questionEn: 'What local street food, kachori, lassi, or monastery cafes are near Sarnath?',
+    questionHi: 'सारनाथ में स्थानीय स्ट्रीट फ़ूड, कचौड़ी-लस्सी और मठ मार्ग के व्यंजन कहाँ मिलते हैं?',
+    accent: 'saffron',
+  },
+  {
+    id: 'sarnath-step-free-plan',
+    badgeEn: 'Smart Itinerary',
+    badgeHi: 'यात्रा योजना',
+    titleEn: '3-Hour Step-Free Family Travel Plan',
+    titleHi: '3-घंटे की सीढ़ी-रहित पारिवारिक यात्रा योजना',
+    descEn: 'Combine Dhamek Stupa, Ashoka Pillar, Sarnath Museum, Wooden Toys ODOP, and local food on flat paths.',
+    descHi: 'समतल मार्गों पर धमेख स्तूप, अशोक स्तंभ, संग्रहालय, काष्ठ खिलौना ODOP और भोजन की योजना बनाएँ।',
+    questionEn: 'Create a 3-hour step-free Sarnath travel plan for a family including local food and Banarasi crafts',
+    questionHi: 'सारनाथ में परिवार के लिए 3 घंटे की सीढ़ी-रहित यात्रा योजना बनाएं जिसमें भोजन और बनारसी शिल्प शामिल हों',
+    accent: 'navy',
   },
 ];
 
@@ -639,6 +687,28 @@ export const LUCKNOW_MONUMENT_SPOTLIGHTS: MonumentSpotlightMeta[] = [
     promptEn: 'Tell me about the Asfi Mosque and how to visit it respectfully.',
     promptHi: 'आसफ़ी मस्जिद के बारे में बताइए और वहाँ सम्मानपूर्वक कैसे जाएँ?',
   },
+  {
+    slug: 'shahi-baoli',
+    name: 'Shahi Baoli (Royal Stepwell)',
+    nameHi: 'शाही बावली (राजसी बावड़ी)',
+    shortSummary: 'Five-storeyed 18th-century arched stepwell featuring a water-reflection lookout.',
+    shortSummaryHi: 'पाँच मंजिला मेहराबदार बावड़ी, जहाँ पानी के प्रतिबिंब से निगरानी होती थी।',
+    visitDurationMin: 15,
+    stepFree: true,
+    promptEn: 'How did the Shahi Baoli stepwell work and what is the legend about it?',
+    promptHi: 'शाही बावली कैसे काम करती थी और इससे जुड़ी लोककथा क्या है?',
+  },
+  {
+    slug: 'chota-imambara',
+    name: 'Chota Imambara (Hussainabad Imambara)',
+    nameHi: 'छोटा इमामबाड़ा (हुसैनाबाद इमामबाड़ा)',
+    shortSummary: 'Ornate 1838 congregation hall known for its gilded dome and Belgian crystal chandeliers.',
+    shortSummaryHi: '1838 का अलंकृत इमामबाड़ा, अपने सुनहरे गुंबद और क्रिस्टल झाड़-फ़ानूसों के लिए प्रसिद्ध।',
+    visitDurationMin: 25,
+    stepFree: true,
+    promptEn: 'Who built the Chota Imambara and why is it called the Palace of Lights?',
+    promptHi: 'छोटा इमामबाड़ा किसने बनवाया और इसे रोशनी का महल क्यों कहा जाता है?',
+  },
 ];
 
 export const LUCKNOW_TOPIC_CARDS: GuideTopicCard[] = [
@@ -692,6 +762,30 @@ export const LUCKNOW_TOPIC_CARDS: GuideTopicCard[] = [
     questionHi: 'बड़ा इमामबाड़ा और आसफ़ी मस्जिद जाते समय पहनावा और व्यवहार कैसा हो?',
     accent: 'brass',
     focusMonumentSlug: 'asfi-mosque',
+  },
+  {
+    id: 'lucknow-street-food',
+    badgeEn: 'Street Food',
+    badgeHi: 'स्ट्रीट फ़ूड',
+    titleEn: 'Awadhi Kebabs, Basket Chaat & Kulfi',
+    titleHi: 'अवधी कबाब, बास्केट चाट और कुल्फी',
+    descEn: 'Discover Akbari Gate in Chowk, Hazratganj Royal Basket Chaat, and Aminabad Kulfi Falooda.',
+    descHi: 'चौक के अकबरी गेट, हज़रतगंज की रॉयल बास्केट चाट और अमीनाबाद की कुल्फी फ़ालूदा के केंद्र जानें।',
+    questionEn: 'What is the best street food in Lucknow like chaat, kebabs, and kulfi?',
+    questionHi: 'लखनऊ में बास्केट चाट, कबाब और कुल्फी जैसा सबसे अच्छा स्ट्रीट फ़ूड कहाँ मिलता है?',
+    accent: 'saffron',
+  },
+  {
+    id: 'lucknow-step-free-plan',
+    badgeEn: 'Smart Itinerary',
+    badgeHi: 'यात्रा योजना',
+    titleEn: '3-Hour Wheelchair & Family Travel Plan',
+    titleHi: '3-घंटे की सुगम पारिवारिक यात्रा योजना',
+    descEn: 'Pair Rumi Darwaza, Bara Imambara courtyard, Shahi Baoli, Chota Imambara, Chikankari, and street food.',
+    descHi: 'रूमी दरवाज़ा, बड़ा इमामबाड़ा आँगन, शाही बावली, छोटा इमामबाड़ा, चिकनकारी और स्ट्रीट फ़ूड की योजना बनाएँ।',
+    questionEn: 'Create a 3-hour wheelchair-accessible Lucknow travel plan for a family including Chikankari and street food',
+    questionHi: 'लखनऊ में परिवार के लिए 3 घंटे की व्हीलचेयर-सुगम यात्रा योजना बनाएं जिसमें चिकनकारी और स्ट्रीट फ़ूड शामिल हों',
+    accent: 'navy',
   },
 ];
 
@@ -749,10 +843,10 @@ export const DESTINATION_CONFIG_MAP: Record<string, DestinationConfig> = {
       greetingSubHi: 'ताजमहल · आगरा किला · यूनेस्को विश्व धरोहर',
     },
     tabHeroes: {
-      tour: { image: '/images/monuments/darwaza-i-rauza.webp', position: 'center 45%' },
-      camera: { image: '/images/nearby/parchinkari-artisan-hub.webp', position: 'center 50%' },
-      nearby: { image: '/images/nearby/itimad-ud-daulah-baby-taj.webp', position: 'center 40%' },
-      facilities: { image: '/images/taj-mahal-banner.webp', position: 'center 75%' },
+      tour: { image: '/images/monuments/darwaza-i-rauza.webp', position: 'center 28%' },
+      camera: { image: '/images/nearby/parchinkari-artisan-hub.webp', position: 'center 40%' },
+      nearby: { image: '/images/nearby/itimad-ud-daulah-baby-taj.webp', position: 'center 32%' },
+      facilities: { image: '/images/taj-mahal-banner.webp', position: 'center 35%' },
     },
     defaultHelplines: DEFAULT_AGRA_HELPLINES,
     offlineGapFollowUps: {
@@ -820,21 +914,21 @@ export const DESTINATION_CONFIG_MAP: Record<string, DestinationConfig> = {
     tabHeroes: {
       tour: {
         image: '/images/monuments/bara-imambara.webp',
-        position: 'center 45%',
+        position: 'center 32%',
         titleEn: 'Walk Lucknow at your own pace',
         titleHi: 'अपनी गति से लखनऊ घूमें',
       },
       camera: {
         image: '/images/monuments/imambara-rooftop.webp',
-        position: 'center 40%',
+        position: 'center 30%',
       },
       nearby: {
         image: '/images/heritage/lucknow.webp',
-        position: 'center 60%',
+        position: 'center 32%',
       },
       facilities: {
         image: '/images/monuments/bara-imambara.webp',
-        position: 'center 65%',
+        position: 'center 32%',
       },
     },
     defaultHelplines: DEFAULT_LUCKNOW_HELPLINES,
@@ -903,21 +997,21 @@ export const DESTINATION_CONFIG_MAP: Record<string, DestinationConfig> = {
     tabHeroes: {
       tour: {
         image: '/images/monuments/chaukhandi-stupa.jpg',
-        position: 'center 42%',
+        position: 'center 28%',
         titleEn: 'Walk Sarnath at your own pace',
         titleHi: 'अपनी गति से सारनाथ घूमें',
       },
       camera: {
         image: '/images/monuments/sarnath-archaeological-museum.jpg',
-        position: 'center 35%',
+        position: 'center 18%',
       },
       nearby: {
         image: '/images/nearby/thai-temple-giant-buddha.jpg',
-        position: 'center 38%',
+        position: 'center 18%',
       },
       facilities: {
         image: '/images/heritage/sarnath.webp',
-        position: 'center 45%',
+        position: 'center 30%',
       },
     },
     defaultHelplines: DEFAULT_SARNATH_HELPLINES,

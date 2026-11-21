@@ -1,0 +1,61 @@
+{
+  "slug": "lucknow",
+  "name": "Lucknow Heritage Zone (Bara Imambara & Rumi Darwaza)",
+  "name_hi": "लखनऊ विरासत क्षेत्र (बड़ा इमामबाड़ा एवं रूमी दरवाज़ा)",
+  "state": "Uttar Pradesh",
+  "description": "The Nawabi heart of old Lucknow: the vast 1784 Bara Imambara with its beamless hall, Bhool Bhulaiya labyrinth, and Shahi Baoli stepwell, flanked by Asfi Mosque, the towering Rumi Darwaza, Chota Imambara, and Uttar Pradesh's ODOP Chikankari and Zari-Zardozi traditions.",
+  "description_hi": "पुराने लखनऊ का नवाबी केंद्र: बिना बीम वाले विशाल हॉल, भूलभुलैया और शाही बावली सहित 1784 का बड़ा इमामबाड़ा, आसफ़ी मस्जिद, भव्य रूमी दरवाज़ा, छोटा इमामबाड़ा तथा उत्तर प्रदेश के ओडीओपी चिकनकारी और ज़री-ज़रदोज़ी शिल्प की ऐतिहासिक धरोहर।",
+  "center_lat": 26.8691,
+  "center_lng": 80.9124,
+  "supported_languages": ["en", "hi", "ur", "ta", "bn", "mr", "te", "fr", "ja", "es"],
+  "emergency_helplines": [
+    {
+      "label": "National Emergency (Police / Fire / Medical)",
+      "label_hi": "राष्ट्रीय आपातकालीन सेवा",
+      "number": "112",
+      "category": "emergency"
+    },
+    {
+      "label": "Medical Ambulance",
+      "label_hi": "एम्बुलेंस सेवा",
+      "number": "108",
+      "category": "medical"
+    },
+    {
+      "label": "Women Power Line (UP)",
+      "label_hi": "महिला पावर लाइन (उ.प्र.)",
+      "number": "1090",
+      "category": "police"
+    },
+    {
+      "label": "UP / Incredible India Tourist Helpline",
+      "label_hi": "पर्यटन हेल्पलाइन",
+      "number": "1363",
+      "category": "help_desk"
+    },
+    {
+      "label": "Chowk Police Station (Old Lucknow Heritage Zone)",
+      "label_hi": "चौक पुलिस थाना (पुराना लखनऊ विरासत क्षेत्र)",
+      "number": "+91-9454403847",
+      "category": "police"
+    },
+    {
+      "label": "KGMU Trauma Centre & Emergency Hospital, Chowk",
+      "label_hi": "केजीएमयू ट्रॉमा सेंटर एवं आपातकालीन अस्पताल, चौक",
+      "number": "+91-522-2258425",
+      "category": "medical"
+    }
+  ],
+  "metadata_json": {
+    "odop_products": ["Chikankari", "Zari-Zardozi"],
+    "best_season": "October to March",
+    "weekly_closure": "Bara Imambara, Bhool Bhulaiya, Shahi Baoli, and Chota Imambara generally open Tue-Sun (6:00 AM - 5:00 PM) and close on Mondays; prayer timings and Muharram schedules may alter access.",
+    "official_sources": [
+      "Hussainabad and Allied Trust (HAT)",
+      "Archaeological Survey of India (ASI)",
+      "Uttar Pradesh Tourism",
+      "UP One District One Product (ODOP) Mission"
+    ]
+  }
+}
+

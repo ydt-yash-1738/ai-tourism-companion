@@ -48,6 +48,14 @@ export interface UiStrings {
   resetFilters: string;
 
   appTitle: string;
+  heroMainKicker: string;
+  heroMainTitle: string;
+  heroMainSub: string;
+  locNotProvided: string;
+  grantLocation: string;
+  enterTourGuide: string;
+  exploreLocations: string;
+  allLocations: string;
   deptInsights: string;
   eyebrow: string;
   heroHeadline: string;
@@ -92,6 +100,11 @@ export interface UiStrings {
   allMonuments: string;
   recordedHistory: string;
   localFolklore: string;
+  itineraryHeading: string;
+  recommendedPlacesHeading: string;
+  openInMaps: string;
+  odopBadge: string;
+  accessibleBadge: string;
   sourceLabel: string;
   attributionLabel: string;
   readAloud: string;
@@ -247,6 +260,14 @@ const EN: UiStrings = {
   resetFilters: 'Reset Filters',
   govTag: 'Prototype for UP Tourism · UP AI Mission',
   appTitle: 'UP AI Heritage Companion',
+  heroMainKicker: 'Uttar Pradesh Heritage · AI Tour Companion',
+  heroMainTitle: 'Uttar Pradesh Tourism',
+  heroMainSub: 'Interactive multilingual AI tour guide for Uttar Pradesh’s iconic heritage destinations.',
+  locNotProvided: 'Location not provided',
+  grantLocation: 'Grant Location',
+  enterTourGuide: 'Enter Tour Guide',
+  exploreLocations: 'Explore Locations',
+  allLocations: 'All Locations',
   deptInsights: 'Dept. Insights',
   eyebrow: 'Digital India Initiative · Multilingual Heritage Guide',
   heroHeadline: "Every Monument's Story, Explained in Your Own Language.",
@@ -299,6 +320,11 @@ const EN: UiStrings = {
   allMonuments: 'All monuments',
   recordedHistory: 'Recorded History',
   localFolklore: 'Local Folklore & Tradition',
+  itineraryHeading: 'Tailored Travel Plan',
+  recommendedPlacesHeading: 'Verified Local Spots & Food',
+  openInMaps: 'Directions',
+  odopBadge: 'UP ODOP',
+  accessibleBadge: 'Step-Free',
   sourceLabel: 'Source: ',
   attributionLabel: 'Attribution: ',
   readAloud: 'Read Aloud',
@@ -406,7 +432,7 @@ const EN: UiStrings = {
   cameraSub: 'Take or upload a photo of a monument, gateway, carving, or inlay panel to identify it.',
   chooseAnotherPhoto: 'Choose Another Photo',
   capturePhoto: 'Capture or Upload Photo',
-  cameraPlaceholder: 'Optional question (e.g., What are these wall carvings and history?)',
+  cameraPlaceholder: 'Optional question — type or tap mic (e.g., What are these wall carvings and history?)',
   demoGpsOff: 'Attach Musamman Burj Demo GPS',
   demoGpsOn: 'Demo GPS: Musamman Burj On',
   usingLiveGps: 'Using Live GPS',
@@ -522,6 +548,14 @@ const HI: UiStrings = {
   resetFilters: 'फ़िल्टर हटाएँ',
   govTag: 'यूपी पर्यटन हेतु प्रोटोटाइप · यूपी एआई मिशन',
   appTitle: 'एआई पर्यटन साथी',
+  heroMainKicker: 'उत्तर प्रदेश विरासत · एआई टूर गाइड',
+  heroMainTitle: 'उत्तर प्रदेश पर्यटन',
+  heroMainSub: 'उत्तर प्रदेश के प्रमुख विरासत स्थलों के लिए आपका इंटरैक्टिव बहुभाषी एआई टूर गाइड।',
+  locNotProvided: 'लोकेशन प्रदान नहीं की गई',
+  grantLocation: 'लोकेशन अनुमति दें',
+  enterTourGuide: 'टूर गाइड खोलें',
+  exploreLocations: 'सभी स्थान देखें',
+  allLocations: 'सभी स्थान',
   deptInsights: 'विभाग डैशबोर्ड',
   eyebrow: 'डिजिटल इंडिया पहल · बहुभाषी विरासत मार्गदर्शक',
   heroHeadline: 'उत्तर प्रदेश की जीवंत विरासत को अपनी भाषा में जानें।',
@@ -533,7 +567,7 @@ const HI: UiStrings = {
   locDefaultNotice: 'स्थान उपलब्ध नहीं होने पर नीचे उत्तर प्रदेश के सक्रिय विरासत स्थलों (आगरा, लखनऊ या सारनाथ) में से चुनें।',
   citiesHeading: 'उत्तर प्रदेश के प्रमुख विरासत शहर',
   citiesSub: 'वर्तमान में आगरा, लखनऊ और सारनाथ सक्रिय हैं; अन्य शहर आगामी चरण में जुड़ेंगे।',
-  liveBadge: '2 स्थल सक्रिय',
+  liveBadge: '3 स्थल सक्रिय',
   liveNow: 'सक्रिय',
   comingSoon: 'शीघ्र उपलब्ध',
   exploreFeatures: 'सभी 9 सुविधाएँ देखें',
@@ -560,6 +594,11 @@ const HI: UiStrings = {
   allMonuments: 'सभी स्मारक',
   recordedHistory: 'प्रमाणित इतिहास',
   localFolklore: 'लोककथा एवं परंपरा',
+  itineraryHeading: 'आपकी यात्रा योजना',
+  recommendedPlacesHeading: 'सत्यापित स्थानीय स्थल व भोजन',
+  openInMaps: 'दिशा देखें',
+  odopBadge: 'यूपी ODOP',
+  accessibleBadge: 'सुगम मार्ग',
   sourceLabel: 'स्रोत: ',
   attributionLabel: 'संदर्भ: ',
   readAloud: 'सुनें',
@@ -666,7 +705,7 @@ const HI: UiStrings = {
   cameraSub: 'किसी भी इमारत, द्वार, नक्काशी या शिलालेख की फ़ोटो अपलोड करें।',
   chooseAnotherPhoto: 'दूसरी फ़ोटो चुनें',
   capturePhoto: 'फ़ोटो लें या अपलोड करें',
-  cameraPlaceholder: 'वैकल्पिक प्रश्न: इस नक्काशी का क्या अर्थ है?',
+  cameraPlaceholder: 'वैकल्पिक प्रश्न — लिखें या माइक दबाकर बोलें (जैसे, इस नक्काशी का इतिहास क्या है?)',
   demoGpsOff: 'मुसम्मन बुर्ज डेमो GPS जोड़ें',
   demoGpsOn: 'डेमो GPS: मुसम्मन बुर्ज सक्रिय',
   usingLiveGps: 'लाइव GPS संलग्न',

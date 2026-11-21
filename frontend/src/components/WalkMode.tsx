@@ -66,6 +66,7 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
   const [view, setView] = useState<'360' | 'photo'>(online ? '360' : 'photo');
   const show360 = online && view === '360';
   const runRef = useRef(0);
+  const walkTimerRef = useRef<number | null>(null);
 
   const stop = stops[idx];
   const narration = isHi ? stop.narrationHi : stop.narration;
@@ -77,13 +78,18 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
   const goTo = useCallback(
     (next: number) => {
       runRef.current += 1;
+      if (walkTimerRef.current !== null) {
+        window.clearTimeout(walkTimerRef.current);
+        walkTimerRef.current = null;
+      }
       stopSpeaking();
       setAudio('idle');
       setProgress(0);
       setPrevIdx(idx);
       setWalking(true);
       setIdx(next);
-      window.setTimeout(() => {
+      walkTimerRef.current = window.setTimeout(() => {
+        walkTimerRef.current = null;
         setWalking(false);
         setPrevIdx(null);
       }, WALK_MS);
@@ -93,43 +99,82 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
 
   // Play: narrate the current stop, then walk on to the next one
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || walking) return;
     const run = ++runRef.current;
     let cancelled = false;
+    let advanceTimer: number | null = null;
+    let muteInterval: number | null = null;
+
     const next = () => {
       if (cancelled || run !== runRef.current) return;
       if (idx < stops.length - 1) goTo(idx + 1);
       else setPlaying(false);
     };
-    const timer = window.setTimeout(async () => {
+
+    const startTimer = window.setTimeout(async () => {
       if (cancelled || run !== runRef.current) return;
       if (voiceOn) {
         setProgress(0);
-        await speakText(narration, language, (s) => setAudio(s), { onProgress: setProgress, rate: speed });
-        window.setTimeout(next, 700);
+        const outcome = await speakText(
+          narration,
+          language,
+          (s) => {
+            if (!cancelled && run === runRef.current) setAudio(s);
+          },
+          {
+            onProgress: (p) => {
+              if (!cancelled && run === runRef.current) setProgress(p);
+            },
+            rate: speed,
+          },
+        );
+        if (cancelled || run !== runRef.current || outcome === 'cancelled') return;
+        advanceTimer = window.setTimeout(next, 700);
       } else {
         const ms = Math.max(4000, (narration.length / 15 / speed) * 1000);
         const started = performance.now();
         setAudio('playing');
-        const tick = window.setInterval(() => {
-          if (cancelled || run !== runRef.current) return window.clearInterval(tick);
+        muteInterval = window.setInterval(() => {
+          if (cancelled || run !== runRef.current) {
+            if (muteInterval !== null) {
+              window.clearInterval(muteInterval);
+              muteInterval = null;
+            }
+            return;
+          }
           const f = (performance.now() - started) / ms;
           setProgress(Math.min(1, f));
           if (f >= 1) {
-            window.clearInterval(tick);
+            if (muteInterval !== null) {
+              window.clearInterval(muteInterval);
+              muteInterval = null;
+            }
             setAudio('idle');
-            window.setTimeout(next, 500);
+            advanceTimer = window.setTimeout(next, 500);
           }
         }, 200);
       }
-    }, walking ? WALK_MS : 400);
+    }, 300);
+
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      window.clearTimeout(startTimer);
+      if (advanceTimer !== null) window.clearTimeout(advanceTimer);
+      if (muteInterval !== null) window.clearInterval(muteInterval);
+      stopSpeaking();
     };
   }, [playing, idx, voiceOn, speed, narration, language, stops.length, goTo, walking]);
 
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(
+    () => () => {
+      if (walkTimerRef.current !== null) {
+        window.clearTimeout(walkTimerRef.current);
+        walkTimerRef.current = null;
+      }
+      stopSpeaking();
+    },
+    [],
+  );
 
   const togglePlay = () => {
     if (playing) {

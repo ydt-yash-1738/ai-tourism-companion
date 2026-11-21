@@ -166,6 +166,48 @@
     "lat": 25.3806,
     "lng": 83.0247,
     "address": "Mulagandhakuti & Dhamek Stupa Esplanade, Sarnath"
+  },
+  {
+    "slug": "sarnath-banarasi-kachori-lassi-corner",
+    "name": "Sarnath Chowk Banarasi Kachori-Sabzi & Kulhad Lassi Corner",
+    "name_hi": "सारनाथ चौक बनारसी कचौड़ी-सब्ज़ी एवं कुल्हड़ लस्सी केंद्र",
+    "category": "food",
+    "is_odop": false,
+    "odop_product": null,
+    "budget_tier": "low",
+    "suitable_for": ["solo", "family", "kids", "elderly"],
+    "interests": ["food", "culture"],
+    "estimated_time_min": 30,
+    "timings": "07:00 AM - 09:00 PM Daily",
+    "entry_fee_inr": "Free entry; INR 50-150 per person",
+    "how_to_reach": "3-minute flat walk south of Chaukhandi Stupa toward Sarnath Crossing.",
+    "official_source": "UP Tourism Culinary Trail",
+    "description": "Popular roadside sweet-and-snack stalls serving crisp Banarasi kachori-sabzi, hot jalebi, malaiyo in winter, and thick clay-cup kulhad lassi.",
+    "description_hi": "चौखंडी स्तूप के पास प्रसिद्ध बनारसी कचौड़ी-सब्ज़ी, गरम जलेबी और मलाईदार कुल्हड़ लस्सी के स्ट्रीट फ़ूड स्टॉल।",
+    "lat": 25.3749,
+    "lng": 83.0219,
+    "address": "Sarnath Crossing, Varanasi-Sarnath Road"
+  },
+  {
+    "slug": "sarnath-pilgrim-veg-thali-bazaar",
+    "name": "Rishipattana Road Pilgrim Vegetarian Thali & Tea Hub",
+    "name_hi": "ऋषिपत्तन मार्ग यात्री शाकाहारी थाली एवं चाय केंद्र",
+    "category": "food",
+    "is_odop": false,
+    "odop_product": null,
+    "budget_tier": "low",
+    "suitable_for": ["solo", "family", "kids", "elderly"],
+    "interests": ["food", "spiritual"],
+    "estimated_time_min": 40,
+    "timings": "08:00 AM - 08:30 PM Daily",
+    "entry_fee_inr": "Free entry; INR 120-250 per meal",
+    "how_to_reach": "2-minute level walk opposite Sarnath Archaeological Museum main gate.",
+    "official_source": "UP Tourism Pilgrim Trail",
+    "description": "Clean, wheelchair-accessible ground-floor eateries serving simple satvik Banarasi vegetarian thalis, khichdi, fresh fruit bowls, and ginger masala chai.",
+    "description_hi": "सारनाथ संग्रहालय द्वार के सामने समतल प्रवेश वाले स्वच्छ भोजनालय, जहाँ सात्विक शाकाहारी थाली और अदरक वाली चाय मिलती है।",
+    "lat": 25.3790,
+    "lng": 83.0232,
+    "address": "Rishipattana Road, Opposite Sarnath Museum, Varanasi"
   }
 ]
 

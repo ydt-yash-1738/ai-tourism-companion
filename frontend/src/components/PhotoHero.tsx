@@ -7,10 +7,10 @@ interface PhotoHeroProps {
 }
 
 /** Photo banner at the top of a companion tab, with the photo drifting on scroll. */
-export function PhotoHero({ image, alt = '', objectPosition = 'center 50%', eyebrow, title }: PhotoHeroProps) {
+export function PhotoHero({ image, alt = '', objectPosition = 'center 32%', eyebrow, title }: PhotoHeroProps) {
   return (
     <header className="photo-hero">
-      <img src={image} alt={alt} aria-hidden={alt ? undefined : true} style={{ objectPosition }} data-parallax="0.22" />
+      <img src={image} alt={alt} aria-hidden={alt ? undefined : true} style={{ objectPosition }} />
       <div className="photo-hero__scrim" aria-hidden="true" />
       <div className="photo-hero__text">
         <span className="photo-hero__eyebrow">{eyebrow}</span>

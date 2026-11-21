@@ -16,6 +16,7 @@ from sqlalchemy.schema import CreateTable
 
 AGRA_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "destinations" / "agra"
 SARNATH_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "destinations" / "sarnath"
+LUCKNOW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "destinations" / "lucknow"
 
 
 @pytest.fixture()
@@ -65,10 +66,10 @@ def test_health_and_destinations(client):
     pack = test_client.get("/api/destinations/agra/offline-pack").json()
     assert pack["destination"]["slug"] == "agra"
     assert len(pack["monuments"]) == 6
-    assert len(pack["knowledge_chunks"]) >= 16
+    assert len(pack["knowledge_chunks"]) == 18
     assert len(pack["tour_routes"]) == 3
     assert len(pack["facilities"]) == 10
-    assert len(pack["nearby_places"]) == 8
+    assert len(pack["nearby_places"]) == 10
 
 
 def test_idempotent_reseeding(client):
@@ -321,10 +322,10 @@ def test_sarnath_multi_destination_full_uc_coverage(client):
     with SessionMaker() as db:
         first_summary = seed_destination_from_dir(db=db, slug="sarnath", data_dir=SARNATH_DATA_DIR)
         assert first_summary["monuments"] == 6
-        assert first_summary["knowledge_chunks"] == 16
+        assert first_summary["knowledge_chunks"] == 18
         assert first_summary["tour_routes"] == 3
         assert first_summary["facilities"] == 10
-        assert first_summary["nearby_places"] == 8
+        assert first_summary["nearby_places"] == 10
         assert first_summary["synthetic_events"] == 25
 
         # Idempotent re-seeding should not duplicate rows
@@ -347,10 +348,10 @@ def test_sarnath_multi_destination_full_uc_coverage(client):
     pack = test_client.get("/api/destinations/sarnath/offline-pack").json()
     assert pack["destination"]["slug"] == "sarnath"
     assert len(pack["monuments"]) == 6
-    assert len(pack["knowledge_chunks"]) >= 16
+    assert len(pack["knowledge_chunks"]) == 18
     assert len(pack["tour_routes"]) == 3
     assert len(pack["facilities"]) == 10
-    assert len(pack["nearby_places"]) == 8
+    assert len(pack["nearby_places"]) == 10
 
     # UC-1 + UC-3: Chat returns both recorded history and Jataka deer folklore
     chat_res = test_client.post(
@@ -505,4 +506,272 @@ def test_sarnath_curated_prompts_are_answered(client):
     for question, lang in sarnath_prompts:
         res = _ask(test_client, question, lang, destination_slug="sarnath")
         assert res["is_knowledge_gap"] is False, f"{lang}: {question}"
+
+
+def test_lucknow_multi_destination_full_uc_coverage(client):
+    test_client, SessionMaker = client
+
+    with SessionMaker() as db:
+        first_summary = seed_destination_from_dir(db=db, slug="lucknow", data_dir=LUCKNOW_DATA_DIR)
+        assert first_summary["monuments"] == 6
+        assert first_summary["knowledge_chunks"] == 18
+        assert first_summary["tour_routes"] == 3
+        assert first_summary["facilities"] == 10
+        assert first_summary["nearby_places"] == 10
+        assert first_summary["synthetic_events"] == 25
+
+        # Idempotent re-seeding should not duplicate rows
+        chunk_count_before = db.query(KnowledgeChunk).count()
+        event_count_before = db.query(AnalyticsEvent).count()
+        seed_destination_from_dir(db=db, slug="lucknow", data_dir=LUCKNOW_DATA_DIR)
+        assert db.query(KnowledgeChunk).count() == chunk_count_before
+        assert db.query(AnalyticsEvent).count() == event_count_before
+
+    health = test_client.get("/health").json()
+    assert health["destinations_seeded"] == 2
+
+    dests = test_client.get("/api/destinations").json()
+    assert {d["slug"] for d in dests} == {"agra", "lucknow"}
+
+    monuments = test_client.get("/api/destinations/lucknow/monuments").json()
+    assert len(monuments) == 6
+    assert any(m["slug"] == "bara-imambara" and m["step_free"] is True for m in monuments)
+
+    pack = test_client.get("/api/destinations/lucknow/offline-pack").json()
+    assert pack["destination"]["slug"] == "lucknow"
+    assert len(pack["monuments"]) == 6
+    assert len(pack["knowledge_chunks"]) == 18
+    assert len(pack["tour_routes"]) == 3
+    assert len(pack["facilities"]) == 10
+    assert len(pack["nearby_places"]) == 10
+
+    # UC-1 + UC-3: Chat returns both recorded history and famine folklore
+    chat_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "lucknow",
+            "question": "Why was the Bara Imambara built during a famine, and what is the built by day, undone by night story?",
+            "language": "en",
+            "persona": "scholar",
+            "simple_language": False,
+        },
+    )
+    assert chat_res.status_code == 200
+    chat_data = chat_res.json()
+    assert chat_data["is_knowledge_gap"] is False
+    assert len(chat_data["verified_history"]) >= 1
+    assert len(chat_data["folklore_legends"]) >= 1
+
+    # Hindi + kids + simple_language
+    hi_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "lucknow",
+            "question": "बड़ा इमामबाड़ा किसने और अकाल के समय क्यों बनवाया?",
+            "language": "hi",
+            "persona": "kids",
+            "simple_language": True,
+        },
+    )
+    assert hi_res.status_code == 200
+    assert hi_res.json()["is_knowledge_gap"] is False
+    assert hi_res.json()["language"] == "hi"
+    assert hi_res.json()["simple_language"] is True
+
+    # Out-of-scope query returns Lucknow-specific follow-ups (never Agra Taj Mahal)
+    gap_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "lucknow",
+            "question": "Explain quantum entanglement in superconductors",
+            "language": "en",
+            "persona": "quick",
+        },
+    )
+    assert gap_res.status_code == 200
+    gap_data = gap_res.json()
+    assert gap_data["is_knowledge_gap"] is True
+    assert all("taj mahal" not in s.lower() for s in gap_data["follow_up_suggestions"])
+    assert any(
+        "bara imambara" in s.lower() or "bhool bhulaiya" in s.lower() or "chikankari" in s.lower()
+        for s in gap_data["follow_up_suggestions"]
+    )
+
+    # UC-2: Vision with Bara Imambara GPS
+    buf = BytesIO()
+    Image.new("RGB", (320, 240), color=(215, 200, 175)).save(buf, format="PNG")
+    buf.seek(0)
+    vis = test_client.post(
+        "/api/vision-ask",
+        files={"image": ("imambara.png", buf, "image/png")},
+        data={
+            "destination_slug": "lucknow",
+            "question": "What monument is this?",
+            "language": "en",
+            "persona": "quick",
+            "lat": "26.8691",
+            "lng": "80.9124",
+        },
+    )
+    assert vis.status_code == 200
+    assert vis.json()["matched_monument_slug"] == "bara-imambara"
+
+    # UC-4 + UC-8: Tours filter
+    tours = test_client.get("/api/destinations/lucknow/tours?max_minutes=60&step_free_only=true").json()
+    assert len(tours) == 2
+    assert all(r["duration_minutes"] <= 60 and r["step_free"] is True for r in tours)
+
+    # UC-6: Facilities & Emergency SOS
+    toilets = test_client.get(
+        "/api/destinations/lucknow/facilities?facility_type=toilet&accessible_only=true&lat=26.8699&lng=80.9125"
+    ).json()
+    assert len(toilets) >= 2
+    assert toilets[0]["slug"] == "bara-imambara-accessible-toilet"
+    assert toilets[0]["distance_meters"] <= toilets[1]["distance_meters"]
+
+    sos = test_client.get("/api/destinations/lucknow/emergency?lat=26.8691&lng=80.9124").json()
+    assert sos["destination_slug"] == "lucknow"
+    assert sos["nearest_hospital"] is not None
+    assert sos["nearest_police"] is not None
+    helpline_nums = {h["number"] for h in sos["helplines"]}
+    assert {"112", "108", "1090", "1363", "+91-9454403847"}.issubset(helpline_nums)
+
+    # UC-5: Nearby ODOP
+    nearby = test_client.get("/api/destinations/lucknow/nearby?odop_only=true&group=elderly").json()
+    assert len(nearby) >= 3
+    assert all(p["is_odop"] is True and "elderly" in p["suitable_for"] for p in nearby)
+
+    # UC-9: Analytics summary isolated per destination
+    lucknow_summary = test_client.get("/api/analytics/summary?destination_slug=lucknow").json()
+    assert lucknow_summary["destination_slug"] == "lucknow"
+    assert lucknow_summary["synthetic_events"] == 25
+    assert lucknow_summary["live_events"] >= 4
+    assert any("quantum" in g["label"].lower() for g in lucknow_summary["knowledge_gaps"])
+
+    agra_summary = test_client.get("/api/analytics/summary?destination_slug=agra").json()
+    assert agra_summary["destination_slug"] == "agra"
+    assert agra_summary["live_events"] == 0
+
+
+def test_lucknow_curated_prompts_are_answered(client):
+    """All Lucknow monument spotlight, topic card, starter, and gap follow-up prompts must be answered."""
+    test_client, SessionMaker = client
+    with SessionMaker() as db:
+        seed_destination_from_dir(db=db, slug="lucknow", data_dir=LUCKNOW_DATA_DIR)
+
+    lucknow_prompts = [
+        # Spotlight prompts (EN + HI)
+        ("Who built the Bara Imambara, and why is its central hall famous?", "en"),
+        ("बड़ा इमामबाड़ा किसने बनवाया और इसका मध्य हॉल क्यों प्रसिद्ध है?", "hi"),
+        ("What is the Bhool Bhulaiya, and what do the tunnel legends say?", "en"),
+        ("भूलभुलैया क्या है और सुरंगों की लोककथा क्या कहती है?", "hi"),
+        ("When was the Rumi Darwaza built, and what does its name mean?", "en"),
+        ("रूमी दरवाज़ा कब बना और इसके नाम का अर्थ क्या है?", "hi"),
+        ("Tell me about the Asfi Mosque and how to visit it respectfully.", "en"),
+        ("आसफ़ी मस्जिद के बारे में बताइए और वहाँ सम्मानपूर्वक कैसे जाएँ?", "hi"),
+        ("How did the Shahi Baoli stepwell work and what is the legend about it?", "en"),
+        ("शाही बावली कैसे काम करती थी और इससे जुड़ी लोककथा क्या है?", "hi"),
+        ("Who built the Chota Imambara and why is it called the Palace of Lights?", "en"),
+        ("छोटा इमामबाड़ा किसने बनवाया और इसे रोशनी का महल क्यों कहा जाता है?", "hi"),
+        # Topic card prompts (EN + HI)
+        ("Why was the Bara Imambara built during a famine, and what is the built by day, undone by night story?", "en"),
+        ('अकाल के समय बड़ा इमामबाड़ा क्यों बना और "दिन में बनाओ, रात में गिराओ" की कहानी क्या है?', "hi"),
+        ("How does the central hall of the Bara Imambara stand without beams?", "en"),
+        ("बड़ा इमामबाड़ा का मध्य हॉल बिना बीम के कैसे खड़ा है?", "hi"),
+        ("What is Chikankari, Lucknow's ODOP craft?", "en"),
+        ("लखनऊ का ODOP शिल्प चिकनकारी क्या है?", "hi"),
+        ("How should I dress and behave when visiting the Bara Imambara and Asfi Mosque?", "en"),
+        ("बड़ा इमामबाड़ा और आसफ़ी मस्जिद जाते समय पहनावा और व्यवहार कैसा हो?", "hi"),
+        # Starter prompts (EN + HI)
+        ("Who built the Bara Imambara, and why during a famine?", "en"),
+        ("बड़ा इमामबाड़ा किसने और अकाल के समय क्यों बनवाया?", "hi"),
+        ("How does the great hall stand without any beams?", "en"),
+        ("विशाल हॉल बिना बीम के कैसे खड़ा है?", "hi"),
+        ("Are the secret tunnels of the Bhool Bhulaiya real?", "en"),
+        ("क्या भूलभुलैया की गुप्त सुरंगें सच हैं?", "hi"),
+        ("What does the name Rumi Darwaza mean?", "en"),
+        ("रूमी दरवाज़ा नाम का अर्थ क्या है?", "hi"),
+        # Gap follow-up suggestions (EN + HI)
+        ("Who built the Bara Imambara?", "en"),
+        ("What is the Bhool Bhulaiya?", "en"),
+        ("What is Chikankari, Lucknow's ODOP craft?", "en"),
+        ("बड़ा इमामबाड़ा किसने बनवाया?", "hi"),
+        ("भूलभुलैया क्या है?", "hi"),
+        ("लखनऊ का ODOP शिल्प चिकनकारी क्या है?", "hi"),
+    ]
+    for question, lang in lucknow_prompts:
+        res = _ask(test_client, question, lang, destination_slug="lucknow")
+        assert res["is_knowledge_gap"] is False, f"{lang}: {question}"
+
+
+def test_street_food_and_nearby_recommendations_all_cities(client):
+    """Street food queries across Agra, Sarnath, and Lucknow return verified DB places with coordinates."""
+    test_client, SessionMaker = client
+    with SessionMaker() as db:
+        seed_destination_from_dir(db=db, slug="sarnath", data_dir=SARNATH_DATA_DIR)
+        seed_destination_from_dir(db=db, slug="lucknow", data_dir=LUCKNOW_DATA_DIR)
+
+    cases = [
+        ("agra", "en", "What is the best street food in Agra and where can I eat chaat or petha?"),
+        ("agra", "hi", "आगरा में सबसे अच्छा स्ट्रीट फ़ूड, चाट और पेठा कहाँ मिलता है?"),
+        ("sarnath", "en", "What local street food, kachori, lassi, or monastery cafes are near Sarnath?"),
+        ("sarnath", "hi", "सारनाथ में स्थानीय स्ट्रीट फ़ूड, कचौड़ी-लस्सी और मठ मार्ग के व्यंजन कहाँ मिलते हैं?"),
+        ("lucknow", "en", "What is the best street food in Lucknow like chaat, kebabs, and kulfi?"),
+        ("lucknow", "hi", "लखनऊ में बास्केट चाट, कबाब और कुल्फी जैसा सबसे अच्छा स्ट्रीट फ़ूड कहाँ मिलता है?"),
+    ]
+    for slug, lang, question in cases:
+        res = _ask(test_client, question, lang, destination_slug=slug)
+        assert res["is_knowledge_gap"] is False, f"{slug} ({lang}): {question}"
+        places = res["recommended_places"]
+        assert len(places) >= 2, f"Expected recommended_places for {slug} ({lang})"
+        assert all(p["lat"] is not None and p["lng"] is not None and p["source_slug"] for p in places)
+
+
+def test_tailored_travel_plan_with_constraints(client):
+    """Itinerary requests respect wheelchair/step-free, time, budget, food, and craft constraints."""
+    test_client, SessionMaker = client
+    with SessionMaker() as db:
+        seed_destination_from_dir(db=db, slug="sarnath", data_dir=SARNATH_DATA_DIR)
+        seed_destination_from_dir(db=db, slug="lucknow", data_dir=LUCKNOW_DATA_DIR)
+
+    agra_plan = _ask(
+        test_client,
+        "Create a 3-hour wheelchair-accessible Agra travel plan for a family on a low budget including food and crafts",
+        "en",
+        destination_slug="agra",
+    )
+    assert agra_plan["is_knowledge_gap"] is False
+    stops = agra_plan["itinerary_stops"]
+    assert len(stops) >= 3
+    assert all(s["lat"] is not None and s["lng"] is not None and s["source_slug"] for s in stops)
+    # Stairs-heavy Agra spots (upper Taj marble plinth & Musamman Burj) must be skipped in step-free plans
+    stop_slugs = {s["source_slug"] for s in stops}
+    assert "taj-mahal-mausoleum" not in stop_slugs
+    assert "musamman-burj" not in stop_slugs
+    assert any(s["category"] == "food" for s in stops)
+    assert any(s["category"] == "craft" for s in stops)
+    assert sum(s["duration_min"] or 0 for s in stops) <= 180
+    assert "friday" in agra_plan["answer_summary"].lower()
+
+    sarnath_plan = _ask(
+        test_client,
+        "Create a 3-hour step-free Sarnath travel plan for a family including local food and Banarasi crafts",
+        "en",
+        destination_slug="sarnath",
+    )
+    assert sarnath_plan["is_knowledge_gap"] is False
+    assert len(sarnath_plan["itinerary_stops"]) >= 3
+    assert all(s["lat"] is not None and s["lng"] is not None for s in sarnath_plan["itinerary_stops"])
+
+    lucknow_plan = _ask(
+        test_client,
+        "लखनऊ में परिवार के लिए 3 घंटे की व्हीलचेयर-सुगम यात्रा योजना बनाएं जिसमें चिकनकारी और स्ट्रीट फ़ूड शामिल हों",
+        "hi",
+        destination_slug="lucknow",
+    )
+    assert lucknow_plan["is_knowledge_gap"] is False
+    lko_stops = lucknow_plan["itinerary_stops"]
+    assert len(lko_stops) >= 3
+    assert "bhool-bhulaiya" not in {s["source_slug"] for s in lko_stops}
+    assert all(s["lat"] is not None and s["lng"] is not None for s in lko_stops)
 
