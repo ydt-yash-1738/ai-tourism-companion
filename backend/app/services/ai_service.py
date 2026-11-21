@@ -392,7 +392,8 @@ def _build_local_fallback_chat(
     lead_chunk = chunks[0]
     lead_text = lead_chunk.content_hi if (is_hi and lead_chunk.content_hi) else lead_chunk.content
     lead_sentences = [s.strip() for s in re.split(r"(?<=[.।])\s+", lead_text) if s.strip()]
-    summary = " ".join(lead_sentences[:2]) if lead_sentences else lead_text
+    # One-sentence headline; the full sourced text follows in the evidence lists
+    summary = lead_sentences[0] if lead_sentences else lead_text
     if lead_chunk.content_type != "RECORDED_HISTORY":
         summary = (
             f"स्थानीय परंपरा के अनुसार (यह दर्ज इतिहास नहीं है): {summary}"
