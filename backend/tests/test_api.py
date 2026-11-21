@@ -15,6 +15,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.schema import CreateTable
 
 AGRA_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "destinations" / "agra"
+SARNATH_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "destinations" / "sarnath"
 
 
 @pytest.fixture()
@@ -255,4 +256,147 @@ def test_pgvector_dialect_compilation():
     stmt = select(KnowledgeChunk.embedding.cosine_distance([0.0] * 768))
     compiled = str(stmt.compile(dialect=postgresql.dialect()))
     assert "<=>" in compiled
+
+
+def test_sarnath_multi_destination_full_uc_coverage(client):
+    test_client, SessionMaker = client
+
+    with SessionMaker() as db:
+        first_summary = seed_destination_from_dir(db=db, slug="sarnath", data_dir=SARNATH_DATA_DIR)
+        assert first_summary["monuments"] == 6
+        assert first_summary["knowledge_chunks"] == 16
+        assert first_summary["tour_routes"] == 3
+        assert first_summary["facilities"] == 10
+        assert first_summary["nearby_places"] == 8
+        assert first_summary["synthetic_events"] == 25
+
+        # Idempotent re-seeding should not duplicate rows
+        chunk_count_before = db.query(KnowledgeChunk).count()
+        event_count_before = db.query(AnalyticsEvent).count()
+        seed_destination_from_dir(db=db, slug="sarnath", data_dir=SARNATH_DATA_DIR)
+        assert db.query(KnowledgeChunk).count() == chunk_count_before
+        assert db.query(AnalyticsEvent).count() == event_count_before
+
+    health = test_client.get("/health").json()
+    assert health["destinations_seeded"] == 2
+
+    dests = test_client.get("/api/destinations").json()
+    assert {d["slug"] for d in dests} == {"agra", "sarnath"}
+
+    monuments = test_client.get("/api/destinations/sarnath/monuments").json()
+    assert len(monuments) == 6
+    assert any(m["slug"] == "dhamek-stupa" and m["step_free"] is True for m in monuments)
+
+    pack = test_client.get("/api/destinations/sarnath/offline-pack").json()
+    assert pack["destination"]["slug"] == "sarnath"
+    assert len(pack["monuments"]) == 6
+    assert len(pack["knowledge_chunks"]) >= 16
+    assert len(pack["tour_routes"]) == 3
+    assert len(pack["facilities"]) == 10
+    assert len(pack["nearby_places"]) == 8
+
+    # UC-1 + UC-3: Chat returns both recorded history and Jataka deer folklore
+    chat_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "sarnath",
+            "question": "Tell me about Dhamek Stupa first sermon and the Golden Deer Jataka folklore",
+            "language": "en",
+            "persona": "scholar",
+            "simple_language": False,
+        },
+    )
+    assert chat_res.status_code == 200
+    chat_data = chat_res.json()
+    assert chat_data["is_knowledge_gap"] is False
+    assert len(chat_data["verified_history"]) >= 1
+    assert len(chat_data["folklore_legends"]) >= 1
+
+    # Hindi + kids + simple_language
+    hi_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "sarnath",
+            "question": "धमेख स्तूप और बुद्ध का प्रथम उपदेश क्या था?",
+            "language": "hi",
+            "persona": "kids",
+            "simple_language": True,
+        },
+    )
+    assert hi_res.status_code == 200
+    assert hi_res.json()["is_knowledge_gap"] is False
+    assert hi_res.json()["language"] == "hi"
+    assert hi_res.json()["simple_language"] is True
+
+    # Out-of-scope query returns Sarnath-specific follow-ups (never Agra Taj Mahal)
+    gap_res = test_client.post(
+        "/api/chat",
+        json={
+            "destination_slug": "sarnath",
+            "question": "Explain quantum entanglement in superconductors",
+            "language": "en",
+            "persona": "quick",
+        },
+    )
+    assert gap_res.status_code == 200
+    gap_data = gap_res.json()
+    assert gap_data["is_knowledge_gap"] is True
+    assert all("taj mahal" not in s.lower() for s in gap_data["follow_up_suggestions"])
+    assert any("sarnath" in s.lower() or "buddha" in s.lower() for s in gap_data["follow_up_suggestions"])
+
+    # UC-2: Vision with Dhamek Stupa GPS
+    buf = BytesIO()
+    Image.new("RGB", (320, 240), color=(210, 185, 150)).save(buf, format="PNG")
+    buf.seek(0)
+    vis = test_client.post(
+        "/api/vision-ask",
+        files={"image": ("dhamek.png", buf, "image/png")},
+        data={
+            "destination_slug": "sarnath",
+            "question": "What stupa is this?",
+            "language": "en",
+            "persona": "quick",
+            "lat": "25.3808",
+            "lng": "83.0245",
+        },
+    )
+    assert vis.status_code == 200
+    assert vis.json()["matched_monument_slug"] == "dhamek-stupa"
+
+    # UC-4 + UC-8: Tours filter
+    tours = test_client.get("/api/destinations/sarnath/tours?max_minutes=60&step_free_only=true").json()
+    assert len(tours) == 2
+    assert all(r["duration_minutes"] <= 60 and r["step_free"] is True for r in tours)
+
+    # UC-6: Facilities & Emergency SOS
+    toilets = test_client.get(
+        "/api/destinations/sarnath/facilities?facility_type=toilet&accessible_only=true&lat=25.3802&lng=83.0238"
+    ).json()
+    assert len(toilets) >= 2
+    assert toilets[0]["slug"] == "sarnath-asi-park-accessible-toilet"
+    assert toilets[0]["distance_meters"] <= toilets[1]["distance_meters"]
+
+    sos = test_client.get("/api/destinations/sarnath/emergency?lat=25.3808&lng=83.0245").json()
+    assert sos["destination_slug"] == "sarnath"
+    assert sos["nearest_hospital"] is not None
+    assert sos["nearest_police"] is not None
+    helpline_nums = {h["number"] for h in sos["helplines"]}
+    assert {"112", "108", "1090", "1363", "+91-542-2595406"}.issubset(helpline_nums)
+
+    # UC-5: Nearby ODOP
+    nearby = test_client.get("/api/destinations/sarnath/nearby?odop_only=true&group=elderly").json()
+    assert len(nearby) >= 3
+    assert all(p["is_odop"] is True and "elderly" in p["suitable_for"] for p in nearby)
+
+    # UC-9: Analytics summary isolated per destination
+    sarnath_summary = test_client.get("/api/analytics/summary?destination_slug=sarnath").json()
+    assert sarnath_summary["destination_slug"] == "sarnath"
+    assert sarnath_summary["synthetic_events"] == 25
+    assert sarnath_summary["live_events"] >= 4
+    assert any("quantum" in g["label"].lower() for g in sarnath_summary["knowledge_gaps"])
+
+    agra_summary = test_client.get("/api/analytics/summary?destination_slug=agra").json()
+    assert agra_summary["destination_slug"] == "agra"
+    assert agra_summary["live_events"] == 0
+
 

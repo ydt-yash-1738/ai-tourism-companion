@@ -9,6 +9,7 @@ import {
   Upload,
   Volume2,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { postVisionAsk } from '../services/api';
 import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
@@ -16,6 +17,7 @@ import type { PersonaType, VisionResponse } from '../types/api';
 import { ErrorStateCard, LoadingStateCard, SkeletonCards } from './ApiStateCard';
 
 interface CameraTabProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   simpleLanguage: boolean;
@@ -25,6 +27,7 @@ interface CameraTabProps {
 }
 
 export function CameraTab({
+  destinationSlug,
   language,
   persona,
   simpleLanguage,
@@ -33,6 +36,8 @@ export function CameraTab({
   userCoords,
 }: CameraTabProps) {
   const ui = getUiText(language);
+  const isHi = language.startsWith('hi');
+  const destConfig = getDestinationConfig(destinationSlug);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [question, setQuestion] = useState('');
@@ -42,7 +47,22 @@ export function CameraTab({
   const [result, setResult] = useState<VisionResponse | null>(null);
   const [audioStatus, setAudioStatus] = useState<AudioPlaybackState>('idle');
 
-  const effectiveCoords = useDemoGps ? { lat: 27.1802, lng: 78.0226 } : userCoords;
+  const effectiveCoords = useDemoGps
+    ? { lat: destConfig.demoGps.lat, lng: destConfig.demoGps.lng }
+    : userCoords;
+
+  const demoGpsOnLabel =
+    destinationSlug === 'agra'
+      ? ui.demoGpsOn
+      : isHi
+        ? `डेमो GPS: ${destConfig.demoGps.labelHi} सक्रिय`
+        : `Demo GPS: ${destConfig.demoGps.labelEn} On`;
+  const demoGpsOffLabel =
+    destinationSlug === 'agra'
+      ? ui.demoGpsOff
+      : isHi
+        ? `${destConfig.demoGps.labelHi} डेमो GPS जोड़ें`
+        : `Attach ${destConfig.demoGps.labelEn} Demo GPS`;
 
   useEffect(() => {
     return () => {
@@ -75,7 +95,7 @@ export function CameraTab({
     try {
       const res = await postVisionAsk({
         imageFile,
-        destinationSlug: 'agra',
+        destinationSlug,
         question: question.trim(),
         language,
         persona,
@@ -155,10 +175,10 @@ export function CameraTab({
               <MapPin size={15} />
               <span>
                 {useDemoGps
-                  ? ui.demoGpsOn
+                  ? demoGpsOnLabel
                   : userCoords
                     ? ui.usingLiveGps
-                    : ui.demoGpsOff}
+                    : demoGpsOffLabel}
               </span>
             </button>
 

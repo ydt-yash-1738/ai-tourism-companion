@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Accessibility,
   ArrowLeft,
@@ -15,8 +15,10 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { LANGUAGE_OPTIONS, PERSONA_OPTIONS } from '../data/upCities';
+import { translateBatchCached } from '../services/translateCache';
 import type { Monument, OfflinePack, PersonaType } from '../types/api';
 import { FallbackNoticeBanner } from './ApiStateCard';
 import { CameraTab } from './CameraTab';
@@ -29,6 +31,7 @@ import { TourTab } from './TourTab';
 export type CompanionTabId = 'guide' | 'camera' | 'tour' | 'nearby' | 'facilities';
 
 interface CompanionShellProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   a11yMode: boolean;
@@ -52,6 +55,7 @@ interface CompanionShellProps {
 }
 
 export function CompanionShell({
+  destinationSlug,
   language,
   persona,
   a11yMode,
@@ -74,8 +78,36 @@ export function CompanionShell({
   onOpenAdmin,
 }: CompanionShellProps) {
   const ui = getUiText(language);
+  const isHi = language.startsWith('hi');
+  const baseLang = language.toLowerCase().split('-')[0];
+  const destConfig = getDestinationConfig(destinationSlug);
   const [activeTab, setActiveTab] = useState<CompanionTabId>('guide');
   const [sosOpen, setSosOpen] = useState(false);
+  const [translatedTitle, setTranslatedTitle] = useState<string>('');
+
+  useEffect(() => {
+    if (destinationSlug === 'agra' || baseLang === 'en' || baseLang === 'hi') {
+      return;
+    }
+    let active = true;
+    translateBatchCached([destConfig.copy.companionTitleEn], baseLang)
+      .then((res) => {
+        if (active && res[0]) setTranslatedTitle(res[0]);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [destinationSlug, baseLang, destConfig.copy.companionTitleEn]);
+
+  const companionTitle =
+    destinationSlug === 'agra'
+      ? ui.companionTitle
+      : isHi
+        ? destConfig.copy.companionTitleHi
+        : baseLang !== 'en' && translatedTitle
+          ? translatedTitle
+          : destConfig.copy.companionTitleEn;
 
   const tabs: Array<{
     id: CompanionTabId;
@@ -107,7 +139,7 @@ export function CompanionShell({
             </button>
 
             <div style={{ minWidth: 0 }}>
-              <div className="companion-topbar__city">{ui.companionTitle}</div>
+              <div className="companion-topbar__city">{companionTitle}</div>
               <div className="companion-topbar__sub">
                 <span className="compact-mobile-hide">{ui.upTourismLabel}</span>
                 <span className={`status-pill ${isOnline ? 'is-online' : 'is-offline'}`}>
@@ -266,6 +298,7 @@ export function CompanionShell({
 
         {activeTab === 'guide' && (
           <GuideTab
+            destinationSlug={destinationSlug}
             language={language}
             persona={persona}
             simpleLanguage={a11yMode}
@@ -279,6 +312,7 @@ export function CompanionShell({
 
         {activeTab === 'camera' && (
           <CameraTab
+            destinationSlug={destinationSlug}
             language={language}
             persona={persona}
             simpleLanguage={a11yMode}
@@ -290,6 +324,7 @@ export function CompanionShell({
 
         {activeTab === 'tour' && (
           <TourTab
+            destinationSlug={destinationSlug}
             language={language}
             persona={persona}
             isOnline={isOnline}
@@ -302,6 +337,7 @@ export function CompanionShell({
 
         {activeTab === 'nearby' && (
           <NearbyTab
+            destinationSlug={destinationSlug}
             language={language}
             isOnline={isOnline}
             userCoords={userCoords}
@@ -311,6 +347,7 @@ export function CompanionShell({
 
         {activeTab === 'facilities' && (
           <FacilitiesTab
+            destinationSlug={destinationSlug}
             language={language}
             isOnline={isOnline}
             sessionHash={sessionHash}
@@ -338,6 +375,7 @@ export function CompanionShell({
       </nav>
 
       <EmergencyModal
+        destinationSlug={destinationSlug}
         open={sosOpen}
         onClose={() => setSosOpen(false)}
         language={language}

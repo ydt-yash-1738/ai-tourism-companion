@@ -1,0 +1,163 @@
+[
+  {
+    "slug": "dhamek-stupa",
+    "name": "Dhamek Stupa",
+    "name_hi": "धमेख स्तूप",
+    "short_summary": "Massive 43.6-metre cylindrical brick and carved Chunar sandstone stupa marking the sacred spot of Buddha's first sermon.",
+    "short_summary_hi": "43.6 मीटर ऊँचा विशाल बेलनाकार ईंट और चुनार बलुआ पत्थर का स्तूप, जो भगवान बुद्ध के प्रथम उपदेश स्थल का प्रतीक है।",
+    "lat": 25.3808,
+    "lng": 83.0245,
+    "geofence_radius_m": 35,
+    "visit_duration_min": 20,
+    "visual_cues": [
+      "massive cylindrical brick and stone stupa",
+      "eight projecting arched niches around drum",
+      "gupta era floral lotus and geometric swastika stone bands",
+      "circular circumambulation stone pathway",
+      "manicured green archaeological park lawns"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Shaded stone benches along the southern archaeological park walkway",
+      "Tree-lined lawn seating overlooking the Dhamek Stupa plinth"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Step-free paved garden pathway encircles the entire base of Dhamek Stupa with gentle slopes and shaded rest benches.",
+    "accessibility_notes_hi": "धमेख स्तूप के चारों ओर समतल पक्का परिक्रमा मार्ग और छायादार विश्राम बेंच उपलब्ध हैं।"
+  },
+  {
+    "slug": "ashoka-pillar-sarnath",
+    "name": "Ashoka Pillar & Main Shrine Ruins",
+    "name_hi": "अशोक स्तंभ एवं मूलगंधकुटी अवशेष",
+    "short_summary": "In-situ polished Chunar sandstone stump of Emperor Ashoka's c. 250 BCE pillar bearing the Brahmi Schism Edict beside the ancient brick Main Shrine.",
+    "short_summary_hi": "सम्राट अशोक द्वारा लगभग 250 ई.पू. में स्थापित पॉलिश किए हुए चुनार बलुआ पत्थर के स्तंभ का मूल आधार एवं प्राचीन मुख्य विहार के अवशेष।",
+    "lat": 25.3815,
+    "lng": 83.0228,
+    "geofence_radius_m": 25,
+    "visit_duration_min": 15,
+    "visual_cues": [
+      "broken polished sandstone pillar base inside protective railing",
+      "excavated red brick monastery and main shrine walls",
+      "brahmi inscription on smooth stone shaft",
+      "protective glass and iron canopy beside ancient ruins"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Shaded canopy benches west of the Main Shrine ruins",
+      "Lawn-side seating along the central brick pathway"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Viewed directly from level ASI brick-paved paths with zero stairs; protective rails keep the monument clear for wheelchair viewing.",
+    "accessibility_notes_hi": "मुख्य मार्ग समतल ईंट-पत्थर का होने से अशोक स्तंभ आधार और प्राचीन विहार के अवशेष व्हीलचेयर से सुगमतापूर्वक देखे जा सकते हैं।"
+  },
+  {
+    "slug": "dharmarajika-stupa",
+    "name": "Dharmarajika Stupa Ruins",
+    "name_hi": "धर्मराजिका स्तूप अवशेष",
+    "short_summary": "Circular brick foundation of Emperor Ashoka's reliquary stupa, expanded over centuries before its 1794 dismantling triggered Sarnath's rediscovery.",
+    "short_summary_hi": "सम्राट अशोक द्वारा निर्मित मूल अस्थि-स्तूप की गोलाकार नींव, जिसके 1794 के उत्खनन से सारनाथ की पुरातात्विक खोज प्रारंभ हुई।",
+    "lat": 25.3810,
+    "lng": 83.0233,
+    "geofence_radius_m": 25,
+    "visit_duration_min": 12,
+    "visual_cues": [
+      "circular low brick concentric ring foundation",
+      "excavated votive stupas surrounding brick plinth",
+      "open air archaeological masonry ruins between main shrine and dhamek"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Garden benches between Dharmarajika Stupa and Dhamek Stupa"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Fully viewable from the flat perimeter pathway connecting Ashoka Pillar to Dhamek Stupa.",
+    "accessibility_notes_hi": "अशोक स्तंभ से धमेख स्तूप को जोड़ने वाले समतल मार्ग से पूरा स्तूप आधार सुगम है।"
+  },
+  {
+    "slug": "sarnath-archaeological-museum",
+    "name": "Sarnath Archaeological Museum (Lion Capital)",
+    "name_hi": "सारनाथ पुरातत्व संग्रहालय (अशोक की लाट)",
+    "short_summary": "Oldest ASI site museum (1910) housing the original four-lion Capital of Ashoka—India's National Emblem—and the Gupta Preaching Buddha.",
+    "short_summary_hi": "1910 में निर्मित भारत का प्राचीनतम एएसआई स्थल संग्रहालय, जहाँ भारत के राष्ट्रीय प्रतीक मूल चार-सिंह अशोक स्तंभ शीर्ष और उपदेश मुद्रा की बुद्ध प्रतिमा सुरक्षित हैं।",
+    "lat": 25.3796,
+    "lng": 83.0231,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 30,
+    "visual_cues": [
+      "sandstone sangharama museum courtyard building",
+      "four back to back asiatic lions on abacus with chakra",
+      "seated gupta period preaching buddha statue with ornate halo",
+      "five gallery halls with carved buddhist sculptures"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Shaded central portico inside the museum courtyard",
+      "Gallery benches inside the Shakyasimha (Main) Hall"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Wheelchair ramp at the main entrance and single-level step-free galleries; closed every Friday and photography inside galleries is restricted.",
+    "accessibility_notes_hi": "मुख्य द्वार पर व्हीलचेयर रैंप और भूतल पर समतल दीर्घाएँ उपलब्ध हैं; संग्रहालय प्रत्येक शुक्रवार बंद रहता है।"
+  },
+  {
+    "slug": "mulagandhakuti-vihara",
+    "name": "Mulagandhakuti Vihara & Sacred Bodhi Tree",
+    "name_hi": "मूलगंधकुटी विहार एवं पवित्र बोधि वृक्ष",
+    "short_summary": "1931 Mahabodhi Society temple adorned with Japanese artist Kosetsu Nosu's frescoes, revered relics, and a Bodhi tree descending from Bodh Gaya.",
+    "short_summary_hi": "1931 में महाबोधि सोसाइटी द्वारा निर्मित भव्य बौद्ध विहार, जिसमें जापानी चित्रकार कोसेत्सु नोसु के भित्तिचित्र और बोधगया वंश का पवित्र बोधि वृक्ष स्थित है।",
+    "lat": 25.3807,
+    "lng": 83.0264,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 20,
+    "visual_cues": [
+      "high pyramidal bodh gaya style temple shikhara",
+      "golden buddha statue inside frescoed prayer hall",
+      "sacred bodhi tree surrounded by circular prayer railing",
+      "bronze preaching dharma wheel sculptures in garden"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": true,
+    "step_free": false,
+    "rest_points": [
+      "Shaded stone platform beneath the Sacred Bodhi Tree",
+      "Peaceful meditation benches around the Panchavargiya Buddha garden"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "The garden, Dharma Chakra statues, and Sacred Bodhi Tree courtyard are flat and ramp-accessible; entering the inner prayer hall requires climbing stone stairs and removing shoes.",
+    "accessibility_notes_hi": "मंदिर उद्यान और पवित्र बोधि वृक्ष परिसर समतल है, किंतु मुख्य गर्भगृह में प्रवेश के लिए सीढ़ियाँ हैं और जूते बाहर उतारने होते हैं।"
+  },
+  {
+    "slug": "chaukhandi-stupa",
+    "name": "Chaukhandi Stupa",
+    "name_hi": "चौखंडी स्तूप",
+    "short_summary": "Gupta-period terraced brick stupa marking where Buddha reunited with his five ascetic companions, crowned by an octagonal 1588 CE Mughal tower.",
+    "short_summary_hi": "गुप्तकालीन ईंटों का सीढ़ीदार स्तूप जहाँ भगवान बुद्ध अपने पाँच पूर्व तपस्वी साथियों से मिले थे, जिसके शीर्ष पर 1588 ई. में निर्मित अष्टकोणीय मुगल मीनार है।",
+    "lat": 25.3741,
+    "lng": 83.0237,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 15,
+    "visual_cues": [
+      "terraced rectangular brick mound covered in green grass",
+      "octagonal mughal brick tower with arched niches on summit",
+      "wide circular park pathway around elevated stupa"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": false,
+    "step_free": false,
+    "rest_points": [
+      "Shaded lawn benches near the ASI entry gate",
+      "Stone seating along the outer garden circuit"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "The surrounding ASI park lawn is flat for viewing the mound and Mughal tower from below; ascending the terraced brick structure involves steep steps and conservation restrictions.",
+    "accessibility_notes_hi": "चौखंडी स्तूप के चारों ओर का उद्यान मार्ग समतल है, लेकिन टीले के ऊपरी हिस्से तक सीढ़ियाँ हैं और संरक्षण कारणों से ऊपर चढ़ना सीमित है।"
+  }
+]
+

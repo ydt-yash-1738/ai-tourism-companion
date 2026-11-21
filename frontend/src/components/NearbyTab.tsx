@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Award, Clock, IndianRupee, Loader2, MapPin, Navigation, Square, Volume2 } from 'lucide-react';
-import { getNearbyMedia } from '../data/agraMedia';
+import { getNearbyMedia } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getNearbyPlaces } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -16,6 +16,7 @@ import {
 } from './ApiStateCard';
 
 interface NearbyTabProps {
+  destinationSlug: string;
   language: string;
   isOnline: boolean;
   userCoords: { lat: number; lng: number } | null;
@@ -31,7 +32,13 @@ const INTEREST_KEYS: Array<'heritage' | 'crafts' | 'food' | 'shopping'> = [
 
 const GROUP_KEYS = ['', 'family', 'kids', 'elderly', 'solo'];
 
-export function NearbyTab({ language, isOnline, userCoords, offlinePack }: NearbyTabProps) {
+export function NearbyTab({
+  destinationSlug,
+  language,
+  isOnline,
+  userCoords,
+  offlinePack,
+}: NearbyTabProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
@@ -91,14 +98,14 @@ export function NearbyTab({ language, isOnline, userCoords, offlinePack }: Nearb
   }, [offlinePack, odopOnly, group, budget, selectedInterests, userCoords]);
 
   const reqKey = isOnline
-    ? `${interestsParam ?? ''}|${budget}|${group}|${odopOnly}|${userCoords?.lat ?? 'x'}|${userCoords?.lng ?? 'x'}|${retryCount}`
+    ? `${destinationSlug}|${interestsParam ?? ''}|${budget}|${group}|${odopOnly}|${userCoords?.lat ?? 'x'}|${userCoords?.lng ?? 'x'}|${retryCount}`
     : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getNearbyPlaces('agra', {
+    getNearbyPlaces(destinationSlug, {
       interests: interestsParam,
       budget: budget || undefined,
       group: group || undefined,
@@ -120,7 +127,7 @@ export function NearbyTab({ language, isOnline, userCoords, offlinePack }: Nearb
     return () => {
       active = false;
     };
-  }, [reqKey, interestsParam, budget, group, odopOnly, userCoords, ui.serverErrorDesc]);
+  }, [reqKey, destinationSlug, interestsParam, budget, group, odopOnly, userCoords, ui.serverErrorDesc]);
 
   const places = isOnline && !apiError ? livePlaces : offlinePlaces;
 
@@ -312,7 +319,7 @@ export function NearbyTab({ language, isOnline, userCoords, offlinePack }: Nearb
                 const title = tr(place.name, place.name_hi);
                 const desc = tr(place.description, place.description_hi);
                 const reach = tr(place.how_to_reach);
-                const media = getNearbyMedia(place.slug);
+                const media = getNearbyMedia(place.slug, destinationSlug);
                 const isLoaded = Boolean(loadedImages[place.slug]);
                 const cardAudioStatus = audioState?.slug === place.slug ? audioState.status : 'idle';
 

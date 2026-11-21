@@ -30,7 +30,7 @@ interface CitySelectorViewProps {
   onLocationDetected: (coords: GeoCoords) => void;
   onChangeLanguage: (lang: string) => void;
   onToggleA11y: () => void;
-  onSelectAgra: (coords?: GeoCoords | null) => void;
+  onSelectDestination: (slug: string, coords?: GeoCoords | null) => void;
   onOpenAdmin: () => void;
 }
 
@@ -41,7 +41,7 @@ export function CitySelectorView({
   onLocationDetected,
   onChangeLanguage,
   onToggleA11y,
-  onSelectAgra,
+  onSelectDestination,
   onOpenAdmin,
 }: CitySelectorViewProps) {
   const ui = getUiText(language);
@@ -121,19 +121,33 @@ export function CitySelectorView({
     };
   }, [userCoords, onLocationDetected]);
 
+  const findNearestLiveCity = (coords: GeoCoords) => {
+    const liveCities = UP_HERITAGE_CITIES.filter((c) => c.clickable);
+    let bestCity = liveCities[0];
+    let bestDist = Infinity;
+    for (const city of liveCities) {
+      const d = haversineMeters(coords.lat, coords.lng, city.lat, city.lng);
+      if (d < bestDist) {
+        bestDist = d;
+        bestCity = city;
+      }
+    }
+    return { city: bestCity, distMeters: bestDist };
+  };
+
   const activeLocationNotice = useMemo(() => {
     if (!userCoords) return null;
-    const agra = UP_HERITAGE_CITIES.find((c) => c.slug === 'agra')!;
-    const distMeters = haversineMeters(userCoords.lat, userCoords.lng, agra.lat, agra.lng);
+    const { city, distMeters } = findNearestLiveCity(userCoords);
     const km = Math.round(distMeters / 1000);
+    const cityLabel = isHi ? city.nameHi : city.name;
     if (distMeters <= 40_000) {
       return isHi
-        ? 'स्थान सक्रिय — आप आगरा विरासत क्षेत्र में हैं! ऊपर "आगरा विरासत साथी खोलें" दबाएँ।'
-        : 'Location active — you are inside the Agra Heritage Zone! Tap Agra below to begin.';
+        ? `स्थान सक्रिय — आप ${cityLabel} विरासत क्षेत्र में हैं! नीचे ${cityLabel} पर टैप करें।`
+        : `Location active — you are inside the ${cityLabel} Heritage Zone! Tap ${cityLabel} below to begin.`;
     }
     return isHi
-      ? `स्थान सक्रिय (${userCoords.lat.toFixed(2)}°N, ${userCoords.lng.toFixed(2)}°E · आगरा से ~${km} किमी दूर) — नीचे आगरा चुनें।`
-      : `Location active (${userCoords.lat.toFixed(2)}°N, ${userCoords.lng.toFixed(2)}°E · ~${km} km from Agra) — Agra is live below.`;
+      ? `स्थान सक्रिय (${userCoords.lat.toFixed(2)}°N, ${userCoords.lng.toFixed(2)}°E · ${cityLabel} से ~${km} किमी दूर) — नीचे आगरा या सारनाथ चुनें।`
+      : `Location active (${userCoords.lat.toFixed(2)}°N, ${userCoords.lng.toFixed(2)}°E · ~${km} km from ${cityLabel}) — Agra & Sarnath are live below.`;
   }, [userCoords, isHi]);
 
   const handleDetectLocation = async () => {
@@ -146,10 +160,9 @@ export function CitySelectorView({
     if (res.coords) {
       setLocationGranted(true);
       onLocationDetected(res.coords);
-      const agra = UP_HERITAGE_CITIES.find((c) => c.slug === 'agra')!;
-      const distMeters = haversineMeters(res.coords.lat, res.coords.lng, agra.lat, agra.lng);
+      const { city, distMeters } = findNearestLiveCity(res.coords);
       if (distMeters <= 40_000) {
-        onSelectAgra(res.coords);
+        onSelectDestination(city.slug, res.coords);
       }
       return;
     }
@@ -157,23 +170,23 @@ export function CitySelectorView({
     if (res.status === 'denied') {
       setCustomNotice(
         isHi
-          ? 'ब्राउज़र या डिवाइस सेटिंग में लोकेशन अनुमति बंद है। अनुमति दें या नीचे आगरा चुनें।'
-          : 'Location permission is blocked in browser/device settings. Enable Location or tap Agra below.',
+          ? 'ब्राउज़र या डिवाइस सेटिंग में लोकेशन अनुमति बंद है। अनुमति दें या नीचे आगरा/सारनाथ चुनें।'
+          : 'Location permission is blocked in browser/device settings. Enable Location or tap Agra or Sarnath below.',
       );
     } else if (res.status === 'unavailable') {
       setCustomNotice(
         isHi
-          ? 'लोकेशन अनुमति मिल गई है, पर डिवाइस की Location Service अभी सटीक स्थिति नहीं दे पाई। Windows/फोन Location सेटिंग जाँचें या नीचे आगरा चुनें।'
-          : 'Location permission is allowed, but your device/Windows Location Service could not get a fix. Check OS Location settings or tap Agra below.',
+          ? 'लोकेशन अनुमति मिल गई है, पर डिवाइस की Location Service अभी सटीक स्थिति नहीं दे पाई। नीचे आगरा या सारनाथ चुनें।'
+          : 'Location permission is allowed, but your device/Windows Location Service could not get a fix. Check OS Location settings or tap Agra or Sarnath below.',
       );
     } else if (res.status === 'timeout') {
       setCustomNotice(
         isHi
-          ? 'लोकेशन प्राप्त करने में समय अधिक लगा। पुनः प्रयास करें या नीचे आगरा चुनें।'
-          : 'Location lookup timed out indoors. Tap Detect My Location to retry or choose Agra below.',
+          ? 'लोकेशन प्राप्त करने में समय अधिक लगा। पुनः प्रयास करें या नीचे आगरा/सारनाथ चुनें।'
+          : 'Location lookup timed out indoors. Tap Detect My Location to retry or choose Agra or Sarnath below.',
       );
     } else {
-      setCustomNotice('GPS is not supported in this browser. Select Agra below to explore.');
+      setCustomNotice('GPS is not supported in this browser. Select Agra or Sarnath below to explore.');
     }
   };
 
@@ -279,10 +292,20 @@ export function CitySelectorView({
                 <button
                   type="button"
                   className="pill-btn is-saffron"
-                  onClick={() => onSelectAgra(userCoords)}
+                  onClick={() => onSelectDestination('agra', userCoords)}
                 >
                   <Compass size={17} />
                   <span>{ui.launchAgra}</span>
+                  <ArrowRight size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className="pill-btn is-active"
+                  onClick={() => onSelectDestination('sarnath', userCoords)}
+                >
+                  <Compass size={17} />
+                  <span>{ui.launchSarnath}</span>
                   <ArrowRight size={16} />
                 </button>
 
@@ -433,7 +456,7 @@ export function CitySelectorView({
                 key={city.slug}
                 type="button"
                 className="city-card is-active"
-                onClick={() => onSelectAgra(userCoords)}
+                onClick={() => onSelectDestination(city.slug, userCoords)}
               >
                 {cardInner}
               </button>

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Hospital, PhoneCall, ShieldAlert, X } from 'lucide-react';
+import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getEmergency } from '../services/api';
-import { DEFAULT_AGRA_HELPLINES, haversineMeters } from '../services/offlineStore';
+import { haversineMeters } from '../services/offlineStore';
 import type { EmergencyResponse, Facility, HelplineItem, OfflinePack } from '../types/api';
 import { FallbackNoticeBanner } from './ApiStateCard';
 
 interface EmergencyModalProps {
+  destinationSlug: string;
   open: boolean;
   onClose: () => void;
   language: string;
@@ -15,6 +17,7 @@ interface EmergencyModalProps {
 }
 
 export function EmergencyModal({
+  destinationSlug,
   open,
   onClose,
   language,
@@ -23,14 +26,15 @@ export function EmergencyModal({
 }: EmergencyModalProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
+  const destConfig = getDestinationConfig(destinationSlug);
   const [liveData, setLiveData] = useState<EmergencyResponse | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const offlineFallback = useMemo<EmergencyResponse>(() => {
-    const refLat = userCoords?.lat ?? 27.1751;
-    const refLng = userCoords?.lng ?? 78.0421;
+    const refLat = userCoords?.lat ?? destConfig.center[0];
+    const refLng = userCoords?.lng ?? destConfig.center[1];
     const facilities = offlinePack?.facilities || [];
     const nearestByType = (ftype: string): Facility | null => {
       const list = facilities
@@ -43,25 +47,25 @@ export function EmergencyModal({
       return list[0] || null;
     };
     return {
-      destination_slug: 'agra',
+      destination_slug: destinationSlug,
       nearest_hospital: nearestByType('medical'),
       nearest_police: nearestByType('police'),
       helplines: offlinePack?.destination.emergency_helplines.length
         ? offlinePack.destination.emergency_helplines
-        : DEFAULT_AGRA_HELPLINES,
+        : destConfig.defaultHelplines,
     };
-  }, [userCoords, offlinePack]);
+  }, [destinationSlug, destConfig, userCoords, offlinePack]);
 
   const reqKey =
     open && typeof navigator !== 'undefined' && navigator.onLine
-      ? `${userCoords?.lat ?? 'x'}|${userCoords?.lng ?? 'x'}|${retryCount}`
+      ? `${destinationSlug}|${userCoords?.lat ?? 'x'}|${userCoords?.lng ?? 'x'}|${retryCount}`
       : null;
   const loading = Boolean(reqKey && settledKey !== reqKey);
 
   useEffect(() => {
     if (!reqKey) return;
     let active = true;
-    getEmergency('agra', userCoords?.lat, userCoords?.lng)
+    getEmergency(destinationSlug, userCoords?.lat, userCoords?.lng)
       .then((res) => {
         if (!active) return;
         setLiveData(res);
@@ -76,7 +80,7 @@ export function EmergencyModal({
     return () => {
       active = false;
     };
-  }, [reqKey, userCoords]);
+  }, [reqKey, destinationSlug, userCoords]);
 
   useEffect(() => {
     if (!open) return;
@@ -89,9 +93,9 @@ export function EmergencyModal({
 
   if (!open) return null;
 
-  const data = liveData ?? offlineFallback;
+  const data = liveData && liveData.destination_slug === destinationSlug ? liveData : offlineFallback;
   const helplines: HelplineItem[] =
-    data.helplines && data.helplines.length > 0 ? data.helplines : DEFAULT_AGRA_HELPLINES;
+    data.helplines && data.helplines.length > 0 ? data.helplines : destConfig.defaultHelplines;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

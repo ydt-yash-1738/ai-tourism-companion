@@ -16,11 +16,9 @@ import {
   Volume2,
 } from 'lucide-react';
 import {
-  AGRA_VISITOR_SNAPSHOT,
-  GUIDE_MONUMENT_SPOTLIGHTS,
-  GUIDE_TOPIC_CARDS,
+  getDestinationConfig,
   getMonumentMedia,
-} from '../data/agraMedia';
+} from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
@@ -31,6 +29,7 @@ import type { ChatResponse, Monument, OfflinePack, PersonaType } from '../types/
 import { ErrorStateCard, FallbackNoticeBanner } from './ApiStateCard';
 
 interface GuideTabProps {
+  destinationSlug: string;
   language: string;
   persona: PersonaType;
   simpleLanguage: boolean;
@@ -52,6 +51,7 @@ interface ChatTurn {
 }
 
 export function GuideTab({
+  destinationSlug,
   language,
   persona,
   simpleLanguage,
@@ -65,6 +65,7 @@ export function GuideTab({
   const isHi = language.startsWith('hi');
   const baseLang = language.toLowerCase().split('-')[0];
   const needsDynamicTranslate = baseLang !== 'en' && baseLang !== 'hi';
+  const destConfig = getDestinationConfig(destinationSlug);
 
   const [selectedMonument, setSelectedMonument] = useState<string>('');
   const [input, setInput] = useState('');
@@ -84,7 +85,14 @@ export function GuideTab({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
   const browserSpeechRef = useRef<{ stop: () => void } | null>(null);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
   const msgSeqRef = useRef(0);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [messages.length, loading]);
 
   useEffect(() => {
     return () => {
@@ -99,7 +107,7 @@ export function GuideTab({
 
   const spotlightMonuments = useMemo(() => {
     const liveBySlug = new Map(monuments.map((m) => [m.slug, m]));
-    const merged = GUIDE_MONUMENT_SPOTLIGHTS.map((spot) => {
+    const merged = destConfig.monumentSpotlights.map((spot) => {
       const live = liveBySlug.get(spot.slug);
       return {
         slug: spot.slug,
@@ -131,12 +139,12 @@ export function GuideTab({
     });
 
     return merged;
-  }, [monuments]);
+  }, [monuments, destConfig.monumentSpotlights]);
 
   const translationReqKey = useMemo(() => {
     if (!needsDynamicTranslate) return null;
-    return `${baseLang}|${spotlightMonuments.map((m) => m.slug).join(',')}`;
-  }, [needsDynamicTranslate, baseLang, spotlightMonuments]);
+    return `${destinationSlug}|${baseLang}|${spotlightMonuments.map((m) => m.slug).join(',')}`;
+  }, [needsDynamicTranslate, destinationSlug, baseLang, spotlightMonuments]);
 
   const translating = Boolean(
     translationReqKey && translationSettledKey !== translationReqKey,
@@ -149,14 +157,24 @@ export function GuideTab({
     spotlightMonuments.forEach((m) => {
       raw.push(m.name, m.shortSummary, m.promptEn);
     });
-    GUIDE_TOPIC_CARDS.forEach((t) => {
+    destConfig.topicCards.forEach((t) => {
       raw.push(t.badgeEn, t.titleEn, t.descEn, t.questionEn);
     });
-    AGRA_VISITOR_SNAPSHOT.forEach((s) => {
+    destConfig.visitorSnapshot.forEach((s) => {
       raw.push(s.titleEn, s.bodyEn);
     });
+    if (destinationSlug !== 'agra') {
+      raw.push(
+        destConfig.copy.guideWelcomeBadgeEn,
+        destConfig.copy.guideHeadingEn,
+        destConfig.copy.allMonumentsEn,
+        destConfig.copy.exploreMonumentsHeadingEn,
+        destConfig.copy.chatPlaceholderEn,
+        ...destConfig.copy.startersEn,
+      );
+    }
 
-    const unique = Array.from(new Set(raw.filter(Boolean))).slice(0, 50);
+    const unique = Array.from(new Set(raw.filter(Boolean)));
     translateBatchCached(unique, baseLang)
       .then((res) => {
         if (!active) return;
@@ -174,7 +192,7 @@ export function GuideTab({
     return () => {
       active = false;
     };
-  }, [translationReqKey, baseLang, spotlightMonuments]);
+  }, [translationReqKey, baseLang, destinationSlug, spotlightMonuments, destConfig]);
 
   const tr = (enText: string, hiText = ''): string => {
     if (isHi && hiText) return hiText;
@@ -217,7 +235,7 @@ export function GuideTab({
       if (isOnline) {
         try {
           res = await postChat({
-            destination_slug: 'agra',
+            destination_slug: destinationSlug,
             question,
             language,
             persona,
@@ -404,13 +422,40 @@ export function GuideTab({
     setMessages([]);
   };
 
+  const welcomeBadge =
+    destinationSlug === 'agra'
+      ? ui.guideWelcomeBadge
+      : tr(destConfig.copy.guideWelcomeBadgeEn, destConfig.copy.guideWelcomeBadgeHi);
+  const guideHeading =
+    destinationSlug === 'agra'
+      ? ui.guideHeading
+      : tr(destConfig.copy.guideHeadingEn, destConfig.copy.guideHeadingHi);
+  const allMonumentsLabel =
+    destinationSlug === 'agra'
+      ? ui.allMonuments
+      : tr(destConfig.copy.allMonumentsEn, destConfig.copy.allMonumentsHi);
+  const exploreHeading =
+    destinationSlug === 'agra'
+      ? ui.exploreMonumentsHeading
+      : tr(destConfig.copy.exploreMonumentsHeadingEn, destConfig.copy.exploreMonumentsHeadingHi);
+  const chatPlaceholder =
+    destinationSlug === 'agra'
+      ? ui.chatPlaceholder
+      : tr(destConfig.copy.chatPlaceholderEn, destConfig.copy.chatPlaceholderHi);
+  const starterQuestions =
+    destinationSlug === 'agra'
+      ? ui.starters
+      : destConfig.copy.startersEn.map((qEn, idx) =>
+          tr(qEn, destConfig.copy.startersHi[idx] || ''),
+        );
+
   return (
     <div className="tab-panel guide-layout">
       <div className="section-card guide-hero-card">
         <div className="guide-eyebrow-row">
           <span className="guide-eyebrow-row__badge">
             <Sparkles size={13} />
-            <span>{ui.guideWelcomeBadge}</span>
+            <span>{welcomeBadge}</span>
           </span>
           <span className="guide-eyebrow-row__persona">{ui.personas[persona]}</span>
           {translating && (
@@ -432,7 +477,7 @@ export function GuideTab({
         >
           <div>
             <h2 style={{ fontSize: 'calc(1.35rem * var(--text-scale))', color: 'var(--navy-deep)' }}>
-              {ui.guideHeading}
+              {guideHeading}
             </h2>
             <p style={{ margin: '2px 0 0', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
               {ui.guideSub}
@@ -452,7 +497,7 @@ export function GuideTab({
               onChange={(e) => setSelectedMonument(e.target.value)}
               aria-label="Filter by specific monument"
             >
-              <option value="">{ui.allMonuments}</option>
+              <option value="">{allMonumentsLabel}</option>
               {monuments.map((m) => (
                 <option key={m.slug} value={m.slug}>
                   {isHi && m.name_hi ? m.name_hi : m.name}
@@ -474,7 +519,7 @@ export function GuideTab({
         </div>
 
         <div className="starter-chips">
-          {ui.starters.map((q) => (
+          {starterQuestions.map((q) => (
             <button
               key={q}
               type="button"
@@ -493,14 +538,14 @@ export function GuideTab({
           <section>
             <div className="guide-section-head">
               <div>
-                <h3>{ui.exploreMonumentsHeading}</h3>
+                <h3>{exploreHeading}</h3>
                 <p>{ui.exploreMonumentsSub}</p>
               </div>
             </div>
 
             <div className="guide-monument-grid">
               {spotlightMonuments.map((item) => {
-                const media = getMonumentMedia(item.slug);
+                const media = getMonumentMedia(item.slug, destinationSlug);
                 const isLoaded = Boolean(loadedImages[item.slug]);
                 const localizedName = tr(item.name, item.nameHi);
                 const localizedSummary = tr(item.shortSummary, item.shortSummaryHi);
@@ -568,9 +613,9 @@ export function GuideTab({
             </div>
 
             <div className="guide-topic-grid">
-              {GUIDE_TOPIC_CARDS.map((topic) => {
+              {destConfig.topicCards.map((topic) => {
                 const topicQuestion = tr(topic.questionEn, topic.questionHi);
-                const focusSlug = topic.id === 'musamman-burj-story' ? 'musamman-burj' : '';
+                const focusSlug = topic.focusMonumentSlug || '';
                 return (
                   <button
                     key={topic.id}
@@ -597,8 +642,8 @@ export function GuideTab({
             </div>
           </section>
 
-          <section className="guide-snapshot-grid" aria-label="Agra visitor quick facts">
-            {AGRA_VISITOR_SNAPSHOT.map((tile, idx) => {
+          <section className="guide-snapshot-grid" aria-label={`${destConfig.nameEn} visitor quick facts`}>
+            {destConfig.visitorSnapshot.map((tile, idx) => {
               const Icon = idx === 0 ? Clock : idx === 1 ? Compass : ShieldCheck;
               return (
                 <div key={tile.id} className="guide-snapshot-tile">
@@ -784,73 +829,70 @@ export function GuideTab({
               </div>
             </div>
           )}
+          <div ref={chatEndRef} />
         </div>
       )}
 
-      {voiceStatus && (
-        <div
-          role="status"
-          style={{
-            padding: '7px 12px',
-            borderRadius: 12,
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: recording || transcribing ? 'var(--navy-tint)' : 'var(--terracotta-tint)',
-            color: recording || transcribing ? 'var(--navy)' : 'var(--terracotta)',
-          }}
-        >
-          {transcribing && <Loader2 size={15} className="spin-icon" />}
-          <span>{voiceStatus}</span>
-        </div>
-      )}
-
-      <form
-        className="chat-composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          sendQuestion(input);
-        }}
-      >
-        <button
-          type="button"
-          className={`pill-btn ${recording ? 'mic-recording' : ''}`}
-          disabled={transcribing}
-          onClick={handleToggleMic}
-          aria-label={recording ? 'Stop voice recording' : 'Speak your question'}
-          title={recording ? 'Stop recording' : 'Speak (Sarvam AI / Device Mic)'}
-        >
-          {transcribing ? (
-            <Loader2 size={17} className="spin-icon" />
-          ) : recording ? (
-            <Square size={17} />
-          ) : (
-            <Mic size={17} />
+      <div className="chat-composer-dock">
+        <div className="chat-composer-dock__inner">
+          {voiceStatus && (
+            <div
+              role="status"
+              className={`chat-composer-dock__status ${
+                recording || transcribing ? 'is-active' : 'is-error'
+              }`}
+            >
+              {transcribing && <Loader2 size={15} className="spin-icon" />}
+              <span>{voiceStatus}</span>
+            </div>
           )}
-        </button>
 
-        <input
-          type="text"
-          className="chat-composer__input"
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            if (voiceStatus && !recording && !transcribing) setVoiceStatus('');
-          }}
-          placeholder={ui.chatPlaceholder}
-        />
+          <form
+            className="chat-composer"
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendQuestion(input);
+            }}
+          >
+            <button
+              type="button"
+              className={`pill-btn ${recording ? 'mic-recording' : ''}`}
+              disabled={transcribing}
+              onClick={handleToggleMic}
+              aria-label={recording ? 'Stop voice recording' : 'Speak your question'}
+              title={recording ? 'Stop recording' : 'Speak (Sarvam AI / Device Mic)'}
+            >
+              {transcribing ? (
+                <Loader2 size={17} className="spin-icon" />
+              ) : recording ? (
+                <Square size={17} />
+              ) : (
+                <Mic size={17} />
+              )}
+            </button>
 
-        <button
-          type="submit"
-          className="pill-btn is-saffron"
-          disabled={!input.trim() || loading}
-          aria-label="Send question"
-        >
-          {loading ? <Loader2 size={17} className="spin-icon" /> : <Send size={17} />}
-        </button>
-      </form>
+            <input
+              type="text"
+              className="chat-composer__input"
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (voiceStatus && !recording && !transcribing) setVoiceStatus('');
+              }}
+              placeholder={chatPlaceholder}
+            />
+
+            <button
+              type="submit"
+              className="pill-btn is-saffron"
+              disabled={!input.trim() || loading}
+              aria-label="Send question"
+            >
+              {loading ? <Loader2 size={17} className="spin-icon" /> : <Send size={17} />}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { postTranslate } from './api';
 
 const clientCache = new Map<string, string>();
+const MAX_TRANSLATE_BATCH = 35;
 
 export async function translateBatchCached(
   texts: string[],
@@ -31,18 +32,21 @@ export async function translateBatchCached(
     return out;
   }
 
-  try {
-    const res = await postTranslate(missingTexts, lang);
-    res.translations.forEach((translated, pos) => {
-      const origIdx = missingIdx[pos];
-      const finalText = translated?.trim() || missingTexts[pos];
-      clientCache.set(`${lang}::${missingTexts[pos]}`, finalText);
-      out[origIdx] = finalText;
-    });
-  } catch {
-    // Keep original strings gracefully on network error
+  for (let start = 0; start < missingTexts.length; start += MAX_TRANSLATE_BATCH) {
+    const chunkTexts = missingTexts.slice(start, start + MAX_TRANSLATE_BATCH);
+    const chunkIndices = missingIdx.slice(start, start + MAX_TRANSLATE_BATCH);
+    try {
+      const res = await postTranslate(chunkTexts, lang);
+      res.translations.forEach((translated, pos) => {
+        const origIdx = chunkIndices[pos];
+        const finalText = translated?.trim() || chunkTexts[pos];
+        clientCache.set(`${lang}::${chunkTexts[pos]}`, finalText);
+        out[origIdx] = finalText;
+      });
+    } catch {
+      // Keep original strings gracefully on network error
+    }
   }
 
   return out;
 }
-
