@@ -24,7 +24,7 @@ from app.services.geo import haversine_meters
 logger = logging.getLogger(__name__)
 
 EMBEDDING_DIM = 768
-GAP_THRESHOLD = 0.25
+GAP_THRESHOLD = 0.42
 
 _STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "by", "can", "did", "do", "does",
@@ -32,9 +32,13 @@ _STOPWORDS = {
     "its", "me", "my", "of", "on", "or", "tell", "that", "the", "their", "them",
     "there", "these", "this", "to", "was", "were", "what", "when", "where",
     "which", "who", "why", "will", "with", "you", "your", "about", "explain",
-    "please", "give", "more", "know", "ka", "ke", "ki", "ko", "kya", "kaise",
+    "please", "give", "more", "know", "mean", "means", "meaning", "happen", "happened",
+    "real", "true", "actually", "really", "story", "stories", "see", "visit", "like", "any",
+    "some", "so", "very", "also", "called", "name", "named", "find", "get", "go", "should",
+    "could", "would", "much", "many", "here", "there", "kind", "type", "is", "was", "ka", "ke", "ki", "ko", "kya", "kaise",
     "kyon", "hai", "hain", "था", "थी", "थे", "है", "हैं", "क्या", "क्यों",
     "कैसे", "के", "की", "को", "में", "से", "और", "का", "पर", "यह", "वह",
+    "किसने", "कौन", "कब", "कहाँ", "कहां", "गया", "गई", "गए", "बताइए", "बताओ", "बारे",
 }
 
 _PERSONA_INSTRUCTIONS: dict[PersonaType, str] = {
@@ -101,11 +105,6 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def _tokenize(text: str) -> list[str]:
-    tokens = re.findall(r"[^\W_]+", text.lower(), flags=re.UNICODE)
-    return [t for t in tokens if len(t) >= 2 and t not in _STOPWORDS]
-
-
 def embed_text(text: str) -> list[float] | None:
     """Compute a normalized 768-dim embedding using Gemini if an API key is configured."""
     client = _get_genai_client()
@@ -124,60 +123,148 @@ def embed_text(text: str) -> list[float] | None:
         return None
 
 
+_TOKEN_RE = re.compile(r"[\wऀ-ॿ؀-ۿ]+", flags=re.UNICODE)
+
+
+def _tokenize(text: str) -> list[str]:
+    """Split text into lowercase word tokens, keeping Devanagari/Urdu vowel signs inside words."""
+    tokens = _TOKEN_RE.findall(text.lower())
+    return [t for t in tokens if len(t) >= 2 and t not in _STOPWORDS and not t.isdigit()]
+
+
+def _prefix_match(a: str, b: str) -> bool:
+    """Loose stem match: 'built'~'build', 'carvings'~'carving', 'बनवाया'~'बनवाना'."""
+    if len(a) < 4 or len(b) < 4:
+        return False
+    common = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        common += 1
+    return common >= 4 and common >= 0.66 * min(len(a), len(b))
+
+
+def _match_strength(tok: str, strong: set[str], weak: set[str]) -> float:
+    if tok in strong:
+        return 1.0
+    if tok in weak:
+        return 0.85
+    if any(_prefix_match(tok, ct) for ct in strong):
+        return 0.7
+    if any(_prefix_match(tok, ct) for ct in weak):
+        return 0.6
+    return 0.0
+
+
+_GENERIC_NAME_WORDS = {
+    "main", "the", "of", "and", "gate", "pavilion", "tower", "octagonal", "great", "mukhya",
+    "मुख्य", "एवं", "द्वार", "शाही", "प्रवेश", "भवन", "मीनार", "अष्टकोणीय",
+}
+_PROPER_PHRASE_RE = re.compile(r"\b([A-Z][a-z]+(?:[ -][A-Z][a-z]+)+)\b")
+
+
+def _entity_tokens(monuments: list[Monument]) -> dict[str, set[int]]:
+    """Map each distinctive monument-name word (EN + HI) to the monuments it names."""
+    entities: dict[str, set[int]] = {}
+    for m in monuments:
+        for tok in _tokenize(f"{m.name} {m.name_hi}"):
+            if tok not in _GENERIC_NAME_WORDS:
+                entities.setdefault(tok, set()).add(m.id)
+    return entities
+
+
+def _unknown_proper_phrase(query: str, corpus_lower: str) -> bool:
+    """True if the question names a place/person (e.g. 'Red Fort') that our content never mentions."""
+    for phrase in _PROPER_PHRASE_RE.findall(query):
+        words = phrase.split()
+        # Ignore a capitalised first word that only starts the sentence ("Why Shah" -> check "Shah")
+        if query.strip().startswith(words[0]) and len(words) > 2:
+            phrase = " ".join(words[1:])
+        elif query.strip().startswith(words[0]) and len(words) == 2:
+            continue
+        if phrase.lower() not in corpus_lower:
+            return True
+    return False
+
+
 def _keyword_rank_chunks(
     chunks: list[KnowledgeChunk],
     query: str,
     monument_id: int | None = None,
     top_k: int = 5,
+    monuments: list[Monument] | None = None,
 ) -> tuple[list[KnowledgeChunk], float]:
-    query_tokens = _tokenize(query)
+    """Rank chunks by IDF-weighted query coverage.
+
+    Returns the ranked chunks and a coverage score in [0, 1]: the share of the question's
+    informative words that the best chunk explains. Rare words (e.g. 'delhi', 'fee') weigh
+    more than words found everywhere (e.g. 'taj'), so off-topic questions score low and are
+    reported as knowledge gaps instead of being answered with unrelated content.
+    """
+    query_tokens = list(dict.fromkeys(_tokenize(query)))
     if not query_tokens or not chunks:
         return [], 0.0
 
-    scored: list[tuple[float, KnowledgeChunk]] = []
+    indexed: list[tuple[KnowledgeChunk, set[str], set[str]]] = []
+    for chunk in chunks:
+        strong = set(_tokenize(f"{chunk.title} {chunk.title_hi} {' '.join(chunk.tags or [])}"))
+        weak = set(_tokenize(f"{chunk.content} {chunk.content_hi}")) - strong
+        indexed.append((chunk, strong, weak))
+
+    corpus_lower = " ".join(
+        f"{c.title} {c.content} {' '.join(c.tags or [])}" for c in chunks
+    ).lower()
+    if _unknown_proper_phrase(query, corpus_lower):
+        return [], 0.0
+
+    entities = _entity_tokens(monuments or [])
+    named_monuments: set[int] = set()
+    for tok in query_tokens:
+        named_monuments |= entities.get(tok, set())
+
+    n = len(indexed)
+    strengths = {
+        tok: [_match_strength(tok, strong, weak) for _, strong, weak in indexed]
+        for tok in query_tokens
+    }
+    idf = {
+        tok: math.log((n + 1) / (sum(1 for s in strengths[tok] if s > 0) + 0.5))
+        for tok in query_tokens
+    }
+    if named_monuments:
+        # The monument the visitor names is the subject of the question: weigh it like the rarest word
+        top_idf = max(idf.values())
+        for tok in query_tokens:
+            if tok in entities:
+                idf[tok] = max(idf[tok], top_idf)
+    total_weight = sum(idf.values()) or 1.0
     q_lower = query.lower()
 
-    for chunk in chunks:
-        title_text = f"{chunk.title} {chunk.title_hi}".lower()
-        tags_text = " ".join(chunk.tags or []).lower()
-        body_text = f"{chunk.content} {chunk.content_hi}".lower()
-
-        title_tokens = set(_tokenize(title_text))
-        tag_tokens = set(_tokenize(tags_text))
-        body_tokens = set(_tokenize(body_text))
-        all_chunk_tokens = title_tokens | tag_tokens | body_tokens
-
-        hits = 0.0
-        for tok in query_tokens:
-            if tok in title_tokens or tok in tag_tokens:
-                hits += 1.4
-            elif tok in body_tokens:
-                hits += 1.0
-            elif any(tok in ct or ct in tok for ct in all_chunk_tokens if len(ct) >= 4):
-                hits += 0.75
-
-        if hits == 0.0:
+    scored: list[tuple[float, float, KnowledgeChunk]] = []
+    for i, (chunk, _, _) in enumerate(indexed):
+        coverage = sum(idf[tok] * strengths[tok][i] for tok in query_tokens) / total_weight
+        if coverage <= 0.0:
             continue
-
-        # Normalize relative to query length so short focused queries still score cleanly
-        score = min(1.0, hits / max(2.0, len(query_tokens) * 0.9))
-
-        # Slight boost when visitor is standing at / querying a specific monument
+        rank = coverage
+        if named_monuments and chunk.monument_id is not None and chunk.monument_id not in named_monuments:
+            rank *= 0.6  # content about a different monument than the one asked about
         if monument_id is not None and chunk.monument_id == monument_id:
-            score = min(1.0, score + 0.12)
-
-        # Phrase match boost for multi-word tags
+            rank += 0.1
         for tag in chunk.tags or []:
             if " " in tag and tag.lower() in q_lower:
-                score = min(1.0, score + 0.2)
+                rank += 0.15
+        if chunk.content_type == "RECORDED_HISTORY":
+            rank += 0.01  # tie-break: recorded history leads over folklore
+        scored.append((rank, coverage, chunk))
 
-        scored.append((score, chunk))
-
-    scored.sort(key=lambda item: item[0], reverse=True)
     if not scored:
         return [], 0.0
-    top_chunks = [c for _, c in scored[:top_k]]
-    return top_chunks, round(scored[0][0], 4)
+    scored.sort(key=lambda item: item[0], reverse=True)
+    best_rank = scored[0][0]
+    # Keep only chunks reasonably close to the best one so unrelated text is not mixed in
+    kept = [item for item in scored if item[0] >= 0.5 * best_rank][:top_k]
+    best_coverage = max(item[1] for item in kept)
+    return [c for _, _, c in kept], round(min(1.0, best_coverage), 4)
 
 
 def retrieve_chunks(
@@ -225,7 +312,10 @@ def retrieve_chunks(
                 if scored_vec and scored_vec[0][0] >= 0.42:
                     return [c for _, c in scored_vec[:top_k]], round(scored_vec[0][0], 4)
 
-    return _keyword_rank_chunks(all_chunks, query, monument_id=monument_id, top_k=top_k)
+    monuments = db.query(Monument).filter(Monument.destination_id == destination_id).all()
+    return _keyword_rank_chunks(
+        all_chunks, query, monument_id=monument_id, top_k=top_k, monuments=monuments
+    )
 
 
 def _format_context_block(chunks: list[KnowledgeChunk], monument_map: dict[int, Monument]) -> str:
@@ -298,10 +388,17 @@ def _build_local_fallback_chat(
         else:
             folklore.append(FolkloreItem(text=text, attribution=chunk.source_name))
 
+    # Recorded history wins ties in ranking; a folklore headline is always labelled as tradition.
     lead_chunk = chunks[0]
     lead_text = lead_chunk.content_hi if (is_hi and lead_chunk.content_hi) else lead_chunk.content
     lead_sentences = [s.strip() for s in re.split(r"(?<=[.।])\s+", lead_text) if s.strip()]
     summary = " ".join(lead_sentences[:2]) if lead_sentences else lead_text
+    if lead_chunk.content_type != "RECORDED_HISTORY":
+        summary = (
+            f"स्थानीय परंपरा के अनुसार (यह दर्ज इतिहास नहीं है): {summary}"
+            if is_hi
+            else f"According to local tradition (this is not recorded history): {summary}"
+        )
 
     if req.persona == "kids" and not is_hi:
         summary = f"Here is the story! {summary}"
@@ -372,9 +469,12 @@ def generate_chat_response(
         "2. Separate RECORDED_HISTORY items into `verified_history` (citing their `source`) and "
         "FOLKLORE_TRADITION items into `folklore_legends` (citing their `attribution`).\n"
         "3. Respect religious and cultural sentiments attached to every site.\n"
-        "4. If the context does not answer the question, set `is_knowledge_gap=true` and clearly state that "
+        "4. `answer_summary` must be built from RECORDED_HISTORY items. Never state folklore as fact; if you "
+        "mention a legend in the summary, explicitly introduce it as a legend or local tradition. If only "
+        "folklore is available, begin the summary by saying so.\n"
+        "5. If the context does not answer the question, set `is_knowledge_gap=true` and clearly state that "
         "verified info is unavailable.\n"
-        "5. Provide 2-3 helpful short `follow_up_suggestions` in the user's language.\n\n"
+        "6. Provide 2-3 helpful short `follow_up_suggestions` in the user's language.\n\n"
         f"PROVIDED CONTEXT:\n{context_block}"
     )
 

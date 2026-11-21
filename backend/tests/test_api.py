@@ -256,3 +256,46 @@ def test_pgvector_dialect_compilation():
     compiled = str(stmt.compile(dialect=postgresql.dialect()))
     assert "<=>" in compiled
 
+
+
+def _ask(test_client, question: str, language: str = "en") -> dict:
+    res = test_client.post(
+        "/api/chat",
+        json={"destination_slug": "agra", "question": question, "language": language, "persona": "quick"},
+    )
+    assert res.status_code == 200
+    return res.json()
+
+
+def test_hindi_tokenizer_keeps_words_whole():
+    from app.services.ai_service import _tokenize
+
+    assert _tokenize("ताजमहल किसने बनवाया?") == ["ताजमहल", "बनवाया"]
+
+
+def test_history_leads_and_hindi_retrieval(client):
+    test_client, _ = client
+
+    en = _ask(test_client, "Why was the Taj Mahal built?")
+    assert en["is_knowledge_gap"] is False
+    assert "Shah Jahan" in en["answer_summary"]
+    assert "hands" not in en["answer_summary"].lower()
+
+    hi = _ask(test_client, "ताजमहल किसने बनवाया?", "hi")
+    assert hi["is_knowledge_gap"] is False
+    assert "शाहजहाँ" in hi["answer_summary"]
+
+
+def test_folklore_headline_is_labelled(client):
+    test_client, _ = client
+    data = _ask(test_client, "Is the Black Taj real?")
+    assert data["answer_summary"].startswith("According to local tradition")
+    assert len(data["folklore_legends"]) >= 1
+
+
+def test_out_of_scope_questions_are_gaps(client):
+    test_client, _ = client
+    for question in ("Who built Fatehpur Sikri?", "What is the entry fee for foreigners?"):
+        data = _ask(test_client, question)
+        assert data["is_knowledge_gap"] is True, question
+        assert data["verified_history"] == []

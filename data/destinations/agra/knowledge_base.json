@@ -8,7 +8,7 @@
     "content_hi": "सम्राट शाहजहाँ ने 1631-1632 ई. में अपनी बेगम मुमताज महल की स्मृति में ताजमहल का निर्माण आरंभ कराया। मुख्य मकबरा लगभग 1648 में और पूरा परिसर 1653 तक तैयार हुआ। इसके प्रमुख वास्तुकार उस्ताद अहमद लाहौरी थे और निर्माण में राजस्थान के मकराना से लाए गए सफेद संगमरमर तथा लगभग 20,000 कारीगरों का योगदान रहा।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI) & UNESCO World Heritage Centre",
-    "tags": ["history", "shah jahan", "mumtaz mahal", "ustad ahmad lahori", "makrana marble", "why built", "who built"]
+    "tags": ["history", "shah jahan", "mumtaz mahal", "ustad ahmad lahori", "makrana marble", "why built", "who built", "किसने बनवाया", "बनवाया", "क्यों बनाया", "निर्माण", "इतिहास", "शाहजहाँ", "मुमताज महल"]
   },
   {
     "chunk_key": "taj-pietra-dura-inlay",
@@ -19,18 +19,18 @@
     "content_hi": "ताजमहल की दीवारों पर बने फूल-पत्ती के अलंकरण 'पर्चिनकारी' कला का उदाहरण हैं, जिसमें सफेद संगमरमर को तराशकर उसमें यशब, लाजवर्द, अकीक और जैस्पर जैसे बहुमूल्य पत्थर जड़े गए हैं।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
-    "tags": ["carvings", "inlay", "parchinkari", "pietra dura", "architecture", "stones", "flowers"]
+    "tags": ["carvings", "inlay", "parchinkari", "pietra dura", "architecture", "stones", "flowers", "नक्काशी", "पर्चिनकारी", "पच्चीकारी", "जड़ाऊ"]
   },
   {
     "chunk_key": "taj-calligraphy-optical",
     "monument_slug": "taj-mahal-mausoleum",
     "title": "Thuluth Calligraphy & Architectural Optical Illusions",
     "title_hi": "सुलेख (कैलीग्राफी) और स्थापत्य का दृष्टि-कौशल",
-    "content": "The monumental arches of both the Great Gate and the main mausoleum feature black jasper calligraphy inlaid into white marble in the Thuluth script, designed by master calligrapher Amanat Khan (Abdul Haq Shirazi). To ensure the Quranic verses look uniform in size from ground level, the lettering is progressively enlarged toward the top of the arches. Similarly, the four corner minarets tilt slightly outward by roughly two degrees so that in an earthquake they would fall away from the central tomb.",
-    "content_hi": "मुख्य द्वार और मकबरे के मेहराबों पर उस्ताद अमानत खान द्वारा तैयार की गई अरबी सुलेख कला है। नीचे से सभी अक्षर एक समान आकार के दिखें, इसके लिए ऊपर के अक्षर क्रमशः बड़े बनाए गए हैं। चारों मीनारें भूकंप से मुख्य गुंबद को सुरक्षित रखने हेतु बाहर की ओर हल्की झुकी हुई हैं।",
+    "content": "The monumental arches of both the Great Gate and the main mausoleum feature black jasper calligraphy inlaid into white marble in the Thuluth script, designed by master calligrapher Amanat Khan (Abdul Haq Shirazi). To ensure the Quranic verses look uniform in size from ground level, the lettering is progressively enlarged toward the top of the arches. The four corner minarets lean slightly outward; this is widely explained as a deliberate design choice so that in an earthquake they would fall away from the central tomb, though the exact intent is not recorded in contemporary sources.",
+    "content_hi": "मुख्य द्वार और मकबरे के मेहराबों पर उस्ताद अमानत खान द्वारा तैयार की गई अरबी सुलेख कला है। नीचे से सभी अक्षर एक समान आकार के दिखें, इसके लिए ऊपर के अक्षर क्रमशः बड़े बनाए गए हैं। चारों मीनारें बाहर की ओर हल्की झुकी हुई हैं; आम तौर पर इसे भूकंप में मुख्य गुंबद को सुरक्षित रखने की योजना माना जाता है, हालाँकि समकालीन स्रोतों में इसका स्पष्ट उल्लेख नहीं है।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "UNESCO World Heritage Centre",
-    "tags": ["calligraphy", "inscriptions", "amanat khan", "minarets", "architecture", "quran"]
+    "tags": ["calligraphy", "inscriptions", "amanat khan", "minarets", "architecture", "quran", "सुलेख", "मीनारें", "कुरान"]
   },
   {
     "chunk_key": "taj-great-gate-history",
@@ -41,7 +41,7 @@
     "content_hi": "लाल बलुआ पत्थर से बना दरवाज़ा-ए-रौज़ा जिलौखाना को शांत चारबाग से अलग करता है। इसके दोनों ओर ग्यारह-ग्यारह संगमरमर की छतरियाँ हैं। इस द्वार से गुजरते समय ताजमहल का दृश्य मेहराब के भीतर फ्रेम होकर प्रकट होता है।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
-    "tags": ["gate", "gateway", "darwaza", "chhatri", "red sandstone", "entrance"]
+    "tags": ["gate", "gateway", "darwaza", "chhatri", "red sandstone", "entrance", "दरवाज़ा", "मुख्य द्वार"]
   },
   {
     "chunk_key": "taj-mosque-jawab-history",
@@ -74,7 +74,7 @@
     "content_hi": "जनश्रुति के अनुसार शाहजहाँ यमुना पार मेहताब बाग में अपने लिए एक काला ताजमहल बनवाना चाहते थे। परंतु भारतीय पुरातत्व सर्वेक्षण (ASI) की खुदाई में काले संगमरमर की किसी नींव के प्रमाण नहीं मिले, बल्कि एक अष्टकोणीय जलाशय मिला जिसमें ताजमहल का प्रतिबिंब दिखाई देता था।",
     "content_type": "FOLKLORE_TRADITION",
     "source_name": "Local Folklore (critically compared with ASI Mehtab Bagh Excavations)",
-    "tags": ["black taj", "myth", "legend", "folklore", "mehtab bagh", "tavernier", "aurangzeb"]
+    "tags": ["black taj", "myth", "legend", "folklore", "mehtab bagh", "tavernier", "aurangzeb", "काला ताजमहल", "मेहताब बाग"]
   },
   {
     "chunk_key": "artisans-hands-folklore",
@@ -85,7 +85,7 @@
     "content_hi": "प्रचलित लोककथा में कहा जाता है कि शाहजहाँ ने कारीगरों के हाथ कटवा दिए थे। हालांकि समकालीन मुगल दस्तावेजों (पादशाहनामा) में इसका कोई ऐतिहासिक प्रमाण नहीं है; बल्कि कारीगरों को पुरस्कार व जागीरें मिलीं और उन्होंने आगे दिल्ली के लाल किले में भी कार्य किया।",
     "content_type": "FOLKLORE_TRADITION",
     "source_name": "Popular Urban Legend (Refuted by Mughal Court Chronicles)",
-    "tags": ["hands", "artisans", "myth", "legend", "folklore", "workers", "taj ganj"]
+    "tags": ["hands", "artisans", "myth", "legend", "folklore", "workers", "taj ganj", "कारीगर", "हाथ काटे"]
   },
   {
     "chunk_key": "taj-changing-colors-folklore",
@@ -107,7 +107,7 @@
     "content_hi": "मूलतः ईंटों से बने 'बादलगढ़' किले को 1565 ई. में सम्राट अकबर ने लाल बलुआ पत्थर से भव्य रूप में पुनः बनवाया। बाद में शाहजहाँ ने इसके भीतर सफेद संगमरमर के महल जोड़े। अमर सिंह द्वार का मोड़दार ढलान शत्रु सेना और हाथियों की गति धीमी करने हेतु बनाया गया था।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI) & UNESCO",
-    "tags": ["agra fort", "akbar", "amar singh gate", "badalgarh", "history", "defense"]
+    "tags": ["agra fort", "akbar", "amar singh gate", "badalgarh", "history", "defense", "आगरा किला", "अकबर"]
   },
   {
     "chunk_key": "jahangiri-mahal-history",
@@ -118,7 +118,7 @@
     "content_hi": "अकबर द्वारा राजपरिवार की रानियों के लिए निर्मित जहाँगीरी महल में राजपूत व मुगल कला का अद्भुत मेल है—इसमें कमल के चिह्न, नक्काशीदार कोष्ठक और छज्जे देखने को मिलते हैं। इसके सामने एक ही पत्थर को तराशकर बनाया गया 'हौज-ए-जहाँगीरी' स्थित है।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
-    "tags": ["jahangiri mahal", "akbar", "rajput", "hauz-i-jahangiri", "carvings", "palace"]
+    "tags": ["jahangiri mahal", "akbar", "rajput", "hauz-i-jahangiri", "carvings", "palace", "जहाँगीरी महल"]
   },
   {
     "chunk_key": "musamman-burj-history",
@@ -129,7 +129,7 @@
     "content_hi": "1632 से 1640 के बीच शाहजहाँ द्वारा निर्मित अष्टकोणीय संगमरमर का मुसम्मन बुर्ज यमुना के पार ताजमहल का सीधा दृश्य प्रस्तुत करता है। 1658 के उत्तराधिकार युद्ध के बाद औरंगज़ेब ने शाहजहाँ को यहीं किले में नजरबंद रखा, जहाँ 1666 में उनका निधन हुआ।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
-    "tags": ["musamman burj", "shah jahan", "aurangzeb", "prison", "view", "marble"]
+    "tags": ["musamman burj", "shah jahan", "aurangzeb", "prison", "view", "marble", "मुसम्मन बुर्ज", "कैद"]
   },
   {
     "chunk_key": "musamman-burj-folklore",
@@ -151,7 +151,7 @@
     "content_hi": "ताजमहल प्रतिदिन सूर्योदय से 30 मिनट पहले खुलता है और सूर्यास्त से 30 मिनट पहले बंद होता है, केवल शुक्रवार को जुमे की नमाज के कारण बंद रहता है। वर्ष में एक बार तीन दिवसीय शाहजहाँ उर्स के दौरान प्रवेश निःशुल्क होता है और तहखाने की असली कब्रें दर्शन के लिए खुलती हैं।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI) & UP Tourism",
-    "tags": ["timings", "tickets", "friday", "urs", "pilgrim", "tradition", "entry"]
+    "tags": ["timings", "tickets", "friday", "urs", "pilgrim", "tradition", "entry", "समय", "टिकट", "शुक्रवार", "उर्स"]
   },
   {
     "chunk_key": "agra-parchinkari-odop-craft",
@@ -173,7 +173,7 @@
     "content_hi": "ताजमहल और आगरा किला दोनों संवेदनशील और पवित्र विरासत स्थल हैं। मुख्य संगमरमर चबूतरे पर जाने से पहले शू-कवर पहनना या नंगे पैर चलना आवश्यक है। भीतर शांति बनाए रखें; ड्रोन, तिपाई (ट्राईपॉड), खाद्य सामग्री और तंबाकू परिसर में वर्जित हैं।",
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
-    "tags": ["rules", "shoe cover", "etiquette", "respect", "prohibited", "camera", "baggage"]
+    "tags": ["rules", "shoe cover", "etiquette", "respect", "prohibited", "camera", "baggage", "नियम", "जूते", "शिष्टाचार"]
   }
 ]
 
