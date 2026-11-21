@@ -5,7 +5,6 @@ import {
   BarChart3,
   BookOpen,
   CheckCircle2,
-  ChevronDown,
   Compass,
   Headphones,
   Languages,
@@ -30,7 +29,7 @@ import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
 import { useReveal } from '../hooks/useReveal';
 import { CityHeritageSketch, UpHeritageCrest } from './HeritageSketchIcons';
-import { ParallaxScene } from './ParallaxScene';
+import { ScrollStory } from './ScrollStory';
 
 interface CitySelectorViewProps {
   language: string;
@@ -165,78 +164,77 @@ export function CitySelectorView({
 
   return (
     <div className="landing">
-      <ParallaxScene variant="hero">
-        <header className="landing-topbar">
-          <div className="landing-topbar__brand">
-            <div className="landing-topbar__crest">
-              <UpHeritageCrest />
+      <ScrollStory
+        photoSrc={`${import.meta.env.BASE_URL}images/taj-mahal.webp`}
+        photoAlt={ui.photoAlt}
+        introKicker={ui.introKicker}
+        introTitle={ui.introTitle}
+        introCue={ui.introCue}
+        panels={ui.storyPanels}
+        topbar={
+          <header className="landing-topbar">
+            <div className="landing-topbar__brand">
+              <div className="landing-topbar__crest">
+                <UpHeritageCrest />
+              </div>
+              <div className="landing-topbar__titles">
+                <span className="landing-topbar__tag">{ui.govTag}</span>
+                <span className="landing-topbar__title">{ui.appTitle}</span>
+              </div>
             </div>
-            <div className="landing-topbar__titles">
-              <span className="landing-topbar__tag">{ui.govTag}</span>
-              <span className="landing-topbar__title">{ui.appTitle}</span>
-            </div>
-          </div>
-          <div className="landing-topbar__actions">
-            <label className="glass-select">
-              <Languages size={16} aria-hidden="true" />
-              <select
-                value={language}
-                onChange={(e) => onChangeLanguage(e.target.value)}
-                aria-label="Choose language"
+            <div className="landing-topbar__actions">
+              <label className="glass-select">
+                <Languages size={16} aria-hidden="true" />
+                <select
+                  value={language}
+                  onChange={(e) => onChangeLanguage(e.target.value)}
+                  aria-label="Choose language"
+                >
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <option key={opt.code} value={opt.code}>
+                      {opt.nativeLabel}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
+                onClick={onToggleA11y}
+                aria-pressed={a11yMode}
+                aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
+                title={a11yMode ? ui.easyModeOn : ui.easyMode}
               >
-                {LANGUAGE_OPTIONS.map((opt) => (
-                  <option key={opt.code} value={opt.code}>
-                    {opt.nativeLabel}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
-              onClick={onToggleA11y}
-              aria-pressed={a11yMode}
-              aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
-              title={a11yMode ? ui.easyModeOn : ui.easyMode}
-            >
-              <Accessibility size={18} />
-            </button>
-          </div>
-        </header>
-
-        <div className="hero-copy">
-          <span className="hero-copy__kicker">
-            <span className="dot-live" />
-            {ui.heroKicker}
-          </span>
-          <h1 className="hero-copy__title">
-            {ui.heroTitleA} <em>{ui.heroTitleB}</em>
-          </h1>
-          <p className="hero-copy__lead">{ui.heroLead}</p>
-        </div>
-
-        <div className="hero-actions">
-          <div className="hero-actions__row">
-            <button type="button" className="btn-primary" onClick={() => onSelectAgra(userCoords)}>
-              <Compass size={19} />
-              <span>{ui.ctaBegin}</span>
-              <ArrowRight size={18} />
-            </button>
-            <button type="button" className="btn-glass" onClick={handleDetectLocation} disabled={locating}>
-              {locating ? <Loader2 size={17} className="spin-icon" /> : <MapPin size={17} />}
-              <span>{locating ? ui.detectingGps : ui.detectGps}</span>
-            </button>
-          </div>
-          <p className="hero-actions__notice" role="status">
-            <ShieldCheck size={15} aria-hidden="true" />
-            <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
-          </p>
-          <span className="hero-actions__cue" aria-hidden="true">
-            <ChevronDown size={18} />
-            {ui.scrollCue}
-          </span>
-        </div>
-      </ParallaxScene>
+                <Accessibility size={18} />
+              </button>
+            </div>
+          </header>
+        }
+        finalPanel={
+          <>
+            <span className="story__panel-kicker">
+              <span className="dot-live" />
+              {ui.finalKicker}
+            </span>
+            <h2 className="story__panel-title">{ui.finalTitle}</h2>
+            <div className="hero-actions__row">
+              <button type="button" className="btn-primary" onClick={() => onSelectAgra(userCoords)}>
+                <Compass size={19} />
+                <span>{ui.ctaBegin}</span>
+                <ArrowRight size={18} />
+              </button>
+              <button type="button" className="btn-glass" onClick={handleDetectLocation} disabled={locating}>
+                {locating ? <Loader2 size={17} className="spin-icon" /> : <MapPin size={17} />}
+                <span>{locating ? ui.detectingGps : ui.detectGps}</span>
+              </button>
+            </div>
+            <p className="hero-actions__notice" role="status">
+              <ShieldCheck size={15} aria-hidden="true" />
+              <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
+            </p>
+          </>
+        }
+      />
 
       <section className="stat-strip" aria-label="Highlights">
         {ui.stats.map((stat, i) => (
@@ -378,6 +376,17 @@ export function CitySelectorView({
         <div className="tricolour-bar" />
         <p>{ui.footerSources}</p>
         <p className="landing-footer__fine">{ui.footerText}</p>
+        <p className="landing-footer__fine">
+          Taj Mahal photo: Yann, edited by Jim Carter, via{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Taj_Mahal_(Edited).jpeg" target="_blank" rel="noreferrer">
+            Wikimedia Commons
+          </a>
+          ,{' '}
+          <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+            CC BY-SA 4.0
+          </a>
+          .
+        </p>
       </footer>
     </div>
   );
