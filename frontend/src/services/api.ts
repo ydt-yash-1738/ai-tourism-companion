@@ -38,6 +38,17 @@ const BASE_URL = resolveApiBaseUrl();
 
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 65000): Promise<T> {
   const controller = new AbortController();
+  const externalSignal = init?.signal;
+  const onExternalAbort = () => controller.abort();
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+    }
+  }
+
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
@@ -51,6 +62,9 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 6500
     return (await res.json()) as T;
   } finally {
     window.clearTimeout(timer);
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
   }
 }
 
@@ -226,9 +240,11 @@ export function postVoiceTTS(
   text: string,
   language: string,
   autoTranslate = false,
+  signal?: AbortSignal,
 ): Promise<VoiceTTSResponse> {
   return requestJson<VoiceTTSResponse>('/api/voice/tts', {
     method: 'POST',
+    signal,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       text: text.slice(0, 2400),

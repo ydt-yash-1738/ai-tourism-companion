@@ -127,17 +127,12 @@
     padding: 8px 12px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    flex-wrap: wrap;
+    overflow-x: visible;
 
     @include m.tablet-up {
-      justify-content: space-between;
-      flex-wrap: wrap;
       padding: 8px 16px;
     }
   }
@@ -146,8 +141,9 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-wrap: nowrap;
-    flex-shrink: 0;
+    flex-wrap: wrap;
+    flex-shrink: 1;
+    min-width: 0;
   }
 
   &__label {
@@ -298,7 +294,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 2000;
   background: rgba(11, 32, 68, 0.64);
   backdrop-filter: blur(4px);
   display: grid;

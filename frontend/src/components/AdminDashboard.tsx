@@ -14,6 +14,12 @@ import {
 } from 'recharts';
 import { getAnalyticsSummary } from '../services/api';
 import type { AnalyticsSummary } from '../types/api';
+import {
+  ErrorStateCard,
+  FallbackNoticeBanner,
+  LoadingStateCard,
+  SkeletonCards,
+} from './ApiStateCard';
 
 interface AdminDashboardProps {
   onBack: () => void;
@@ -23,43 +29,32 @@ const CHART_COLORS = ['#12346b', '#e86f1f', '#147a4b', '#b88420', '#9b3d2c', '#4
 
 export function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [includeSynthetic, setIncludeSynthetic] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
 
-  const refreshSummary = async (syntheticFlag = includeSynthetic) => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await getAnalyticsSummary('agra', syntheticFlag);
-      setSummary(res);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to fetch analytics summary.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const reqKey = `${includeSynthetic}|${refreshCount}`;
+  const loading = settledKey !== reqKey;
 
   useEffect(() => {
     let active = true;
     getAnalyticsSummary('agra', includeSynthetic)
       .then((res) => {
-        if (active) {
-          setSummary(res);
-          setError('');
-          setLoading(false);
-        }
+        if (!active) return;
+        setSummary(res);
+        setError('');
+        setSettledKey(reqKey);
       })
       .catch((err) => {
-        if (active) {
-          setError(err instanceof Error ? err.message : 'Unable to fetch analytics summary.');
-          setLoading(false);
-        }
+        if (!active) return;
+        setError(err instanceof Error ? err.message : 'Unable to fetch analytics summary.');
+        setSettledKey(reqKey);
       });
     return () => {
       active = false;
     };
-  }, [includeSynthetic]);
+  }, [reqKey, includeSynthetic]);
 
   return (
     <div className="admin-shell">
@@ -78,10 +73,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
             <button
               type="button"
               className={`pill-btn ${includeSynthetic ? 'is-active' : ''}`}
-              onClick={() => {
-                setLoading(true);
-                setIncludeSynthetic((v) => !v);
-              }}
+              onClick={() => setIncludeSynthetic((v) => !v)}
             >
               {includeSynthetic ? 'Live + Synthetic Data' : 'Live Events Only'}
             </button>
@@ -89,7 +81,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
             <button
               type="button"
               className="pill-btn"
-              onClick={() => refreshSummary(includeSynthetic)}
+              onClick={() => setRefreshCount((n) => n + 1)}
               disabled={loading}
             >
               {loading ? <Loader2 size={16} className="spin-icon" /> : <RefreshCw size={16} />}
@@ -103,7 +95,44 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
           </div>
         </header>
 
-        {error && <div className="gap-notice" style={{ marginBottom: 16 }}>{error}</div>}
+        {loading && !summary && (
+          <div style={{ display: 'grid', gap: 14 }}>
+            <LoadingStateCard
+              message="Loading UP Tourism Department analytics..."
+              subMessage="Aggregating live session telemetry and content gap signals."
+              compact
+            />
+            <SkeletonCards variant="dashboard" />
+          </div>
+        )}
+
+        {loading && summary && (
+          <FallbackNoticeBanner
+            message="Refreshing live visitor insights..."
+            variant="info"
+            loading
+          />
+        )}
+
+        {!loading && error && !summary && (
+          <ErrorStateCard
+            title="Unable to load Visitor Insights"
+            message="The analytics API could not be reached. The backend may be starting up or offline."
+            detail={error}
+            retryLabel="Retry"
+            onRetry={() => setRefreshCount((n) => n + 1)}
+            secondaryAction={{ label: 'Back to App', onClick: onBack }}
+          />
+        )}
+
+        {!loading && error && summary && (
+          <FallbackNoticeBanner
+            message={`Refresh failed: ${error}`}
+            retryLabel="Retry"
+            onRetry={() => setRefreshCount((n) => n + 1)}
+            variant="warning"
+          />
+        )}
 
         {summary && (
           <>

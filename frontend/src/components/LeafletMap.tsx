@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { haversineMeters } from '../services/offlineStore';
 
 export interface MapPinItem {
   id: string;
@@ -104,7 +105,9 @@ export function LeafletMap({
       })
         .bindPopup('<strong>Your Current Location</strong>')
         .addTo(layerGroup);
-      boundsPoints.push([userCoords.lat, userCoords.lng]);
+      if (haversineMeters(userCoords.lat, userCoords.lng, center[0], center[1]) <= 15_000) {
+        boundsPoints.push([userCoords.lat, userCoords.lng]);
+      }
     }
 
     if (boundsPoints.length >= 2) {

@@ -20,8 +20,13 @@ export default function App() {
   );
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [monuments, setMonuments] = useState<Monument[]>([]);
+  const [monumentsRetry, setMonumentsRetry] = useState(0);
+  const [monumentsSettledKey, setMonumentsSettledKey] = useState<string | null>(null);
+  const [monumentsError, setMonumentsError] = useState<string | null>(null);
+
   const [offlinePack, setOfflinePack] = useState<OfflinePack | null>(() => loadOfflinePack('agra'));
   const [downloadingPack, setDownloadingPack] = useState(false);
+  const [offlinePackError, setOfflinePackError] = useState<string | null>(null);
 
   const sessionHash = useMemo(() => getOrCreateSessionHash(), []);
 
@@ -40,18 +45,29 @@ export default function App() {
     };
   }, []);
 
+  const monumentsReqKey =
+    screen === 'companion' && isOnline ? `companion|${monumentsRetry}` : null;
+  const monumentsLoading = Boolean(monumentsReqKey && monumentsSettledKey !== monumentsReqKey);
+
   useEffect(() => {
-    if (screen !== 'companion' || !isOnline) return;
+    if (!monumentsReqKey) return;
     let active = true;
     getMonuments('agra')
       .then((list) => {
-        if (active) setMonuments(list);
+        if (!active) return;
+        setMonuments(list);
+        setMonumentsError(null);
+        setMonumentsSettledKey(monumentsReqKey);
       })
-      .catch(() => undefined);
+      .catch((err) => {
+        if (!active) return;
+        setMonumentsError(err instanceof Error ? err.message : 'Unable to load monuments.');
+        setMonumentsSettledKey(monumentsReqKey);
+      });
     return () => {
       active = false;
     };
-  }, [screen, isOnline]);
+  }, [monumentsReqKey]);
 
   const activeMonuments = monuments.length > 0 ? monuments : (offlinePack?.monuments ?? []);
 
@@ -64,11 +80,17 @@ export default function App() {
   const handleDownloadOfflinePack = async () => {
     if (downloadingPack || !isOnline) return;
     setDownloadingPack(true);
+    setOfflinePackError(null);
     try {
       const pack = await getOfflinePack('agra');
       saveOfflinePack('agra', pack);
       setOfflinePack(pack);
       setMonuments(pack.monuments);
+      setMonumentsError(null);
+    } catch (err) {
+      setOfflinePackError(
+        err instanceof Error ? err.message : 'Could not download offline pack.',
+      );
     } finally {
       setDownloadingPack(false);
     }
@@ -95,8 +117,13 @@ export default function App() {
         sessionHash={sessionHash}
         userCoords={userCoords}
         monuments={activeMonuments}
+        monumentsLoading={monumentsLoading && activeMonuments.length === 0}
+        monumentsError={monumentsError}
+        onRetryMonuments={() => setMonumentsRetry((n) => n + 1)}
         offlinePack={offlinePack}
         downloadingPack={downloadingPack}
+        offlinePackError={offlinePackError}
+        onDismissOfflinePackError={() => setOfflinePackError(null)}
         onChangeLanguage={setLanguage}
         onChangePersona={setPersona}
         onToggleA11y={() => setA11yMode((v) => !v)}
