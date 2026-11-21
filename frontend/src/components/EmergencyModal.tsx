@@ -4,6 +4,7 @@ import { getUiText } from '../data/i18n';
 import { getEmergency } from '../services/api';
 import { DEFAULT_AGRA_HELPLINES, haversineMeters } from '../services/offlineStore';
 import type { EmergencyResponse, Facility, HelplineItem, OfflinePack } from '../types/api';
+import { FallbackNoticeBanner } from './ApiStateCard';
 
 interface EmergencyModalProps {
   open: boolean;
@@ -23,6 +24,9 @@ export function EmergencyModal({
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
   const [liveData, setLiveData] = useState<EmergencyResponse | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [settledKey, setSettledKey] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const offlineFallback = useMemo<EmergencyResponse>(() => {
     const refLat = userCoords?.lat ?? 27.1751;
@@ -48,18 +52,31 @@ export function EmergencyModal({
     };
   }, [userCoords, offlinePack]);
 
+  const reqKey =
+    open && typeof navigator !== 'undefined' && navigator.onLine
+      ? `${userCoords?.lat ?? 'x'}|${userCoords?.lng ?? 'x'}|${retryCount}`
+      : null;
+  const loading = Boolean(reqKey && settledKey !== reqKey);
+
   useEffect(() => {
-    if (!open || !navigator.onLine) return;
+    if (!reqKey) return;
     let active = true;
     getEmergency('agra', userCoords?.lat, userCoords?.lng)
       .then((res) => {
-        if (active) setLiveData(res);
+        if (!active) return;
+        setLiveData(res);
+        setApiError(null);
+        setSettledKey(reqKey);
       })
-      .catch(() => undefined);
+      .catch((err) => {
+        if (!active) return;
+        setApiError(err instanceof Error ? err.message : 'Unable to reach emergency API.');
+        setSettledKey(reqKey);
+      });
     return () => {
       active = false;
     };
-  }, [open, userCoords]);
+  }, [reqKey, userCoords]);
 
   useEffect(() => {
     if (!open) return;
@@ -95,9 +112,20 @@ export function EmergencyModal({
           </button>
         </div>
 
-        <p style={{ margin: '10px 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+        <p style={{ margin: '10px 0 10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
           {ui.sosSub}
         </p>
+
+        {loading && <FallbackNoticeBanner message={ui.loadingEmergency} variant="info" loading />}
+
+        {!loading && apiError && (
+          <FallbackNoticeBanner
+            message={ui.offlineFallbackNotice}
+            retryLabel={ui.retry}
+            onRetry={() => setRetryCount((n) => n + 1)}
+            variant="warning"
+          />
+        )}
 
         <div className="sos-modal__nearest-grid">
           {data.nearest_hospital && (

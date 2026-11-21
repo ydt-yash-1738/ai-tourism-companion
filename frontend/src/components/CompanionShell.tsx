@@ -18,6 +18,7 @@ import {
 import { getUiText } from '../data/i18n';
 import { LANGUAGE_OPTIONS, PERSONA_OPTIONS } from '../data/upCities';
 import type { Monument, OfflinePack, PersonaType } from '../types/api';
+import { FallbackNoticeBanner } from './ApiStateCard';
 import { CameraTab } from './CameraTab';
 import { EmergencyModal } from './EmergencyModal';
 import { FacilitiesTab } from './FacilitiesTab';
@@ -35,8 +36,13 @@ interface CompanionShellProps {
   sessionHash: string;
   userCoords: { lat: number; lng: number } | null;
   monuments: Monument[];
+  monumentsLoading: boolean;
+  monumentsError: string | null;
+  onRetryMonuments: () => void;
   offlinePack: OfflinePack | null;
   downloadingPack: boolean;
+  offlinePackError: string | null;
+  onDismissOfflinePackError: () => void;
   onChangeLanguage: (lang: string) => void;
   onChangePersona: (p: PersonaType) => void;
   onToggleA11y: () => void;
@@ -53,8 +59,13 @@ export function CompanionShell({
   sessionHash,
   userCoords,
   monuments,
+  monumentsLoading,
+  monumentsError,
+  onRetryMonuments,
   offlinePack,
   downloadingPack,
+  offlinePackError,
+  onDismissOfflinePackError,
   onChangeLanguage,
   onChangePersona,
   onToggleA11y,
@@ -112,7 +123,7 @@ export function CompanionShell({
               type="button"
               className={`pill-btn ${offlinePack ? 'is-emerald' : ''}`}
               onClick={onDownloadOfflinePack}
-              disabled={downloadingPack}
+              disabled={downloadingPack || !isOnline}
               style={{ padding: '7px 11px', minHeight: 40 }}
             >
               {downloadingPack ? (
@@ -123,7 +134,11 @@ export function CompanionShell({
                 <Download size={15} />
               )}
               <span className="compact-mobile-hide">
-                {downloadingPack ? '...' : offlinePack ? ui.offlineReady : ui.offlinePack}
+                {downloadingPack
+                  ? ui.downloadingPack
+                  : offlinePack
+                    ? ui.offlineReady
+                    : ui.offlinePack}
               </span>
             </button>
 
@@ -176,17 +191,31 @@ export function CompanionShell({
 
           <div className="control-ribbon__group">
             <span className="control-ribbon__label">{ui.styleLabel}</span>
-            {PERSONA_OPTIONS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className={`persona-chip ${persona === p.id ? 'is-active' : ''}`}
-                onClick={() => onChangePersona(p.id)}
-                title={p.hint}
-              >
-                {ui.personas[p.id]}
-              </button>
-            ))}
+            <select
+              className="lang-select mobile-only-controls"
+              value={persona}
+              onChange={(e) => onChangePersona(e.target.value as PersonaType)}
+              aria-label="Choose guide style"
+            >
+              {PERSONA_OPTIONS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {ui.personas[p.id]}
+                </option>
+              ))}
+            </select>
+            <div className="control-ribbon__group desktop-only-controls">
+              {PERSONA_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`persona-chip ${persona === p.id ? 'is-active' : ''}`}
+                  onClick={() => onChangePersona(p.id)}
+                  title={p.hint}
+                >
+                  {ui.personas[p.id]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -216,6 +245,25 @@ export function CompanionShell({
           </div>
         )}
 
+        {offlinePackError && (
+          <FallbackNoticeBanner
+            message={ui.offlinePackFailed}
+            retryLabel={ui.retry}
+            onRetry={isOnline ? onDownloadOfflinePack : undefined}
+            onDismiss={onDismissOfflinePackError}
+            variant="warning"
+          />
+        )}
+
+        {monumentsError && monuments.length === 0 && isOnline && (
+          <FallbackNoticeBanner
+            message={`${ui.serverErrorTitle} — ${ui.loadingMonuments}`}
+            retryLabel={ui.retry}
+            onRetry={onRetryMonuments}
+            variant="warning"
+          />
+        )}
+
         {activeTab === 'guide' && (
           <GuideTab
             language={language}
@@ -224,6 +272,7 @@ export function CompanionShell({
             isOnline={isOnline}
             sessionHash={sessionHash}
             monuments={monuments}
+            monumentsLoading={monumentsLoading}
             offlinePack={offlinePack}
           />
         )}

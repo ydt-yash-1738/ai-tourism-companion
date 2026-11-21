@@ -3,13 +3,17 @@ import {
   Accessibility,
   ArrowRight,
   BarChart3,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   Loader2,
   MapPin,
+  RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
-import { LANGUAGE_OPTIONS, UP_HERITAGE_CITIES } from '../data/upCities';
+import { LANGUAGE_OPTIONS, UP_HERITAGE_CITIES, type UpHeritageCity } from '../data/upCities';
 import {
   isGeolocationAlreadyGranted,
   requestBrowserLocation,
@@ -17,11 +21,7 @@ import {
 } from '../services/geolocation';
 import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
-import {
-  CityHeritageSketch,
-  HeritageJaliBackdrop,
-  UpHeritageCrest,
-} from './HeritageSketchIcons';
+import { UpHeritageCrest } from './HeritageSketchIcons';
 
 interface CitySelectorViewProps {
   language: string;
@@ -46,35 +46,59 @@ export function CitySelectorView({
 }: CitySelectorViewProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
+  const baseLang = language.toLowerCase().split('-')[0];
+  const translationKey = baseLang !== 'en' && baseLang !== 'hi' ? baseLang : null;
+
   const [locating, setLocating] = useState(false);
+  const [locationGranted, setLocationGranted] = useState(false);
   const [customNotice, setCustomNotice] = useState<string | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [settledTranslationKey, setSettledTranslationKey] = useState<string | null>(null);
   const [translatedCities, setTranslatedCities] = useState<
     Record<string, { name: string; monument: string; tagline: string }>
   >({});
 
+  const translating = Boolean(translationKey && settledTranslationKey !== translationKey);
+
   useEffect(() => {
-    const baseLang = language.toLowerCase().split('-')[0];
-    if (baseLang === 'en' || baseLang === 'hi') return;
+    if (paused) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % UP_HERITAGE_CITIES.length);
+    }, 5500);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [paused]);
+
+  useEffect(() => {
+    if (!translationKey) return;
 
     let active = true;
     const flat = UP_HERITAGE_CITIES.flatMap((c) => [c.name, c.monumentLabel, c.tagline]);
-    translateBatchCached(flat, baseLang).then((res) => {
-      if (!active) return;
-      const next: Record<string, { name: string; monument: string; tagline: string }> = {};
-      UP_HERITAGE_CITIES.forEach((city, idx) => {
-        const offset = idx * 3;
-        next[city.slug] = {
-          name: res[offset] || city.name,
-          monument: res[offset + 1] || city.monumentLabel,
-          tagline: res[offset + 2] || city.tagline,
-        };
+    translateBatchCached(flat, translationKey)
+      .then((res) => {
+        if (!active) return;
+        const next: Record<string, { name: string; monument: string; tagline: string }> = {};
+        UP_HERITAGE_CITIES.forEach((city, idx) => {
+          const offset = idx * 3;
+          next[city.slug] = {
+            name: res[offset] || city.name,
+            monument: res[offset + 1] || city.monumentLabel,
+            tagline: res[offset + 2] || city.tagline,
+          };
+        });
+        setTranslatedCities(next);
+        setSettledTranslationKey(translationKey);
+      })
+      .catch(() => {
+        if (active) setSettledTranslationKey(translationKey);
       });
-      setTranslatedCities(next);
-    });
     return () => {
       active = false;
     };
-  }, [language]);
+  }, [translationKey]);
 
   // If browser permission is already granted, silently fetch coordinates without hijacking navigation
   useEffect(() => {
@@ -83,6 +107,7 @@ export function CitySelectorView({
     isGeolocationAlreadyGranted()
       .then((granted) => {
         if (!granted || !active) return null;
+        setLocationGranted(true);
         return requestBrowserLocation();
       })
       .then((res) => {
@@ -119,6 +144,7 @@ export function CitySelectorView({
     setLocating(false);
 
     if (res.coords) {
+      setLocationGranted(true);
       onLocationDetected(res.coords);
       const agra = UP_HERITAGE_CITIES.find((c) => c.slug === 'agra')!;
       const distMeters = haversineMeters(res.coords.lat, res.coords.lng, agra.lat, agra.lng);
@@ -149,6 +175,25 @@ export function CitySelectorView({
     } else {
       setCustomNotice('GPS is not supported in this browser. Select Agra below to explore.');
     }
+  };
+
+  const getCityCopy = (city: UpHeritageCity) => {
+    const tr = translationKey ? translatedCities[city.slug] : null;
+    return {
+      name: isHi ? city.nameHi : tr?.name || city.name,
+      monument: isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel,
+      tagline: isHi ? city.taglineHi : tr?.tagline || city.tagline,
+    };
+  };
+
+  const markImageLoaded = (slug: string) => {
+    setLoadedImages((prev) => (prev[slug] ? prev : { ...prev, [slug]: true }));
+  };
+
+  const stepSlide = (delta: number) => {
+    setActiveSlide(
+      (prev) => (prev + delta + UP_HERITAGE_CITIES.length) % UP_HERITAGE_CITIES.length,
+    );
   };
 
   return (
@@ -200,43 +245,127 @@ export function CitySelectorView({
       </header>
 
       <section className="landing-hero">
-        <div className="landing-hero__panel">
-          <HeritageJaliBackdrop className="landing-hero__jali" />
-
-          <div className="landing-hero__eyebrow">
-            <span className="dot-live" />
-            <span>{ui.eyebrow}</span>
+        <div
+          className="landing-hero__panel"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+        >
+          <div className="landing-hero__slideshow" aria-hidden="true">
+            {UP_HERITAGE_CITIES.map((city, idx) => (
+              <div
+                key={city.slug}
+                className={`landing-hero__slide ${idx === activeSlide ? 'is-active' : ''}`}
+              >
+                <img
+                  src={city.image}
+                  alt=""
+                  style={{ objectPosition: city.objectPosition }}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={idx === 0 ? 'high' : 'auto'}
+                />
+              </div>
+            ))}
           </div>
 
-          <h2 className="landing-hero__headline">{ui.heroHeadline}</h2>
-          <p className="landing-hero__sub">{ui.heroSub}</p>
+          <div className="landing-hero__scrim" aria-hidden="true" />
 
-          <div className="landing-hero__cta-row">
-            <button
-              type="button"
-              className="pill-btn is-saffron"
-              onClick={() => onSelectAgra(userCoords)}
-            >
-              <Compass size={17} />
-              <span>{ui.launchAgra}</span>
-              <ArrowRight size={16} />
-            </button>
+          <div className="landing-hero__content">
+            <h2 className="landing-hero__headline">{ui.heroHeadline}</h2>
 
-            <button
-              type="button"
-              className="pill-btn"
-              onClick={handleDetectLocation}
-              disabled={locating}
-            >
-              {locating ? <Loader2 size={16} className="spin-icon" /> : <MapPin size={16} />}
-              <span>{locating ? ui.detectingGps : ui.detectGps}</span>
-            </button>
+            <div className="landing-hero__bottom-bar">
+              <div className="landing-hero__cta-row">
+                <button
+                  type="button"
+                  className="pill-btn is-saffron"
+                  onClick={() => onSelectAgra(userCoords)}
+                >
+                  <Compass size={17} />
+                  <span>{ui.launchAgra}</span>
+                  <ArrowRight size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`pill-btn is-hero-glass ${userCoords || locationGranted ? 'is-detected' : ''}`}
+                  onClick={handleDetectLocation}
+                  disabled={locating}
+                  title={
+                    userCoords || locationGranted
+                      ? isHi
+                        ? 'वर्तमान स्थान रीफ़्रेश करें'
+                        : 'Tap to refresh your GPS location'
+                      : undefined
+                  }
+                >
+                  {locating ? (
+                    <Loader2 size={16} className="spin-icon" />
+                  ) : userCoords ? (
+                    <CheckCircle2 size={16} />
+                  ) : locationGranted ? (
+                    <RefreshCw size={15} />
+                  ) : (
+                    <MapPin size={16} />
+                  )}
+                  <span>
+                    {locating
+                      ? ui.detectingGps
+                      : userCoords
+                        ? ui.locationActive
+                        : locationGranted
+                          ? ui.refreshLocation
+                          : ui.detectGps}
+                  </span>
+                  {!locating && userCoords && <RefreshCw size={13} style={{ opacity: 0.85 }} />}
+                </button>
+              </div>
+
+              <div className="landing-hero__slide-controls">
+                <button
+                  type="button"
+                  className="landing-hero__slide-nav"
+                  onClick={() => stepSlide(-1)}
+                  aria-label="Previous heritage highlight"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <div className="landing-hero__dots" role="tablist" aria-label="Heritage slideshow">
+                  {UP_HERITAGE_CITIES.map((city, idx) => (
+                    <button
+                      key={city.slug}
+                      type="button"
+                      role="tab"
+                      aria-selected={idx === activeSlide}
+                      aria-label={`Show ${city.name}`}
+                      className={`landing-hero__dot ${idx === activeSlide ? 'is-active' : ''}`}
+                      onClick={() => setActiveSlide(idx)}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="landing-hero__slide-nav"
+                  onClick={() => stepSlide(1)}
+                  aria-label="Next heritage highlight"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div className="landing-hero__loc-banner" role="status">
-            <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-            <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
-          </div>
+        <div
+          className={`landing-hero__loc-banner ${
+            customNotice ? 'is-notice' : userCoords ? 'is-active' : ''
+          }`}
+          role="status"
+        >
+          <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+          <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
         </div>
       </section>
 
@@ -247,17 +376,57 @@ export function CitySelectorView({
             <p>{ui.citiesSub}</p>
           </div>
           <div className="city-section__legend">
+            {translating && (
+              <span className="translating-pill" role="status">
+                <Loader2 size={13} className="spin-icon" />
+                <span>{ui.translating}</span>
+              </span>
+            )}
             <span className="badge-live">● {ui.liveBadge}</span>
           </div>
         </div>
 
         <div className="city-grid">
           {UP_HERITAGE_CITIES.map((city) => {
-            const baseLang = language.toLowerCase().split('-')[0];
-            const tr = baseLang !== 'en' && baseLang !== 'hi' ? translatedCities[city.slug] : null;
-            const cityName = isHi ? city.nameHi : tr?.name || city.name;
-            const monumentLabel = isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel;
-            const tagline = isHi ? city.taglineHi : tr?.tagline || city.tagline;
+            const copy = getCityCopy(city);
+            const isLoaded = Boolean(loadedImages[city.slug]);
+
+            const cardInner = (
+              <>
+                <div className="city-card__media">
+                  <img
+                    className={`city-card__img ${isLoaded ? 'is-loaded' : ''}`}
+                    src={city.image}
+                    alt={city.imageAlt}
+                    style={{ objectPosition: city.objectPosition }}
+                    loading="lazy"
+                    onLoad={() => markImageLoaded(city.slug)}
+                    onError={() => markImageLoaded(city.slug)}
+                  />
+                </div>
+                <div className="city-card__scrim" aria-hidden="true" />
+
+                <div className="city-card__content">
+                  <div className="city-card__top">
+                    <span className="city-card__status">
+                      {city.clickable && <span className="status-dot" aria-hidden="true" />}
+                      <span>{city.clickable ? ui.liveNow : ui.comingSoon}</span>
+                    </span>
+                  </div>
+
+                  <div className="city-card__body">
+                    <div className="city-card__monument">{copy.monument}</div>
+                    <div className="city-card__name">{copy.name}</div>
+                    <p className="city-card__desc">{copy.tagline}</p>
+
+                    <div className="city-card__footer">
+                      <span>{city.clickable ? ui.exploreFeatures : ui.packPlanned}</span>
+                      {city.clickable && <ArrowRight size={16} />}
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
 
             return city.clickable ? (
               <button
@@ -266,24 +435,7 @@ export function CitySelectorView({
                 className="city-card is-active"
                 onClick={() => onSelectAgra(userCoords)}
               >
-                <div className="city-card__top">
-                  <div className="city-card__sketch-box">
-                    <CityHeritageSketch city={city.slug} />
-                  </div>
-                  <span className="city-card__status">{ui.liveNow}</span>
-                </div>
-
-                <div>
-                  <div className="city-card__name">{cityName}</div>
-                  <div className="city-card__monument">{monumentLabel}</div>
-                </div>
-
-                <p className="city-card__desc">{tagline}</p>
-
-                <div className="city-card__footer">
-                  <span>{ui.exploreFeatures}</span>
-                  <ArrowRight size={16} />
-                </div>
+                {cardInner}
               </button>
             ) : (
               <div
@@ -293,23 +445,7 @@ export function CitySelectorView({
                 aria-disabled="true"
                 aria-label={`${city.name} — ${ui.comingSoon}`}
               >
-                <div className="city-card__top">
-                  <div className="city-card__sketch-box">
-                    <CityHeritageSketch city={city.slug} />
-                  </div>
-                  <span className="city-card__status">{ui.comingSoon}</span>
-                </div>
-
-                <div>
-                  <div className="city-card__name">{cityName}</div>
-                  <div className="city-card__monument">{monumentLabel}</div>
-                </div>
-
-                <p className="city-card__desc">{tagline}</p>
-
-                <div className="city-card__footer">
-                  <span>{ui.packPlanned}</span>
-                </div>
+                {cardInner}
               </div>
             );
           })}

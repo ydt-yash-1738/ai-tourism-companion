@@ -1,14 +1,30 @@
 import { LANGUAGE_OPTIONS } from '../data/upCities';
 import { postVoiceTTS } from './api';
 
-let currentAudio: HTMLAudioElement | null = null;
+export type AudioPlaybackState = 'idle' | 'loading' | 'playing';
 
-export function stopSpeaking(): void {
+let currentAudio: HTMLAudioElement | null = null;
+let activePlaybackToken = 0;
+let activeTtsAbort: AbortController | null = null;
+
+function clearCurrentAudio(): void {
   if (currentAudio) {
+    currentAudio.onplaying = null;
+    currentAudio.onended = null;
+    currentAudio.onerror = null;
     currentAudio.pause();
     currentAudio.src = '';
     currentAudio = null;
   }
+}
+
+export function stopSpeaking(): void {
+  activePlaybackToken += 1;
+  if (activeTtsAbort) {
+    activeTtsAbort.abort();
+    activeTtsAbort = null;
+  }
+  clearCurrentAudio();
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -17,44 +33,83 @@ export function stopSpeaking(): void {
 export async function speakText(
   text: string,
   languageCode: string,
-  onSpeakingChange?: (speaking: boolean) => void,
+  onStateChange?: (state: AudioPlaybackState) => void,
   options?: { autoTranslate?: boolean },
-): Promise<'sarvam' | 'device'> {
+): Promise<'sarvam' | 'device' | 'cancelled'> {
   stopSpeaking();
-  if (!text.trim()) return 'device';
+  if (!text.trim()) {
+    onStateChange?.('idle');
+    return 'cancelled';
+  }
 
-  onSpeakingChange?.(true);
+  const token = ++activePlaybackToken;
+  onStateChange?.('loading');
   let textForDeviceFallback = text;
 
   // Try cloud Sarvam AI / Bhashini TTS first; automatically translate if text isn't in target language
   try {
     if (navigator.onLine) {
-      const res = await postVoiceTTS(text, languageCode, Boolean(options?.autoTranslate));
+      const controller = new AbortController();
+      activeTtsAbort = controller;
+      const res = await postVoiceTTS(
+        text,
+        languageCode,
+        Boolean(options?.autoTranslate),
+        controller.signal,
+      );
+      if (activeTtsAbort === controller) {
+        activeTtsAbort = null;
+      }
+      if (token !== activePlaybackToken) {
+        return 'cancelled';
+      }
       if (res.spoken_text && res.spoken_text.trim()) {
         textForDeviceFallback = res.spoken_text;
       }
       if (!res.fallback_to_device && res.audio_base64) {
         const audio = new Audio(`data:${res.content_type};base64,${res.audio_base64}`);
         currentAudio = audio;
+        let markedPlaying = false;
+        const markPlaying = () => {
+          if (!markedPlaying && token === activePlaybackToken) {
+            markedPlaying = true;
+            onStateChange?.('playing');
+          }
+        };
+        audio.onplaying = markPlaying;
         audio.onended = () => {
-          currentAudio = null;
-          onSpeakingChange?.(false);
+          if (currentAudio === audio) currentAudio = null;
+          if (token === activePlaybackToken) onStateChange?.('idle');
         };
         audio.onerror = () => {
-          currentAudio = null;
-          onSpeakingChange?.(false);
+          if (currentAudio === audio) currentAudio = null;
+          if (token === activePlaybackToken) onStateChange?.('idle');
         };
         await audio.play();
+        if (token !== activePlaybackToken) {
+          clearCurrentAudio();
+          return 'cancelled';
+        }
+        markPlaying();
         return 'sarvam';
       }
     }
   } catch {
+    activeTtsAbort = null;
+    clearCurrentAudio();
+    if (token !== activePlaybackToken) {
+      return 'cancelled';
+    }
     // Silent failover to device speech
   }
 
-  return new Promise<'device'>((resolve) => {
+  if (token !== activePlaybackToken) {
+    return 'cancelled';
+  }
+
+  return new Promise<'device' | 'cancelled'>((resolve) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      onSpeakingChange?.(false);
+      if (token === activePlaybackToken) onStateChange?.('idle');
       resolve('device');
       return;
     }
@@ -73,13 +128,37 @@ export async function speakText(
     }
 
     utterance.rate = 0.96;
+    let started = false;
+    let settled = false;
+    const safetyTimer = window.setTimeout(() => {
+      if (!started && !settled && token === activePlaybackToken && window.speechSynthesis.speaking) {
+        started = true;
+        onStateChange?.('playing');
+      }
+    }, 250);
+
+    const cleanup = () => {
+      window.clearTimeout(safetyTimer);
+    };
+
+    utterance.onstart = () => {
+      if (token !== activePlaybackToken) return;
+      started = true;
+      onStateChange?.('playing');
+    };
     utterance.onend = () => {
-      onSpeakingChange?.(false);
-      resolve('device');
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (token === activePlaybackToken) onStateChange?.('idle');
+      resolve(token === activePlaybackToken ? 'device' : 'cancelled');
     };
     utterance.onerror = () => {
-      onSpeakingChange?.(false);
-      resolve('device');
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (token === activePlaybackToken) onStateChange?.('idle');
+      resolve(token === activePlaybackToken ? 'device' : 'cancelled');
     };
     window.speechSynthesis.speak(utterance);
   });
