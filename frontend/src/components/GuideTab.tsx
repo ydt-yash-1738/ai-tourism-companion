@@ -67,6 +67,16 @@ export function GuideTab({
   const micStreamRef = useRef<MediaStream | null>(null);
   const browserSpeechRef = useRef<{ stop: () => void } | null>(null);
   const msgSeqRef = useRef(0);
+  const streamRef = useRef<HTMLDivElement>(null);
+
+  // Bring the newest question or answer into view, below the sticky header
+  useEffect(() => {
+    const last = streamRef.current?.lastElementChild as HTMLElement | null;
+    if (!last) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const top = last.getBoundingClientRect().top + window.scrollY - 76;
+    window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+  }, [messages.length, loading]);
 
   useEffect(() => {
     return () => {
@@ -347,7 +357,7 @@ export function GuideTab({
         )}
       </section>
 
-      <div className="chat-stream" aria-live="polite">
+      <div className="chat-stream" aria-live="polite" ref={streamRef}>
         {messages.map((turn) =>
           turn.role === 'user' ? (
             <div key={turn.id} className="chat-bubble is-user">

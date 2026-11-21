@@ -41,6 +41,24 @@ export default function App() {
     };
   }, []);
 
+  // First launch: load the content pack bundled inside the app so everything
+  // works with no network and no backend. A later online download refreshes it.
+  useEffect(() => {
+    if (offlinePack) return;
+    let active = true;
+    fetch(`${import.meta.env.BASE_URL}packs/agra.json`)
+      .then((res) => (res.ok ? (res.json() as Promise<OfflinePack>) : null))
+      .then((pack) => {
+        if (!active || !pack) return;
+        saveOfflinePack('agra', pack);
+        setOfflinePack(pack);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [offlinePack]);
+
   // Track whether the API is actually reachable, not just whether the phone has a network
   useEffect(() => {
     const onStatus = (e: Event) => setServerReachable((e as CustomEvent<boolean>).detail);
