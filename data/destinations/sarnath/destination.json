@@ -1,0 +1,60 @@
+{
+  "slug": "sarnath",
+  "name": "Sarnath Buddhist Heritage Zone (Dhamek Stupa & Ashoka Pillar)",
+  "name_hi": "सारनाथ बौद्ध विरासत क्षेत्र (धमेख स्तूप एवं अशोक स्तंभ)",
+  "state": "Uttar Pradesh",
+  "description": "Sacred Deer Park (Isipatana / Mrigadava) where Gautama Buddha delivered his first sermon and founded the Sangha, home to Dhamek Stupa, Ashoka's Lion Capital (India's National Emblem), Chaukhandi Stupa, living monasteries, and Varanasi ODOP Banarasi Silk & Wooden Toy traditions.",
+  "description_hi": "पावन ऋषिपत्तन एवं मृगदाव क्षेत्र जहाँ भगवान बुद्ध ने अपना प्रथम धर्मोपदेश (धर्मचक्रप्रवर्तन) दिया और बौद्ध संघ की स्थापना की—धमेख स्तूप, अशोक के सिंह स्तंभ (भारत का राष्ट्रीय प्रतीक), चौखंडी स्तूप तथा बनारसी रेशम व काष्ठ खिलौना शिल्प का ऐतिहासिक केंद्र।",
+  "center_lat": 25.3808,
+  "center_lng": 83.0245,
+  "supported_languages": ["en", "hi", "ur", "ta", "bn", "mr", "te", "fr", "ja", "es"],
+  "emergency_helplines": [
+    {
+      "label": "National Emergency (Police / Fire / Medical)",
+      "label_hi": "राष्ट्रीय आपातकालीन सेवा",
+      "number": "112",
+      "category": "emergency"
+    },
+    {
+      "label": "Medical Ambulance",
+      "label_hi": "एम्बुलेंस सेवा",
+      "number": "108",
+      "category": "medical"
+    },
+    {
+      "label": "Women Power Line (UP)",
+      "label_hi": "महिला पावर लाइन (उ.प्र.)",
+      "number": "1090",
+      "category": "police"
+    },
+    {
+      "label": "UP / Incredible India Tourist Helpline",
+      "label_hi": "पर्यटन हेल्पलाइन",
+      "number": "1363",
+      "category": "help_desk"
+    },
+    {
+      "label": "Sarnath Police Station (Varanasi)",
+      "label_hi": "सारनाथ पुलिस थाना (वाराणसी)",
+      "number": "+91-542-2595406",
+      "category": "police"
+    },
+    {
+      "label": "Pt. Deen Dayal Upadhyaya District Hospital, Pandeypur",
+      "label_hi": "पं. दीनदयाल उपाध्याय जिला अस्पताल, पांडेयपुर",
+      "number": "+91-542-2508017",
+      "category": "medical"
+    }
+  ],
+  "metadata_json": {
+    "odop_products": ["Banarasi Silk & Brocades", "Varanasi Wooden Lacquerware & Toys"],
+    "best_season": "October to March",
+    "weekly_closure": "Sarnath Archaeological Site & Chaukhandi Stupa are open daily (sunrise to sunset); Sarnath Archaeological Museum (Lion Capital) is closed every Friday.",
+    "official_sources": [
+      "Archaeological Survey of India (ASI)",
+      "UNESCO World Heritage Tentative List (Sarnath)",
+      "Uttar Pradesh Tourism"
+    ]
+  }
+}
+

@@ -21,11 +21,18 @@
   flex-direction: column;
   gap: 12px;
   min-height: calc(100vh - 250px);
+  animation: none;
+  padding-bottom: 86px;
+
+  @include m.tablet-up {
+    padding-bottom: 92px;
+  }
 }
 
 .guide-hero-card {
   border-top: 4px solid var(--navy);
   background: linear-gradient(180deg, #ffffff 0%, #fffcf6 100%);
+  animation: fadeSlideUp 0.25s ease;
 }
 
 .guide-eyebrow-row {
@@ -65,6 +72,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: fadeSlideUp 0.25s ease;
 }
 
 .guide-section-head {
@@ -532,22 +540,71 @@
   font-weight: 600;
 }
 
+.chat-composer-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  z-index: 35;
+  padding: 0 12px;
+  pointer-events: none;
+
+  @include m.tablet-up {
+    bottom: 12px;
+    padding: 0 16px;
+  }
+
+  &__inner {
+    max-width: 1120px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  &__status {
+    pointer-events: auto;
+    padding: 7px 12px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-card);
+
+    &.is-active {
+      background: var(--navy-tint);
+      color: var(--navy);
+      border: 1px solid rgba(18, 52, 107, 0.2);
+    }
+
+    &.is-error {
+      background: var(--terracotta-tint);
+      color: var(--terracotta);
+      border: 1px solid rgba(155, 61, 44, 0.25);
+    }
+  }
+}
+
 .chat-composer {
   @include m.card-surface;
-  margin-top: auto;
+  pointer-events: auto;
   padding: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
-  position: sticky;
-  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  z-index: 25;
-  box-shadow: 0 6px 24px rgba(18, 52, 107, 0.14);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 28px rgba(18, 52, 107, 0.18),
+    0 2px 6px rgba(18, 52, 107, 0.08);
 
   @include m.tablet-up {
     padding: 10px;
     gap: 8px;
-    bottom: 12px;
   }
 
   &__input {

@@ -1,0 +1,778 @@
+import { DEFAULT_AGRA_HELPLINES, DEFAULT_SARNATH_HELPLINES } from '../services/offlineStore';
+import type { HelplineItem } from '../types/api';
+
+export interface LocationMediaItem {
+  image: string;
+  alt: string;
+  objectPosition: string;
+}
+
+export interface MonumentSpotlightMeta {
+  slug: string;
+  name: string;
+  nameHi: string;
+  shortSummary: string;
+  shortSummaryHi: string;
+  visitDurationMin: number;
+  stepFree: boolean;
+  promptEn: string;
+  promptHi: string;
+}
+
+export interface GuideTopicCard {
+  id: string;
+  badgeEn: string;
+  badgeHi: string;
+  titleEn: string;
+  titleHi: string;
+  descEn: string;
+  descHi: string;
+  questionEn: string;
+  questionHi: string;
+  accent: 'saffron' | 'navy' | 'emerald' | 'brass';
+  focusMonumentSlug?: string;
+}
+
+export interface VisitorSnapshotTile {
+  id: string;
+  titleEn: string;
+  titleHi: string;
+  bodyEn: string;
+  bodyHi: string;
+}
+
+export interface DestinationConfig {
+  slug: string;
+  nameEn: string;
+  nameHi: string;
+  center: [number, number];
+  facilitiesCenter: [number, number];
+  demoGps: {
+    lat: number;
+    lng: number;
+    labelEn: string;
+    labelHi: string;
+  };
+  defaultMedia: LocationMediaItem;
+  defaultHelplines: HelplineItem[];
+  offlineGapFollowUps: {
+    en: string[];
+    hi: string[];
+  };
+  copy: {
+    companionTitleEn: string;
+    companionTitleHi: string;
+    guideWelcomeBadgeEn: string;
+    guideWelcomeBadgeHi: string;
+    guideHeadingEn: string;
+    guideHeadingHi: string;
+    allMonumentsEn: string;
+    allMonumentsHi: string;
+    exploreMonumentsHeadingEn: string;
+    exploreMonumentsHeadingHi: string;
+    chatPlaceholderEn: string;
+    chatPlaceholderHi: string;
+    startersEn: string[];
+    startersHi: string[];
+  };
+  monumentSpotlights: MonumentSpotlightMeta[];
+  topicCards: GuideTopicCard[];
+  visitorSnapshot: VisitorSnapshotTile[];
+}
+
+const DEFAULT_AGRA_MEDIA: LocationMediaItem = {
+  image: '/images/heritage/agra.jpg',
+  alt: 'Taj Mahal white marble mausoleum and reflecting pool in Agra',
+  objectPosition: 'center 42%',
+};
+
+const DEFAULT_SARNATH_MEDIA: LocationMediaItem = {
+  image: '/images/heritage/sarnath.jpg',
+  alt: 'Ancient cylindrical brick and carved stone Dhamek Stupa at Sarnath',
+  objectPosition: 'center 36%',
+};
+
+export const NEARBY_MEDIA_MAP: Record<string, LocationMediaItem> = {
+  // Agra Nearby & ODOP
+  'mehtab-bagh': {
+    image: '/images/nearby/mehtab-bagh.jpg',
+    alt: 'Mehtab Bagh riverfront garden framing the Taj Mahal across the Yamuna River',
+    objectPosition: 'center 45%',
+  },
+  'itimad-ud-daulah-baby-taj': {
+    image: '/images/nearby/itimad-ud-daulah-baby-taj.jpg',
+    alt: 'Tomb of Itimad-ud-Daulah (Baby Taj) white marble Pietra Dura mausoleum in Agra',
+    objectPosition: 'center 40%',
+  },
+  'parchinkari-artisan-hub': {
+    image: '/images/nearby/parchinkari-artisan-hub.jpg',
+    alt: 'Taj Ganj Parchinkari marble floral stone inlay craft panel',
+    objectPosition: 'center center',
+  },
+  'agra-odop-leather-emporium': {
+    image: '/images/nearby/agra-odop-leather-emporium.jpg',
+    alt: 'Traditional handcrafted embroidered Indian Mojari and Jutti leather footwear',
+    objectPosition: 'center center',
+  },
+  'sadar-bazaar-chaat-gali': {
+    image: '/images/nearby/sadar-bazaar-chaat-gali.jpg',
+    alt: 'Crispy Agra street chaat Aloo Tikki served with mint and tamarind chutneys',
+    objectPosition: 'center 52%',
+  },
+  'agra-petha-heritage-lane': {
+    image: '/images/nearby/agra-petha-heritage-lane.jpg',
+    alt: 'Traditional golden saffron Agra Petha ash-gourd sweets',
+    objectPosition: 'center center',
+  },
+  'kinari-bazaar-heritage': {
+    image: '/images/nearby/kinari-bazaar-heritage.jpg',
+    alt: 'Historic old city market street leading to Jama Masjid in Agra',
+    objectPosition: 'center 38%',
+  },
+  'taj-mahotsav-shilpgram': {
+    image: '/images/nearby/taj-mahotsav-shilpgram.jpg',
+    alt: 'Handicraft stalls and cultural bazaar showcase at Shilpgram Craft Village',
+    objectPosition: 'center 45%',
+  },
+  // Sarnath Nearby & ODOP
+  'thai-temple-giant-buddha': {
+    image: '/images/nearby/thai-temple-giant-buddha.jpg',
+    alt: 'Wat Thai Sarnath monastery gardens and 80-foot standing Buddha statue',
+    objectPosition: 'center 35%',
+  },
+  'sarnath-deer-park-isipatana': {
+    image: '/images/nearby/sarnath-deer-park-isipatana.jpg',
+    alt: 'Spotted deer inside Sarnath Mrigadava Deer Park sanctuary',
+    objectPosition: 'center 45%',
+  },
+  'digambar-jain-temple-sarnath': {
+    image: '/images/nearby/digambar-jain-temple-sarnath.jpg',
+    alt: 'Shri Digambar Jain Temple at Simhapuri adjacent to Dhamek Stupa in Sarnath',
+    objectPosition: 'center 38%',
+  },
+  'deendayal-hastkala-sankul-odop': {
+    image: '/images/nearby/deendayal-hastkala-sankul-odop.jpg',
+    alt: 'Deendayal Hastkala Sankul Trade Facilitation Centre & Crafts Museum in Varanasi',
+    objectPosition: 'center 42%',
+  },
+  'sarai-mohana-banarasi-weavers': {
+    image: '/images/nearby/sarai-mohana-banarasi-weavers.jpg',
+    alt: 'Traditional Banarasi silk saree handloom weaving in Sarai Mohana near Sarnath',
+    objectPosition: 'center center',
+  },
+  'varanasi-wooden-toys-craft-hub': {
+    image: '/images/nearby/varanasi-wooden-toys-craft-hub.jpg',
+    alt: 'Hand-painted GI-tagged Varanasi wooden lacquerware and traditional toys',
+    objectPosition: 'center center',
+  },
+  'sarnath-tibetan-monastery-food-lane': {
+    image: '/images/nearby/sarnath-tibetan-monastery-food-lane.jpg',
+    alt: 'Tibetan momos and monastery street refreshments near Sarnath',
+    objectPosition: 'center center',
+  },
+  'buddha-purnima-sarnath-mahotsav': {
+    image: '/images/nearby/buddha-purnima-sarnath-mahotsav.jpg',
+    alt: 'Illuminated Dhamek Stupa and evening cultural celebration during Buddha Purnima',
+    objectPosition: 'center 40%',
+  },
+};
+
+export const FACILITY_MEDIA_MAP: Record<string, LocationMediaItem> = {
+  // Agra Facilities
+  'taj-west-gate-accessible-toilet': {
+    image: '/images/facilities/taj-west-gate-accessible-toilet.jpg',
+    alt: 'Taj Mahal West Gate entry plaza where public and accessible restrooms are located',
+    objectPosition: 'center 42%',
+  },
+  'taj-east-gate-toilet-water': {
+    image: '/images/facilities/taj-east-gate-toilet-water.jpg',
+    alt: 'Taj Mahal East Gate forecourt entrance, restrooms, and cloakroom plaza',
+    objectPosition: 'center 42%',
+  },
+  'taj-shilpgram-parking': {
+    image: '/images/facilities/taj-shilpgram-parking.jpg',
+    alt: 'Electric shuttles and rickshaw transit zone connecting Shilpgram Parking to Taj East Gate',
+    objectPosition: 'center 48%',
+  },
+  'taj-ro-drinking-water': {
+    image: '/images/facilities/taj-ro-drinking-water.jpg',
+    alt: 'Jilaukhana Forecourt courtyard near the Great Gate hosting ASI RO drinking water station',
+    objectPosition: 'center 45%',
+  },
+  'taj-asi-medical-first-aid': {
+    image: '/images/facilities/taj-asi-medical-first-aid.jpg',
+    alt: 'Eastern Arcade inside the Taj Mahal Jilaukhana Forecourt housing the ASI First-Aid post',
+    objectPosition: 'center 42%',
+  },
+  'sn-medical-college-hospital': {
+    image: '/images/facilities/sn-medical-college-hospital.jpg',
+    alt: 'Uttar Pradesh government hospital campus serving emergency medical care',
+    objectPosition: 'center 45%',
+  },
+  'taj-ganj-tourist-police': {
+    image: '/images/facilities/taj-ganj-tourist-police.jpg',
+    alt: 'Taj Ganj approach road and South Gate corridor near the Tourist Police booth',
+    objectPosition: 'center 45%',
+  },
+  'up-tourism-help-desk': {
+    image: '/images/facilities/up-tourism-help-desk.jpg',
+    alt: 'Taj Mahal West Gate visitor entry plaza and UP Tourism help desk zone',
+    objectPosition: 'center 48%',
+  },
+  'agra-fort-gate-facilities': {
+    image: '/images/facilities/agra-fort-gate-facilities.jpg',
+    alt: 'Agra Fort Amar Singh Gate outer entrance plaza with restrooms, water, and parking',
+    objectPosition: 'center 40%',
+  },
+  'taj-east-gate-food-plaza': {
+    image: '/images/facilities/taj-east-gate-food-plaza.jpg',
+    alt: 'Freshly prepared North Indian vegetarian thali served at Taj Ganj clean food plaza',
+    objectPosition: 'center center',
+  },
+  // Sarnath Facilities
+  'sarnath-asi-park-accessible-toilet': {
+    image: '/images/facilities/sarnath-asi-park-accessible-toilet.jpg',
+    alt: 'Sarnath Archaeological Site south lawn entrance with accessible restrooms',
+    objectPosition: 'center 45%',
+  },
+  'sarnath-museum-restrooms-cloakroom': {
+    image: '/images/facilities/sarnath-museum-restrooms-cloakroom.jpg',
+    alt: 'Sarnath Archaeological Museum entrance housing cloakroom lockers and restrooms',
+    objectPosition: 'center 42%',
+  },
+  'sarnath-main-parking-e-rickshaw': {
+    image: '/images/facilities/sarnath-main-parking-e-rickshaw.jpg',
+    alt: 'Rishipattana Marg visitor parking and electric rickshaw transit hub in Sarnath',
+    objectPosition: 'center 48%',
+  },
+  'sarnath-asi-ro-drinking-water': {
+    image: '/images/facilities/sarnath-asi-ro-drinking-water.jpg',
+    alt: 'Paved central park walkway in Sarnath leading to the ASI RO drinking water station',
+    objectPosition: 'center 44%',
+  },
+  'sarnath-asi-first-aid-post': {
+    image: '/images/facilities/sarnath-asi-first-aid-post.jpg',
+    alt: 'Sarnath Archaeological Park conservation complex housing the ASI first-aid post',
+    objectPosition: 'center 45%',
+  },
+  'ddu-district-hospital-varanasi': {
+    image: '/images/facilities/ddu-district-hospital-varanasi.jpg',
+    alt: 'Pandit Deen Dayal Upadhyaya District Government Hospital in Varanasi',
+    objectPosition: 'center 45%',
+  },
+  'sarnath-police-station-booth': {
+    image: '/images/facilities/sarnath-police-station-booth.jpg',
+    alt: 'Sarnath Police Station and Tourist Assistance post near Chaukhandi Stupa',
+    objectPosition: 'center 45%',
+  },
+  'sarnath-up-tourism-info-desk': {
+    image: '/images/facilities/sarnath-up-tourism-info-desk.jpg',
+    alt: 'UP Tourism Information Centre and wheelchair loan desk approach in Sarnath',
+    objectPosition: 'center 45%',
+  },
+  'chaukhandi-gate-water-toilet': {
+    image: '/images/facilities/chaukhandi-gate-water-toilet.jpg',
+    alt: 'Chaukhandi Stupa garden entrance with public restrooms and drinking water',
+    objectPosition: 'center 42%',
+  },
+  'sarnath-bodhi-garden-food-plaza': {
+    image: '/images/facilities/sarnath-bodhi-garden-food-plaza.jpg',
+    alt: 'Clean vegetarian Banarasi thali and tea refreshments near Sarnath Bodhi garden',
+    objectPosition: 'center center',
+  },
+};
+
+export const MONUMENT_MEDIA_MAP: Record<string, LocationMediaItem> = {
+  // Agra Monuments
+  'darwaza-i-rauza': {
+    image: '/images/monuments/darwaza-i-rauza.jpg',
+    alt: 'Darwaza-i-Rauza red sandstone southern Great Gate of the Taj Mahal',
+    objectPosition: 'center 35%',
+  },
+  'taj-mahal-mausoleum': DEFAULT_AGRA_MEDIA,
+  'taj-mahal-mosque-jawab': {
+    image: '/images/monuments/taj-mahal-mosque-jawab.jpg',
+    alt: 'Twin red sandstone Taj Mosque and Jawab pavilion flanking the marble plinth',
+    objectPosition: 'center 45%',
+  },
+  'amar-singh-gate': {
+    image: '/images/monuments/amar-singh-gate.jpg',
+    alt: 'Amar Singh Gate red sandstone defensive bastion entrance at Agra Fort',
+    objectPosition: 'center 38%',
+  },
+  'jahangiri-mahal': {
+    image: '/images/monuments/jahangiri-mahal.jpg',
+    alt: 'Jahangiri Mahal red sandstone palace courtyard inside Agra Fort',
+    objectPosition: 'center 42%',
+  },
+  'musamman-burj': {
+    image: '/images/monuments/musamman-burj.jpg',
+    alt: 'Musamman Burj white marble octagonal pavilion at Agra Fort',
+    objectPosition: 'center 38%',
+  },
+  // Sarnath Monuments
+  'dhamek-stupa': DEFAULT_SARNATH_MEDIA,
+  'ashoka-pillar-sarnath': {
+    image: '/images/monuments/ashoka-pillar-sarnath.jpg',
+    alt: 'In-situ polished Chunar sandstone stump of Ashoka Pillar in Sarnath',
+    objectPosition: 'center 45%',
+  },
+  'dharmarajika-stupa': {
+    image: '/images/monuments/dharmarajika-stupa.jpg',
+    alt: 'Circular excavated brick foundation of Dharmarajika Stupa in Sarnath',
+    objectPosition: 'center 48%',
+  },
+  'sarnath-archaeological-museum': {
+    image: '/images/monuments/sarnath-archaeological-museum.jpg',
+    alt: 'Original four-lion Capital of Ashoka at Sarnath Archaeological Museum',
+    objectPosition: 'center 32%',
+  },
+  'mulagandhakuti-vihara': {
+    image: '/images/monuments/mulagandhakuti-vihara.jpg',
+    alt: 'Mulagandhakuti Vihara temple tower and monastery courtyard in Sarnath',
+    objectPosition: 'center 36%',
+  },
+  'chaukhandi-stupa': {
+    image: '/images/monuments/chaukhandi-stupa.jpg',
+    alt: 'Chaukhandi Stupa brick terraces crowned by 1588 CE octagonal Mughal tower',
+    objectPosition: 'center 38%',
+  },
+};
+
+export const GUIDE_MONUMENT_SPOTLIGHTS: MonumentSpotlightMeta[] = [
+  {
+    slug: 'taj-mahal-mausoleum',
+    name: 'Taj Mahal Main Mausoleum',
+    nameHi: 'ताजमहल मुख्य मकबरा',
+    shortSummary:
+      'Ivory-white Makrana marble mausoleum built by Shah Jahan featuring Pietra Dura floral inlay and four minarets.',
+    shortSummaryHi:
+      'सम्राट शाहजहाँ द्वारा मकराना के सफेद संगमरमर से निर्मित मुख्य मकबरा, जिसमें पर्चिनकारी की उत्कृष्ट कला है।',
+    visitDurationMin: 25,
+    stepFree: false,
+    promptEn: 'Tell me the verified history, architecture, and folklore of the Taj Mahal Main Mausoleum.',
+    promptHi: 'ताजमहल मुख्य मकबरे का प्रमाणित इतिहास, वास्तुकला और लोककथा बताइए।',
+  },
+  {
+    slug: 'darwaza-i-rauza',
+    name: 'Darwaza-i-Rauza (The Great Gate)',
+    nameHi: 'दरवाज़ा-ए-रौज़ा (मुख्य शाही प्रवेश द्वार)',
+    shortSummary:
+      'Monumental red sandstone southern gateway leading into the Charbagh garden with optical framing of the Taj Mahal.',
+    shortSummaryHi:
+      'ताजमहल के चारबाग उद्यान में प्रवेश कराने वाला भव्य लाल बलुआ पत्थर का मुख्य द्वार।',
+    visitDurationMin: 10,
+    stepFree: true,
+    promptEn: 'What makes Darwaza-i-Rauza special, including its eleven domes and optical framing?',
+    promptHi: 'दरवाज़ा-ए-रौज़ा की 11 छतरियों और वास्तुकला के दृष्टि प्रभाव के बारे में बताइए।',
+  },
+  {
+    slug: 'taj-mahal-mosque-jawab',
+    name: 'Taj Mosque & Jawab Pavilion',
+    nameHi: 'ताज मस्जिद एवं जवाब भवन',
+    shortSummary:
+      'Twin red sandstone structures flanking the mausoleum on the west and east to maintain Mughal symmetry.',
+    shortSummaryHi:
+      'मुख्य मकबरे के पश्चिम और पूर्व में समरूपता बनाए रखने के लिए निर्मित लाल बलुआ पत्थर के दो जुड़वाँ भवन।',
+    visitDurationMin: 10,
+    stepFree: true,
+    promptEn: 'Why were the Taj Mosque and Jawab Pavilion built as twins, and why is Taj Mahal closed on Fridays?',
+    promptHi: 'ताज मस्जिद और जवाब भवन की समरूपता तथा शुक्रवार को बंद रहने का कारण बताइए।',
+  },
+  {
+    slug: 'amar-singh-gate',
+    name: 'Amar Singh Gate (Agra Fort)',
+    nameHi: 'अमर सिंह द्वार (आगरा किला)',
+    shortSummary:
+      'Primary public entrance to Agra Fort featuring a defensive dog-leg L-shaped ramp and glazed tile inlay.',
+    shortSummaryHi:
+      'आगरा किले का मुख्य प्रवेश द्वार, जिसमें सुरक्षा हेतु मोड़दार ढलान और आकर्षक पत्थर की नक्काशी है।',
+    visitDurationMin: 15,
+    stepFree: true,
+    promptEn: 'Explain the defensive history and L-shaped ramp of Amar Singh Gate at Agra Fort.',
+    promptHi: 'आगरा किले के अमर सिंह द्वार के इतिहास और सुरक्षात्मक ढलान के बारे में बताइए।',
+  },
+  {
+    slug: 'jahangiri-mahal',
+    name: 'Jahangiri Mahal',
+    nameHi: 'जहाँगीरी महल',
+    shortSummary:
+      'Akbar-era red sandstone palace showcasing a fusion of Timurid arches and Rajput stone brackets.',
+    shortSummaryHi:
+      'अकबर काल का लाल बलुआ पत्थर का महल, जो मुगल और राजपूत स्थापत्य शैली का सुंदर संगम दर्शाता है।',
+    visitDurationMin: 20,
+    stepFree: true,
+    promptEn: 'What Rajput-Mughal features and Hauz-i-Jahangiri bowl are inside Jahangiri Mahal?',
+    promptHi: 'जहाँगीरी महल में मुगल-राजपूत स्थापत्य और हौज-ए-जहाँगीरी की विशेषता बताइए।',
+  },
+  {
+    slug: 'musamman-burj',
+    name: 'Musamman Burj (Octagonal Tower)',
+    nameHi: 'मुसम्मन बुर्ज (अष्टकोणीय मीनार)',
+    shortSummary:
+      'White marble pavilion overlooking the Yamuna River where Emperor Shah Jahan spent his final years.',
+    shortSummaryHi:
+      'यमुना और ताजमहल की ओर मुख किए सफेद संगमरमर का अष्टकोणीय मंडप, जहाँ शाहजहाँ ने अंतिम वर्ष बिताए।',
+    visitDurationMin: 15,
+    stepFree: false,
+    promptEn: 'What happened to Shah Jahan at Musamman Burj, and what is history vs folklore there?',
+    promptHi: 'मुसम्मन बुर्ज में शाहजहाँ के अंतिम वर्षों का प्रमाणित इतिहास और लोककथा बताइए।',
+  },
+];
+
+export const SARNATH_MONUMENT_SPOTLIGHTS: MonumentSpotlightMeta[] = [
+  {
+    slug: 'dhamek-stupa',
+    name: 'Dhamek Stupa',
+    nameHi: 'धमेख स्तूप',
+    shortSummary:
+      '43.6 m cylindrical brick and carved Chunar sandstone stupa marking the sacred spot of Buddha’s first sermon.',
+    shortSummaryHi:
+      '43.6 मीटर ऊँचा विशाल बेलनाकार स्तूप, जो भगवान बुद्ध के प्रथम धर्मोपदेश स्थल का प्रतीक है।',
+    visitDurationMin: 20,
+    stepFree: true,
+    promptEn: 'Tell me the verified history, Gupta carvings, and Jataka deer lore of Dhamek Stupa.',
+    promptHi: 'धमेख स्तूप का प्रमाणित इतिहास, गुप्तकालीन नक्काशी और मृग जातक कथा बताइए।',
+  },
+  {
+    slug: 'ashoka-pillar-sarnath',
+    name: 'Ashoka Pillar & Main Shrine',
+    nameHi: 'अशोक स्तंभ एवं मुख्य विहार अवशेष',
+    shortSummary:
+      'In-situ polished Chunar sandstone stump of Ashoka’s c. 250 BCE pillar inscribed with his Brahmi Schism Edict.',
+    shortSummaryHi:
+      'लगभग 250 ई.पू. में सम्राट अशोक द्वारा स्थापित पॉलिश किए चुनार पत्थर के स्तंभ का मूल आधार व ब्राह्मी अभिलेख।',
+    visitDurationMin: 15,
+    stepFree: true,
+    promptEn: 'What is inscribed on the Ashoka Pillar at Sarnath and how was it excavated?',
+    promptHi: 'सारनाथ के अशोक स्तंभ पर क्या उत्कीर्ण है और इसकी खोज कैसे हुई?',
+  },
+  {
+    slug: 'sarnath-archaeological-museum',
+    name: 'Sarnath Museum (Lion Capital)',
+    nameHi: 'सारनाथ पुरातत्व संग्रहालय',
+    shortSummary:
+      'Oldest ASI site museum (1910) preserving the original four-lion Ashoka Capital—India’s National Emblem.',
+    shortSummaryHi:
+      '1910 में स्थापित एएसआई संग्रहालय, जहाँ भारत का राष्ट्रीय प्रतीक मूल अशोक स्तंभ शीर्ष सुरक्षित है।',
+    visitDurationMin: 30,
+    stepFree: true,
+    promptEn: 'Tell me about the Ashoka Lion Capital inside Sarnath Museum and its Friday closure.',
+    promptHi: 'सारनाथ संग्रहालय में रखे अशोक के सिंह स्तंभ और शुक्रवार अवकाश के बारे में बताइए।',
+  },
+  {
+    slug: 'dharmarajika-stupa',
+    name: 'Dharmarajika Stupa Ruins',
+    nameHi: 'धर्मराजिका स्तूप अवशेष',
+    shortSummary:
+      'Circular brick reliquary stupa founded by Emperor Ashoka whose 1794 excavation initiated Sarnath’s rediscovery.',
+    shortSummaryHi:
+      'सम्राट अशोक द्वारा निर्मित अस्थि-स्तूप की नींव, जिसके 1794 के उत्खनन से सारनाथ पुनः प्रकाश में आया।',
+    visitDurationMin: 12,
+    stepFree: true,
+    promptEn: 'What happened at Dharmarajika Stupa in 1794 and what is history vs folklore there?',
+    promptHi: '1794 में धर्मराजिका स्तूप के उत्खनन का इतिहास और इससे जुड़ी जनश्रुति बताइए।',
+  },
+  {
+    slug: 'mulagandhakuti-vihara',
+    name: 'Mulagandhakuti Vihara & Bodhi Tree',
+    nameHi: 'मूलगंधकुटी विहार एवं बोधि वृक्ष',
+    shortSummary:
+      '1931 Mahabodhi temple famous for Kosetsu Nosu’s frescoes, sacred relics, and a Bodhi Tree from Bodh Gaya’s lineage.',
+    shortSummaryHi:
+      '1931 में निर्मित बौद्ध विहार, जिसमें कोसेत्सु नोसु के भित्तिचित्र और पवित्र बोधि वृक्ष स्थित हैं।',
+    visitDurationMin: 20,
+    stepFree: false,
+    promptEn: 'Tell me about Kosetsu Nosu’s frescoes and the Sacred Bodhi Tree at Mulagandhakuti Vihara.',
+    promptHi: 'मूलगंधकुटी विहार के भित्तिचित्र और पवित्र बोधि वृक्ष की परंपरा के बारे में बताइए।',
+  },
+  {
+    slug: 'chaukhandi-stupa',
+    name: 'Chaukhandi Stupa',
+    nameHi: 'चौखंडी स्तूप',
+    shortSummary:
+      'Gupta-era terraced brick stupa crowned by Govardhan’s 1588 CE octagonal Mughal tower honouring Emperor Humayun.',
+    shortSummaryHi:
+      'गुप्तकालीन सीढ़ीदार ईंटों का स्तूप, जिसके शीर्ष पर 1588 ई. में हुमायूँ की स्मृति में मुगल मीनार बनी है।',
+    visitDurationMin: 15,
+    stepFree: false,
+    promptEn: 'Why does the Buddhist Chaukhandi Stupa have an octagonal Mughal tower on top?',
+    promptHi: 'बौद्ध चौखंडी स्तूप के शिखर पर अष्टकोणीय मुगल मीनार क्यों बनी है?',
+  },
+];
+
+export const GUIDE_TOPIC_CARDS: GuideTopicCard[] = [
+  {
+    id: 'black-taj-myth',
+    badgeEn: 'History vs. Folklore',
+    badgeHi: 'इतिहास बनाम लोककथा',
+    titleEn: 'Black Taj Mahal & Artisans’ Hands Myths',
+    titleHi: 'काला ताजमहल व कारीगरों के हाथ काटने की किंवदंती',
+    descEn: 'Compare Tavernier’s 1665 Black Taj legend and artisan myths against ASI excavations at Mehtab Bagh.',
+    descHi: 'मेहताब बाग में ASI की खुदाई और मुगल अभिलेखों के आधार पर इन प्रचलित लोककथाओं की सच्चाई जानें।',
+    questionEn: 'Are the Black Taj Mahal story and the myth about cutting off artisans hands true?',
+    questionHi: 'क्या काले ताजमहल और कारीगरों के हाथ काटने की कहानी सच है या लोककथा?',
+    accent: 'saffron',
+  },
+  {
+    id: 'optical-parchinkari',
+    badgeEn: 'Architecture & Craft',
+    badgeHi: 'स्थापत्य एवं शिल्प',
+    titleEn: 'Optical Illusions & Pietra Dura Inlay',
+    titleHi: 'दृष्टि-कौशल सुलेख और पर्चिनकारी कला',
+    descEn: 'Discover Amanat Khan’s scaled calligraphy, outward-tilting minarets, and semi-precious stone inlay.',
+    descHi: 'ऊँचाई के अनुसार बड़े होते अक्षर, बाहर की ओर झुकी मीनारें और संगमरमर में रत्न जड़ाई का रहस्य।',
+    questionEn: 'Explain the calligraphy optical illusions, tilting minarets, and Parchinkari stone inlay at the Taj Mahal.',
+    questionHi: 'ताजमहल की कैलीग्राफी के दृष्टि-कौशल, झुकी मीनारों और पर्चिनकारी कला को समझाइए।',
+    accent: 'navy',
+  },
+  {
+    id: 'musamman-burj-story',
+    badgeEn: 'Agra Fort',
+    badgeHi: 'आगरा किला',
+    titleEn: 'Shah Jahan’s Final Years & Secret Tunnels',
+    titleHi: 'शाहजहाँ के अंतिम वर्ष और गुप्त सुरंगों का सच',
+    descEn: 'Separate recorded 1658–1666 house arrest history from folk stories of reflective gems and river tunnels.',
+    descHi: '1658-1666 के ऐतिहासिक विवरण और गुप्त सुरंगों व हीरे के प्रतिबिंब की लोककथा का अंतर जानें।',
+    questionEn: 'What happened to Shah Jahan at Musamman Burj and are there secret tunnels to the Taj Mahal?',
+    questionHi: 'मुसम्मन बुर्ज में शाहजहाँ के अंतिम वर्ष कैसे बीते और क्या वहाँ से ताजमहल तक कोई गुप्त सुरंग है?',
+    accent: 'brass',
+    focusMonumentSlug: 'musamman-burj',
+  },
+  {
+    id: 'timings-etiquette',
+    badgeEn: 'Visitor Essentials',
+    badgeHi: 'यात्री नियम',
+    titleEn: 'Sunrise Hours, Friday Closure & Rules',
+    titleHi: 'खुलने का समय, शुक्रवार बंद व प्रवेश नियम',
+    descEn: 'Check sunrise-to-sunset timings, annual Shah Jahan Urs access, shoe covers, and step-free routes.',
+    descHi: 'सूर्योदय-सूर्यास्त समय, शाहजहाँ उर्स, शू-कवर नियम और व्हीलचेयर सुगम मार्ग की जानकारी लें।',
+    questionEn: 'What are the Taj Mahal timings, Friday closure rule, shoe cover etiquette, and step-free routes?',
+    questionHi: 'ताजमहल खुलने का समय, शुक्रवार नियम, शू-कवर और व्हीलचेयर सुगम मार्ग की जानकारी दें।',
+    accent: 'emerald',
+  },
+];
+
+export const SARNATH_TOPIC_CARDS: GuideTopicCard[] = [
+  {
+    id: 'sarnath-deer-jataka',
+    badgeEn: 'History vs. Folklore',
+    badgeHi: 'इतिहास बनाम लोककथा',
+    titleEn: 'First Sermon & Golden Deer Jataka Lore',
+    titleHi: 'प्रथम धर्मोपदेश एवं स्वर्ण मृग जातक कथा',
+    descEn: 'Pair the historical Dhammacakkappavattana Sutta at Dhamek Stupa with the compassionate Saranganatha Deer Park legend.',
+    descHi: 'धर्मचक्रप्रवर्तन के ऐतिहासिक प्रमाणों के साथ मृगदाव व सारंगनाथ की करुणामयी जातक कथा जानें।',
+    questionEn: 'Tell me about Buddha first sermon at Sarnath and the Golden Deer Jataka folklore.',
+    questionHi: 'सारनाथ में बुद्ध के प्रथम उपदेश और स्वर्ण मृग जातक लोककथा के बारे में बताइए।',
+    accent: 'saffron',
+    focusMonumentSlug: 'dhamek-stupa',
+  },
+  {
+    id: 'sarnath-national-emblem',
+    badgeEn: 'National Heritage',
+    badgeHi: 'राष्ट्रीय धरोहर',
+    titleEn: 'Lion Capital & India’s National Emblem',
+    titleHi: 'अशोक का सिंह स्तंभ और राष्ट्रीय प्रतीक',
+    descEn: 'Explore Friedrich Oertel’s 1904-1905 discovery, the 24-spoked Ashoka Chakra, and the Schism Edict.',
+    descHi: '1904-1905 की खुदाई, 24 तीलियों वाले अशोक चक्र और भारत के राजचिह्न बनने की पूरी गाथा।',
+    questionEn: 'How was the Ashoka Lion Capital excavated and how did it become India National Emblem?',
+    questionHi: 'सारनाथ का सिंह स्तंभ कैसे खोजा गया और यह भारत का राष्ट्रीय प्रतीक कैसे बना?',
+    accent: 'navy',
+    focusMonumentSlug: 'sarnath-archaeological-museum',
+  },
+  {
+    id: 'chaukhandi-humayun-story',
+    badgeEn: 'Syncretic Monument',
+    badgeHi: 'अनोखा स्थापत्य',
+    titleEn: 'Chaukhandi Stupa & Humayun’s Tower',
+    titleHi: 'चौखंडी स्तूप और हुमायूँ की मुगल मीनार',
+    descEn: 'Discover how Gupta Buddhist terraces were topped by Govardhan’s 1588 CE Mughal tower after Humayun’s stay.',
+    descHi: 'गुप्तकालीन बौद्ध स्तूप के ऊपर अकबर के शासन में 1588 ई. में अष्टकोणीय मुगल मीनार बनने की कहानी।',
+    questionEn: 'Why does Chaukhandi Stupa have an octagonal Mughal tower on top of a Buddhist stupa?',
+    questionHi: 'चौखंडी स्तूप के ऊपर अष्टकोणीय मुगल मीनार क्यों बनी है और इसकी लोककथा क्या है?',
+    accent: 'brass',
+    focusMonumentSlug: 'chaukhandi-stupa',
+  },
+  {
+    id: 'sarnath-timings-etiquette',
+    badgeEn: 'Visitor Essentials',
+    badgeHi: 'यात्री नियम',
+    titleEn: 'Park Hours, Museum Friday Closure & Rules',
+    titleHi: 'दर्शन समय, संग्रहालय शुक्रवार बंद व नियम',
+    descEn: 'Plan ahead: outdoor ruins open daily (INR 25/300), while Sarnath Museum is closed every Friday.',
+    descHi: 'स्तूप उद्यान प्रतिदिन खुलता है, जबकि सारनाथ संग्रहालय प्रत्येक शुक्रवार बंद रहता है—टिकट व शिष्टाचार जानें।',
+    questionEn: 'What are the Sarnath monument timings, ticket prices, Friday museum closure, and visitor rules?',
+    questionHi: 'सारनाथ स्मारक व संग्रहालय खुलने का समय, टिकट शुल्क, शुक्रवार अवकाश और प्रवेश नियम बताइए।',
+    accent: 'emerald',
+  },
+];
+
+export const AGRA_VISITOR_SNAPSHOT: VisitorSnapshotTile[] = [
+  {
+    id: 'timings',
+    titleEn: 'Visiting Window & Friday Rule',
+    titleHi: 'खुलने का समय व शुक्रवार नियम',
+    bodyEn: 'Taj Mahal opens 30 min before sunrise to sunset (closed Fridays). Agra Fort is open all days.',
+    bodyHi: 'ताजमहल सूर्योदय से 30 मिनट पहले खुलता है (शुक्रवार बंद)। आगरा किला सभी दिन खुला रहता है।',
+  },
+  {
+    id: 'unesco',
+    titleEn: 'Dual UNESCO Heritage Circuit',
+    titleHi: 'दो यूनेस्को विश्व धरोहर स्थल',
+    bodyEn: 'Taj Mahal & Agra Fort sit 2.5 km apart along the Yamuna bend, paired with UP ODOP Marble & Leather crafts.',
+    bodyHi: 'ताजमहल और आगरा किला यमुना तट पर 2.5 किमी दूर स्थित हैं, साथ में यूपी ODOP शिल्प केंद्र भी हैं।',
+  },
+  {
+    id: 'verified',
+    titleEn: 'ASI-Grounded + 10-Lang Voice',
+    titleHi: 'ASI प्रमाणित + 10 भाषाओं में आवाज़',
+    bodyEn: 'Every answer separates recorded history from local folklore with voice input and read-aloud support.',
+    bodyHi: 'प्रत्येक उत्तर प्रमाणित इतिहास व लोककथा को अलग दिखाता है तथा बोलकर पूछने और सुनने की सुविधा देता है।',
+  },
+];
+
+export const SARNATH_VISITOR_SNAPSHOT: VisitorSnapshotTile[] = [
+  {
+    id: 'timings',
+    titleEn: 'Site Open Daily · Museum Closed Fri',
+    titleHi: 'उद्यान प्रतिदिन · संग्रहालय शुक्रवार बंद',
+    bodyEn: 'Dhamek & Chaukhandi Stupas open daily (sunrise–sunset). Sarnath Museum (Lion Capital) is closed every Friday.',
+    bodyHi: 'धमेख व चौखंडी स्तूप प्रतिदिन खुले रहते हैं, जबकि सारनाथ संग्रहालय प्रत्येक शुक्रवार बंद रहता है।',
+  },
+  {
+    id: 'circuit',
+    titleEn: 'Step-Free Buddhist & Jain Circuit',
+    titleHi: 'सुगम बौद्ध एवं जैन विरासत क्षेत्र',
+    bodyEn: 'Flat brick garden paths link Dhamek Stupa, Ashoka Pillar, Jain Temple, and Banarasi Silk & Toy UP ODOP hubs.',
+    bodyHi: 'समतल उद्यान मार्ग धमेख स्तूप, अशोक स्तंभ, जैन मंदिर तथा बनारसी रेशम व काष्ठ खिलौना ODOP से जुड़े हैं।',
+  },
+  {
+    id: 'verified',
+    titleEn: 'ASI-Grounded + 10-Lang Voice',
+    titleHi: 'ASI प्रमाणित + 10 भाषाओं में आवाज़',
+    bodyEn: 'Every answer separates ASI archaeology from Jataka & oral folklore with multilingual voice and read-aloud support.',
+    bodyHi: 'प्रत्येक उत्तर पुरातत्व इतिहास व जातक लोककथा को अलग दिखाता है तथा बहुभाषी आवाज़ सहायता देता है।',
+  },
+];
+
+export const DESTINATION_CONFIG_MAP: Record<string, DestinationConfig> = {
+  agra: {
+    slug: 'agra',
+    nameEn: 'Agra',
+    nameHi: 'आगरा',
+    center: [27.1751, 78.0421],
+    facilitiesCenter: [27.1735, 78.0421],
+    demoGps: {
+      lat: 27.1802,
+      lng: 78.0226,
+      labelEn: 'Musamman Burj',
+      labelHi: 'मुसम्मन बुर्ज',
+    },
+    defaultMedia: DEFAULT_AGRA_MEDIA,
+    defaultHelplines: DEFAULT_AGRA_HELPLINES,
+    offlineGapFollowUps: {
+      en: ['Why was the Taj Mahal built?', 'Is the Black Taj Mahal myth true?'],
+      hi: ['ताजमहल क्यों बनाया गया?', 'काले ताजमहल की कहानी सच है या लोककथा?'],
+    },
+    copy: {
+      companionTitleEn: 'Agra Heritage Companion',
+      companionTitleHi: 'आगरा विरासत साथी',
+      guideWelcomeBadgeEn: 'UNESCO Dual Heritage · Taj Mahal & Agra Fort',
+      guideWelcomeBadgeHi: 'यूनेस्को युगल विरासत · ताजमहल एवं आगरा किला',
+      guideHeadingEn: 'Ask Anything About Agra Heritage',
+      guideHeadingHi: 'आगरा विरासत के बारे में पूछें',
+      allMonumentsEn: 'All Agra Monuments',
+      allMonumentsHi: 'पूरा आगरा क्षेत्र',
+      exploreMonumentsHeadingEn: 'Explore Agra Monuments',
+      exploreMonumentsHeadingHi: 'आगरा के प्रमुख स्मारक देखें',
+      chatPlaceholderEn: 'Type or speak a question about Taj Mahal or Agra Fort...',
+      chatPlaceholderHi: 'ताजमहल या आगरा किले के बारे में लिखें या बोलकर पूछें...',
+      startersEn: [
+        'Why was the Taj Mahal built, and is the Black Taj Mahal story true?',
+        'What do the floral carvings and Parchinkari inlay mean?',
+        'What happened to Shah Jahan at Musamman Burj?',
+        'Are there step-free routes and shoe cover rules here?',
+      ],
+      startersHi: [
+        'ताजमहल क्यों बनाया गया और काले ताजमहल की कहानी सच है या लोककथा?',
+        'दीवारों पर फूल-पत्ती की पर्चिनकारी कला का क्या अर्थ है?',
+        'शाहजहाँ ने मुसम्मन बुर्ज में अंतिम वर्ष कैसे बिताए?',
+        'ताजमहल खुलने का समय और शुक्रवार के नियम क्या हैं?',
+      ],
+    },
+    monumentSpotlights: GUIDE_MONUMENT_SPOTLIGHTS,
+    topicCards: GUIDE_TOPIC_CARDS,
+    visitorSnapshot: AGRA_VISITOR_SNAPSHOT,
+  },
+  sarnath: {
+    slug: 'sarnath',
+    nameEn: 'Sarnath',
+    nameHi: 'सारनाथ',
+    center: [25.3808, 83.0245],
+    facilitiesCenter: [25.3792, 83.0235],
+    demoGps: {
+      lat: 25.3808,
+      lng: 83.0245,
+      labelEn: 'Dhamek Stupa',
+      labelHi: 'धमेख स्तूप',
+    },
+    defaultMedia: DEFAULT_SARNATH_MEDIA,
+    defaultHelplines: DEFAULT_SARNATH_HELPLINES,
+    offlineGapFollowUps: {
+      en: [
+        'Where did Gautama Buddha deliver his first sermon?',
+        'Tell me the Golden Deer Jataka story of Sarnath',
+      ],
+      hi: [
+        'बुद्ध ने पहला उपदेश कहाँ दिया था?',
+        'सारनाथ की स्वर्ण मृग जातक लोककथा बताइए',
+      ],
+    },
+    copy: {
+      companionTitleEn: 'Sarnath Heritage Companion',
+      companionTitleHi: 'सारनाथ विरासत साथी',
+      guideWelcomeBadgeEn: 'Sacred Deer Park · Dhamek Stupa & Lion Capital',
+      guideWelcomeBadgeHi: 'पावन मृगदाव · धमेख स्तूप एवं अशोक स्तंभ',
+      guideHeadingEn: 'Ask Anything About Sarnath Heritage',
+      guideHeadingHi: 'सारनाथ विरासत के बारे में पूछें',
+      allMonumentsEn: 'All Sarnath Monuments',
+      allMonumentsHi: 'पूरा सारनाथ क्षेत्र',
+      exploreMonumentsHeadingEn: 'Explore Sarnath Monuments',
+      exploreMonumentsHeadingHi: 'सारनाथ के प्रमुख स्मारक देखें',
+      chatPlaceholderEn: 'Type or speak a question about Dhamek Stupa, Ashoka Pillar, or Sarnath...',
+      chatPlaceholderHi: 'धमेख स्तूप, अशोक स्तंभ या सारनाथ के बारे में लिखें या बोलकर पूछें...',
+      startersEn: [
+        'Where did Buddha deliver his first sermon, and what is the Deer Park legend?',
+        'How did the Ashoka Lion Capital become India’s National Emblem?',
+        'Why does Chaukhandi Stupa have a Mughal octagonal tower on top?',
+        'When is Sarnath Museum closed, and are step-free paths available?',
+      ],
+      startersHi: [
+        'भगवान बुद्ध ने प्रथम उपदेश कहाँ दिया और स्वर्ण मृग जातक कथा क्या है?',
+        'अशोक का सिंह स्तंभ भारत का राष्ट्रीय प्रतीक कैसे बना?',
+        'चौखंडी स्तूप के शिखर पर मुगल मीनार क्यों बनाई गई?',
+        'सारनाथ संग्रहालय किस दिन बंद रहता है और क्या रैंप मार्ग उपलब्ध है?',
+      ],
+    },
+    monumentSpotlights: SARNATH_MONUMENT_SPOTLIGHTS,
+    topicCards: SARNATH_TOPIC_CARDS,
+    visitorSnapshot: SARNATH_VISITOR_SNAPSHOT,
+  },
+};
+
+export function getDestinationConfig(slug: string): DestinationConfig {
+  return DESTINATION_CONFIG_MAP[slug] || DESTINATION_CONFIG_MAP.agra;
+}
+
+export function getNearbyMedia(slug: string, destSlug = 'agra'): LocationMediaItem {
+  return NEARBY_MEDIA_MAP[slug] || getDestinationConfig(destSlug).defaultMedia;
+}
+
+export function getFacilityMedia(slug: string, destSlug = 'agra'): LocationMediaItem {
+  return FACILITY_MEDIA_MAP[slug] || getDestinationConfig(destSlug).defaultMedia;
+}
+
+export function getMonumentMedia(slug: string, destSlug = 'agra'): LocationMediaItem {
+  return MONUMENT_MEDIA_MAP[slug] || getDestinationConfig(destSlug).defaultMedia;
+}
+
