@@ -3,17 +3,25 @@ import {
   Accessibility,
   ArrowRight,
   BarChart3,
+  BookOpen,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
+  ChevronDown,
   Compass,
+  Headphones,
+  Languages,
+  LifeBuoy,
   Loader2,
   MapPin,
+  MessageCircle,
   RefreshCw,
+  ScanLine,
   ShieldCheck,
+  Sparkles,
+  Store,
+  WifiOff,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
-import { LANGUAGE_OPTIONS, UP_HERITAGE_CITIES, type UpHeritageCity } from '../data/upCities';
+import { LANGUAGE_OPTIONS, UP_HERITAGE_CITIES } from '../data/upCities';
 import {
   isGeolocationAlreadyGranted,
   requestBrowserLocation,
@@ -21,7 +29,9 @@ import {
 } from '../services/geolocation';
 import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
-import { UpHeritageCrest } from './HeritageSketchIcons';
+import { useReveal } from '../hooks/useReveal';
+import { CityHeritageSketch, UpHeritageCrest } from './HeritageSketchIcons';
+import { ParallaxScene } from './ParallaxScene';
 
 interface CitySelectorViewProps {
   language: string;
@@ -49,28 +59,13 @@ export function CitySelectorView({
   const baseLang = language.toLowerCase().split('-')[0];
   const translationKey = baseLang !== 'en' && baseLang !== 'hi' ? baseLang : null;
 
+  useReveal([language]);
   const [locating, setLocating] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
   const [customNotice, setCustomNotice] = useState<string | null>(null);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
-  const [settledTranslationKey, setSettledTranslationKey] = useState<string | null>(null);
   const [translatedCities, setTranslatedCities] = useState<
     Record<string, { name: string; monument: string; tagline: string }>
   >({});
-
-  const translating = Boolean(translationKey && settledTranslationKey !== translationKey);
-
-  useEffect(() => {
-    if (paused) return;
-    const timer = window.setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % UP_HERITAGE_CITIES.length);
-    }, 5500);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [paused]);
 
   useEffect(() => {
     if (!translationKey) return;
@@ -90,11 +85,8 @@ export function CitySelectorView({
           };
         });
         setTranslatedCities(next);
-        setSettledTranslationKey(translationKey);
       })
-      .catch(() => {
-        if (active) setSettledTranslationKey(translationKey);
-      });
+      .catch(() => undefined);
     return () => {
       active = false;
     };
@@ -177,282 +169,251 @@ export function CitySelectorView({
     }
   };
 
-  const getCityCopy = (city: UpHeritageCity) => {
-    const tr = translationKey ? translatedCities[city.slug] : null;
-    return {
-      name: isHi ? city.nameHi : tr?.name || city.name,
-      monument: isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel,
-      tagline: isHi ? city.taglineHi : tr?.tagline || city.tagline,
-    };
-  };
-
-  const markImageLoaded = (slug: string) => {
-    setLoadedImages((prev) => (prev[slug] ? prev : { ...prev, [slug]: true }));
-  };
-
-  const stepSlide = (delta: number) => {
-    setActiveSlide(
-      (prev) => (prev + delta + UP_HERITAGE_CITIES.length) % UP_HERITAGE_CITIES.length,
-    );
-  };
+  const features = [MessageCircle, ScanLine, ShieldCheck, Headphones, Store, LifeBuoy, WifiOff, Accessibility];
 
   return (
-    <div className="landing-shell">
-      <div className="tricolour-bar" />
-
-      <header className="gov-masthead">
-        <div className="gov-masthead__inner">
-          <div className="gov-masthead__brand">
-            <div className="gov-masthead__crest">
+    <div className="landing">
+      <ParallaxScene variant="hero">
+        <header className="landing-topbar">
+          <div className="landing-topbar__brand">
+            <div className="landing-topbar__crest">
               <UpHeritageCrest />
             </div>
-            <div>
-              <div className="gov-masthead__gov-tag">{ui.govTag}</div>
-              <h1 className="gov-masthead__title">{ui.appTitle}</h1>
+            <div className="landing-topbar__titles">
+              <span className="landing-topbar__tag">{ui.govTag}</span>
+              <span className="landing-topbar__title">{ui.appTitle}</span>
             </div>
           </div>
-
-          <div className="gov-masthead__actions">
-            <select
-              className="lang-select"
-              value={language}
-              onChange={(e) => onChangeLanguage(e.target.value)}
-              aria-label="Choose language"
-            >
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {opt.nativeLabel}
-                </option>
-              ))}
-            </select>
-
+          <div className="landing-topbar__actions">
+            <label className="glass-select">
+              <Languages size={16} aria-hidden="true" />
+              <select
+                value={language}
+                onChange={(e) => onChangeLanguage(e.target.value)}
+                aria-label="Choose language"
+              >
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.nativeLabel}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
-              className={`pill-btn ${a11yMode ? 'is-emerald' : ''}`}
+              className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
               onClick={onToggleA11y}
               aria-pressed={a11yMode}
+              aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
+              title={a11yMode ? ui.easyModeOn : ui.easyMode}
             >
-              <Accessibility size={16} />
-              <span>{a11yMode ? ui.easyModeOn : ui.easyMode}</span>
-            </button>
-
-            <button type="button" className="pill-btn" onClick={onOpenAdmin}>
-              <BarChart3 size={16} />
-              <span>{ui.deptInsights}</span>
+              <Accessibility size={18} />
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="landing-hero">
-        <div
-          className="landing-hero__panel"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onFocusCapture={() => setPaused(true)}
-          onBlurCapture={() => setPaused(false)}
-        >
-          <div className="landing-hero__slideshow" aria-hidden="true">
-            {UP_HERITAGE_CITIES.map((city, idx) => (
-              <div
-                key={city.slug}
-                className={`landing-hero__slide ${idx === activeSlide ? 'is-active' : ''}`}
-              >
-                <img
-                  src={city.image}
-                  alt=""
-                  style={{ objectPosition: city.objectPosition }}
-                  loading={idx === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={idx === 0 ? 'high' : 'auto'}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="landing-hero__scrim" aria-hidden="true" />
-
-          <div className="landing-hero__content">
-            <h2 className="landing-hero__headline">{ui.heroHeadline}</h2>
-
-            <div className="landing-hero__bottom-bar">
-              <div className="landing-hero__cta-row">
-                <button
-                  type="button"
-                  className="pill-btn is-saffron"
-                  onClick={() => onSelectAgra(userCoords)}
-                >
-                  <Compass size={17} />
-                  <span>{ui.launchAgra}</span>
-                  <ArrowRight size={16} />
-                </button>
-
-                <button
-                  type="button"
-                  className={`pill-btn is-hero-glass ${userCoords || locationGranted ? 'is-detected' : ''}`}
-                  onClick={handleDetectLocation}
-                  disabled={locating}
-                  title={
-                    userCoords || locationGranted
-                      ? isHi
-                        ? 'वर्तमान स्थान रीफ़्रेश करें'
-                        : 'Tap to refresh your GPS location'
-                      : undefined
-                  }
-                >
-                  {locating ? (
-                    <Loader2 size={16} className="spin-icon" />
-                  ) : userCoords ? (
-                    <CheckCircle2 size={16} />
-                  ) : locationGranted ? (
-                    <RefreshCw size={15} />
-                  ) : (
-                    <MapPin size={16} />
-                  )}
-                  <span>
-                    {locating
-                      ? ui.detectingGps
-                      : userCoords
-                        ? ui.locationActive
-                        : locationGranted
-                          ? ui.refreshLocation
-                          : ui.detectGps}
-                  </span>
-                  {!locating && userCoords && <RefreshCw size={13} style={{ opacity: 0.85 }} />}
-                </button>
-              </div>
-
-              <div className="landing-hero__slide-controls">
-                <button
-                  type="button"
-                  className="landing-hero__slide-nav"
-                  onClick={() => stepSlide(-1)}
-                  aria-label="Previous heritage highlight"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                <div className="landing-hero__dots" role="tablist" aria-label="Heritage slideshow">
-                  {UP_HERITAGE_CITIES.map((city, idx) => (
-                    <button
-                      key={city.slug}
-                      type="button"
-                      role="tab"
-                      aria-selected={idx === activeSlide}
-                      aria-label={`Show ${city.name}`}
-                      className={`landing-hero__dot ${idx === activeSlide ? 'is-active' : ''}`}
-                      onClick={() => setActiveSlide(idx)}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  className="landing-hero__slide-nav"
-                  onClick={() => stepSlide(1)}
-                  aria-label="Next heritage highlight"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="hero-copy">
+          <span className="hero-copy__kicker">
+            <span className="dot-live" />
+            {ui.heroKicker}
+          </span>
+          <h1 className="hero-copy__title">
+            {ui.heroTitleA} <em>{ui.heroTitleB}</em>
+          </h1>
+          <p className="hero-copy__lead">{ui.heroLead}</p>
         </div>
 
-        <div
-          className={`landing-hero__loc-banner ${
-            customNotice ? 'is-notice' : userCoords ? 'is-active' : ''
-          }`}
-          role="status"
-        >
-          <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-          <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
+        <div className="hero-actions">
+          <div className="hero-actions__row">
+            <button type="button" className="btn-primary" onClick={() => onSelectAgra(userCoords)}>
+              <Compass size={19} />
+              <span>{ui.ctaBegin}</span>
+              <ArrowRight size={18} />
+            </button>
+            <button
+              type="button"
+              className="btn-glass"
+              onClick={handleDetectLocation}
+              disabled={locating}
+              title={
+                userCoords || locationGranted
+                  ? isHi
+                    ? 'वर्तमान स्थान रीफ़्रेश करें'
+                    : 'Tap to refresh your GPS location'
+                  : undefined
+              }
+            >
+              {locating ? (
+                <Loader2 size={17} className="spin-icon" />
+              ) : userCoords ? (
+                <CheckCircle2 size={17} />
+              ) : locationGranted ? (
+                <RefreshCw size={16} />
+              ) : (
+                <MapPin size={17} />
+              )}
+              <span>
+                {locating
+                  ? ui.detectingGps
+                  : userCoords
+                    ? ui.locationActive
+                    : locationGranted
+                      ? ui.refreshLocation
+                      : ui.detectGps}
+              </span>
+            </button>
+          </div>
+          <p className="hero-actions__notice" role="status">
+            <ShieldCheck size={15} aria-hidden="true" />
+            <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
+          </p>
+          <span className="hero-actions__cue" aria-hidden="true">
+            <ChevronDown size={18} />
+            {ui.scrollCue}
+          </span>
+        </div>
+      </ParallaxScene>
+
+      <section className="stat-strip" aria-label="Highlights">
+        {ui.stats.map((stat, i) => (
+          <div key={stat.label} className="stat-strip__item" data-reveal style={{ ['--i' as string]: i }}>
+            <strong>{stat.value}</strong>
+            <span>{stat.label}</span>
+          </div>
+        ))}
+      </section>
+
+      <section className="landing-section">
+        <header className="section-head" data-reveal>
+          <h2>{ui.featuresHeading}</h2>
+          <p>{ui.featuresSub}</p>
+        </header>
+        <div className="feature-grid">
+          {ui.features.map((f, i) => {
+            const Icon = features[i] ?? Sparkles;
+            return (
+              <article key={f.title} className="feature-card" data-reveal style={{ ['--i' as string]: i % 4 }}>
+                <span className={`feature-card__icon tone-${i % 4}`}>
+                  <Icon size={22} />
+                </span>
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
-      <main className="city-section">
-        <div className="city-section__header">
-          <div>
-            <h2>{ui.citiesHeading}</h2>
-            <p>{ui.citiesSub}</p>
+      <section className="trust-section">
+        <div className="trust-section__inner">
+          <div className="trust-section__copy" data-reveal>
+            <span className="section-kicker">{ui.trustKicker}</span>
+            <h2>{ui.trustHeading}</h2>
+            <p>{ui.trustSub}</p>
+            <ul className="trust-points">
+              {ui.trustPoints.map((pt) => (
+                <li key={pt}>
+                  <CheckCircle2 size={18} aria-hidden="true" />
+                  <span>{pt}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="city-section__legend">
-            {translating && (
-              <span className="translating-pill" role="status">
-                <Loader2 size={13} className="spin-icon" />
-                <span>{ui.translating}</span>
-              </span>
-            )}
-            <span className="badge-live">● {ui.liveBadge}</span>
+
+          <div className="trust-demo" data-reveal aria-label="Example answer">
+            <div className="trust-demo__q">{ui.trustSampleQ}</div>
+            <div className="evidence evidence--history">
+              <div className="evidence__label">
+                <ShieldCheck size={15} />
+                {ui.recordedHistory}
+              </div>
+              <p>{ui.trustHistoryText}</p>
+              <cite>{ui.trustHistorySource}</cite>
+            </div>
+            <div className="evidence evidence--folklore">
+              <div className="evidence__label">
+                <BookOpen size={15} />
+                {ui.localFolklore}
+              </div>
+              <p>{ui.trustFolkText}</p>
+              <cite>{ui.trustFolkSource}</cite>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="city-grid">
+      <section className="landing-section">
+        <header className="section-head" data-reveal>
+          <h2>{ui.destHeading}</h2>
+          <p>{ui.destSub}</p>
+        </header>
+        <div className="dest-rail" role="list">
           {UP_HERITAGE_CITIES.map((city) => {
-            const copy = getCityCopy(city);
-            const isLoaded = Boolean(loadedImages[city.slug]);
-
-            const cardInner = (
+            const tr = translationKey ? translatedCities[city.slug] : null;
+            const cityName = isHi ? city.nameHi : tr?.name || city.name;
+            const monumentLabel = isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel;
+            const tagline = isHi ? city.taglineHi : tr?.tagline || city.tagline;
+            const body = (
               <>
-                <div className="city-card__media">
-                  <img
-                    className={`city-card__img ${isLoaded ? 'is-loaded' : ''}`}
-                    src={city.image}
-                    alt={city.imageAlt}
-                    style={{ objectPosition: city.objectPosition }}
-                    loading="lazy"
-                    onLoad={() => markImageLoaded(city.slug)}
-                    onError={() => markImageLoaded(city.slug)}
-                  />
+                <div className="dest-card__art">
+                  <CityHeritageSketch city={city.slug} />
+                  <span className={`dest-card__badge ${city.clickable ? 'is-live' : ''}`}>
+                    {city.clickable ? ui.liveNow : ui.comingSoon}
+                  </span>
                 </div>
-                <div className="city-card__scrim" aria-hidden="true" />
-
-                <div className="city-card__content">
-                  <div className="city-card__top">
-                    <span className="city-card__status">
-                      {city.clickable && <span className="status-dot" aria-hidden="true" />}
-                      <span>{city.clickable ? ui.liveNow : ui.comingSoon}</span>
+                <div className="dest-card__body">
+                  <h3>{cityName}</h3>
+                  <span className="dest-card__monument">{monumentLabel}</span>
+                  <p>{tagline}</p>
+                  {city.clickable && (
+                    <span className="dest-card__go">
+                      {ui.exploreFeatures}
+                      <ArrowRight size={15} />
                     </span>
-                  </div>
-
-                  <div className="city-card__body">
-                    <div className="city-card__monument">{copy.monument}</div>
-                    <div className="city-card__name">{copy.name}</div>
-                    <p className="city-card__desc">{copy.tagline}</p>
-
-                    <div className="city-card__footer">
-                      <span>{city.clickable ? ui.exploreFeatures : ui.packPlanned}</span>
-                      {city.clickable && <ArrowRight size={16} />}
-                    </div>
-                  </div>
+                  )}
                 </div>
               </>
             );
-
             return city.clickable ? (
               <button
                 key={city.slug}
                 type="button"
-                className="city-card is-active"
+                role="listitem"
+                className="dest-card is-live"
                 onClick={() => onSelectAgra(userCoords)}
               >
-                {cardInner}
+                {body}
               </button>
             ) : (
-              <div
-                key={city.slug}
-                className="city-card is-placeholder"
-                role="region"
-                aria-disabled="true"
-                aria-label={`${city.name} — ${ui.comingSoon}`}
-              >
-                {cardInner}
+              <div key={city.slug} role="listitem" className="dest-card" aria-label={`${city.name}, ${ui.comingSoon}`}>
+                {body}
               </div>
             );
           })}
         </div>
-      </main>
+      </section>
 
-      <footer className="gov-footer">{ui.footerText}</footer>
+      <section className="dept-section" data-reveal>
+        <div className="dept-section__art" aria-hidden="true">
+          {[62, 88, 45, 74, 96, 58, 80].map((h, i) => (
+            <span key={i} style={{ height: `${h}%`, ['--i' as string]: i }} />
+          ))}
+        </div>
+        <div className="dept-section__copy">
+          <h2>{ui.deptHeading}</h2>
+          <p>{ui.deptSub}</p>
+          <button type="button" className="btn-light" onClick={onOpenAdmin}>
+            <BarChart3 size={18} />
+            <span>{ui.deptCta}</span>
+          </button>
+        </div>
+      </section>
+
+      <footer className="landing-footer">
+        <div className="tricolour-bar" />
+        <p>{ui.footerSources}</p>
+        <p className="landing-footer__fine">{ui.footerText}</p>
+      </footer>
     </div>
   );
 }

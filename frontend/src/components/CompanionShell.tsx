@@ -1,19 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Accessibility,
   ArrowLeft,
   BarChart3,
+  BookOpen,
   Camera,
   Check,
   Compass,
   Download,
   Headphones,
+  Languages,
   Loader2,
   MapPin,
   MessageSquare,
+  ServerCrash,
   ShieldAlert,
+  ShieldCheck,
   Wifi,
   WifiOff,
+  X,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { LANGUAGE_OPTIONS, PERSONA_OPTIONS } from '../data/upCities';
@@ -33,6 +38,7 @@ interface CompanionShellProps {
   persona: PersonaType;
   a11yMode: boolean;
   isOnline: boolean;
+  serverReachable: boolean;
   sessionHash: string;
   userCoords: { lat: number; lng: number } | null;
   monuments: Monument[];
@@ -51,11 +57,30 @@ interface CompanionShellProps {
   onOpenAdmin: () => void;
 }
 
+const ONBOARDING_KEY = 'up_companion_onboarded_v1';
+
+function readOnboarded(): boolean {
+  try {
+    return window.localStorage.getItem(ONBOARDING_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeOnboarded() {
+  try {
+    window.localStorage.setItem(ONBOARDING_KEY, '1');
+  } catch {
+    // storage unavailable (private mode): onboarding simply shows again next time
+  }
+}
+
 export function CompanionShell({
   language,
   persona,
   a11yMode,
   isOnline,
+  serverReachable,
   sessionHash,
   userCoords,
   monuments,
@@ -76,151 +101,96 @@ export function CompanionShell({
   const ui = getUiText(language);
   const [activeTab, setActiveTab] = useState<CompanionTabId>('guide');
   const [sosOpen, setSosOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [onboardStep, setOnboardStep] = useState<number | null>(() => (readOnboarded() ? null : 0));
+  const [scrolled, setScrolled] = useState(false);
 
-  const tabs: Array<{
-    id: CompanionTabId;
-    label: string;
-    icon: typeof MessageSquare;
-  }> = [
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [activeTab]);
+
+  const connection: 'online' | 'offline' | 'unreachable' = !isOnline
+    ? 'offline'
+    : serverReachable
+      ? 'online'
+      : 'unreachable';
+  const ConnIcon = connection === 'online' ? Wifi : connection === 'offline' ? WifiOff : ServerCrash;
+  const connLabel =
+    connection === 'online' ? ui.online : connection === 'offline' ? ui.offline : ui.serverUnreachable;
+  const workingOffline = connection !== 'online';
+
+  const tabs: Array<{ id: CompanionTabId; label: string; icon: typeof MessageSquare }> = [
     { id: 'guide', label: ui.tabs.guide, icon: MessageSquare },
-    { id: 'camera', label: ui.tabs.camera, icon: Camera },
     { id: 'tour', label: ui.tabs.tour, icon: Headphones },
+    { id: 'camera', label: ui.tabs.camera, icon: Camera },
     { id: 'nearby', label: ui.tabs.nearby, icon: Compass },
     { id: 'facilities', label: ui.tabs.facilities, icon: MapPin },
   ];
 
+  const finishOnboarding = () => {
+    writeOnboarded();
+    setOnboardStep(null);
+  };
+
+  const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === language);
+
   return (
     <div className="companion-shell">
-      <div className="tricolour-bar" />
+      <header className={`app-header ${scrolled ? 'is-scrolled' : ''}`}>
+        <div className="app-header__row">
+          <button type="button" className="icon-btn" onClick={onBackToCities} aria-label="Back to destinations">
+            <ArrowLeft size={20} />
+          </button>
 
-      <header className="companion-topbar">
-        <div className="companion-topbar__row">
-          <div className="companion-topbar__left">
-            <button
-              type="button"
-              className="pill-btn"
-              onClick={onBackToCities}
-              aria-label="Back to UP Heritage Cities"
-              style={{ padding: '8px 10px' }}
-            >
-              <ArrowLeft size={17} />
-            </button>
-
-            <div style={{ minWidth: 0 }}>
-              <div className="companion-topbar__city">{ui.companionTitle}</div>
-              <div className="companion-topbar__sub">
-                <span className="compact-mobile-hide">{ui.upTourismLabel}</span>
-                <span className={`status-pill ${isOnline ? 'is-online' : 'is-offline'}`}>
-                  {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
-                  <span>{isOnline ? ui.online : ui.offline}</span>
-                </span>
-              </div>
-            </div>
+          <div className="app-header__title">
+            <span className="app-header__city">{ui.companionTitle}</span>
+            <span className={`conn-badge is-${connection}`} role="status">
+              <ConnIcon size={12} />
+              {connLabel}
+            </span>
           </div>
 
-          <div className="companion-topbar__controls">
+          <div className="app-header__actions">
             <button
               type="button"
-              className={`pill-btn ${offlinePack ? 'is-emerald' : ''}`}
+              className={`icon-btn ${offlinePack ? 'is-ready' : ''}`}
               onClick={onDownloadOfflinePack}
-              disabled={downloadingPack || !isOnline}
-              style={{ padding: '7px 11px', minHeight: 40 }}
+              disabled={downloadingPack || !!offlinePack || workingOffline}
+              aria-label={offlinePack ? ui.offlineReady : ui.offlinePack}
+              title={offlinePack ? ui.offlineReady : ui.offlinePack}
             >
               {downloadingPack ? (
-                <Loader2 size={15} className="spin-icon" />
+                <Loader2 size={19} className="spin-icon" />
               ) : offlinePack ? (
-                <Check size={15} />
+                <Check size={19} />
               ) : (
-                <Download size={15} />
+                <Download size={19} />
               )}
-              <span className="compact-mobile-hide">
-                {downloadingPack
-                  ? ui.downloadingPack
-                  : offlinePack
-                    ? ui.offlineReady
-                    : ui.offlinePack}
-              </span>
             </button>
-
             <button
               type="button"
-              className="pill-btn"
-              onClick={onOpenAdmin}
-              aria-label="Open Tourism Department Insights"
-              style={{ padding: '7px 10px', minHeight: 40 }}
+              className="icon-btn icon-btn--lang"
+              onClick={() => setSettingsOpen(true)}
+              aria-label={ui.settingsTitle}
             >
-              <BarChart3 size={16} />
+              <Languages size={18} />
+              <span>{(langMeta?.code ?? language).slice(0, 2).toUpperCase()}</span>
             </button>
-
             <button type="button" className="sos-btn" onClick={() => setSosOpen(true)}>
-              <ShieldAlert size={16} />
+              <ShieldAlert size={17} />
               <span>SOS</span>
             </button>
           </div>
         </div>
       </header>
 
-      <div className="control-ribbon">
-        <div className="control-ribbon__inner">
-          <div className="control-ribbon__group">
-            <span className="control-ribbon__label">{ui.langLabel}</span>
-            <select
-              className="lang-select"
-              value={language}
-              onChange={(e) => onChangeLanguage(e.target.value)}
-              aria-label="Choose language"
-            >
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {opt.nativeLabel}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              className={`pill-btn ${a11yMode ? 'is-emerald' : ''}`}
-              style={{ minHeight: 36, padding: '4px 11px', fontSize: '0.8rem' }}
-              onClick={onToggleA11y}
-              aria-pressed={a11yMode}
-            >
-              <Accessibility size={15} />
-              <span>{a11yMode ? ui.easyModeOn : ui.easyMode}</span>
-            </button>
-          </div>
-
-          <div className="control-ribbon__group">
-            <span className="control-ribbon__label">{ui.styleLabel}</span>
-            <select
-              className="lang-select mobile-only-controls"
-              value={persona}
-              onChange={(e) => onChangePersona(e.target.value as PersonaType)}
-              aria-label="Choose guide style"
-            >
-              {PERSONA_OPTIONS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {ui.personas[p.id]}
-                </option>
-              ))}
-            </select>
-            <div className="control-ribbon__group desktop-only-controls">
-              {PERSONA_OPTIONS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`persona-chip ${persona === p.id ? 'is-active' : ''}`}
-                  onClick={() => onChangePersona(p.id)}
-                  title={p.hint}
-                >
-                  {ui.personas[p.id]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav className="desktop-tabs" aria-label="Companion Sections">
+      <nav className="desktop-tabs" aria-label="Companion sections">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -229,8 +199,9 @@ export function CompanionShell({
               type="button"
               className={`desktop-tabs__btn ${activeTab === tab.id ? 'is-active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
             >
-              <Icon size={17} />
+              <Icon size={18} />
               <span>{tab.label}</span>
             </button>
           );
@@ -238,10 +209,10 @@ export function CompanionShell({
       </nav>
 
       <main className="companion-main">
-        {!isOnline && (
+        {workingOffline && (
           <div className="offline-banner" role="status">
-            <WifiOff size={16} />
-            <span>{ui.offlineBanner}</span>
+            <ConnIcon size={16} />
+            <span>{offlinePack ? ui.offlineBanner : ui.gapNoticeOffline}</span>
           </div>
         )}
 
@@ -249,13 +220,13 @@ export function CompanionShell({
           <FallbackNoticeBanner
             message={ui.offlinePackFailed}
             retryLabel={ui.retry}
-            onRetry={isOnline ? onDownloadOfflinePack : undefined}
+            onRetry={!workingOffline ? onDownloadOfflinePack : undefined}
             onDismiss={onDismissOfflinePackError}
             variant="warning"
           />
         )}
 
-        {monumentsError && monuments.length === 0 && isOnline && (
+        {monumentsError && monuments.length === 0 && !workingOffline && (
           <FallbackNoticeBanner
             message={`${ui.serverErrorTitle} — ${ui.loadingMonuments}`}
             retryLabel={ui.retry}
@@ -264,78 +235,189 @@ export function CompanionShell({
           />
         )}
 
-        {activeTab === 'guide' && (
-          <GuideTab
-            language={language}
-            persona={persona}
-            simpleLanguage={a11yMode}
-            isOnline={isOnline}
-            sessionHash={sessionHash}
-            monuments={monuments}
-            monumentsLoading={monumentsLoading}
-            offlinePack={offlinePack}
-          />
-        )}
+        <div key={activeTab} className="tab-stage">
+          {activeTab === 'guide' && (
+            <GuideTab
+              language={language}
+              persona={persona}
+              simpleLanguage={a11yMode}
+              isOnline={isOnline && serverReachable}
+              sessionHash={sessionHash}
+              monuments={monuments}
+              monumentsLoading={monumentsLoading}
+              offlinePack={offlinePack}
+              onChangePersona={onChangePersona}
+            />
+          )}
 
-        {activeTab === 'camera' && (
-          <CameraTab
-            language={language}
-            persona={persona}
-            simpleLanguage={a11yMode}
-            isOnline={isOnline}
-            sessionHash={sessionHash}
-            userCoords={userCoords}
-          />
-        )}
+          {activeTab === 'camera' && (
+            <CameraTab
+              language={language}
+              persona={persona}
+              simpleLanguage={a11yMode}
+              isOnline={isOnline}
+              sessionHash={sessionHash}
+              userCoords={userCoords}
+            />
+          )}
 
-        {activeTab === 'tour' && (
-          <TourTab
-            language={language}
-            persona={persona}
-            isOnline={isOnline}
-            sessionHash={sessionHash}
-            userCoords={userCoords}
-            monuments={monuments}
-            offlinePack={offlinePack}
-          />
-        )}
+          {activeTab === 'tour' && (
+            <TourTab
+              language={language}
+              persona={persona}
+              isOnline={isOnline}
+              sessionHash={sessionHash}
+              userCoords={userCoords}
+              monuments={monuments}
+              offlinePack={offlinePack}
+            />
+          )}
 
-        {activeTab === 'nearby' && (
-          <NearbyTab
-            language={language}
-            isOnline={isOnline}
-            userCoords={userCoords}
-            offlinePack={offlinePack}
-          />
-        )}
+          {activeTab === 'nearby' && (
+            <NearbyTab language={language} isOnline={isOnline} userCoords={userCoords} offlinePack={offlinePack} />
+          )}
 
-        {activeTab === 'facilities' && (
-          <FacilitiesTab
-            language={language}
-            isOnline={isOnline}
-            sessionHash={sessionHash}
-            userCoords={userCoords}
-            offlinePack={offlinePack}
-          />
-        )}
+          {activeTab === 'facilities' && (
+            <FacilitiesTab
+              language={language}
+              isOnline={isOnline}
+              sessionHash={sessionHash}
+              userCoords={userCoords}
+              offlinePack={offlinePack}
+            />
+          )}
+        </div>
       </main>
 
-      <nav className="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <nav className="dock" aria-label="Companion sections">
         {tabs.map((tab) => {
           const Icon = tab.icon;
+          const isCamera = tab.id === 'camera';
           return (
             <button
               key={tab.id}
               type="button"
-              className={`mobile-bottom-nav__btn ${activeTab === tab.id ? 'is-active' : ''}`}
+              className={`dock__btn ${isCamera ? 'dock__btn--fab' : ''} ${activeTab === tab.id ? 'is-active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
             >
-              <Icon size={19} />
-              <span>{tab.label}</span>
+              <span className="dock__icon">
+                <Icon size={isCamera ? 24 : 20} />
+              </span>
+              <span className="dock__label">{tab.label}</span>
             </button>
           );
         })}
       </nav>
+
+      {settingsOpen && (
+        <div className="sheet-backdrop" onClick={() => setSettingsOpen(false)} role="presentation">
+          <section
+            className="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label={ui.settingsTitle}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="sheet__grip" aria-hidden="true" />
+            <header className="sheet__head">
+              <h2>{ui.settingsTitle}</h2>
+              <button type="button" className="icon-btn" onClick={() => setSettingsOpen(false)} aria-label="Close">
+                <X size={20} />
+              </button>
+            </header>
+
+            <h3 className="sheet__label">{ui.languageLabel}</h3>
+            <div className="lang-grid">
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.code}
+                  type="button"
+                  className={`lang-grid__btn ${language === opt.code ? 'is-active' : ''}`}
+                  onClick={() => onChangeLanguage(opt.code)}
+                  aria-pressed={language === opt.code}
+                >
+                  {opt.nativeLabel}
+                </button>
+              ))}
+            </div>
+
+            <h3 className="sheet__label">{ui.styleLabel}</h3>
+            <div className="segmented" role="radiogroup" aria-label={ui.styleLabel}>
+              {PERSONA_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={persona === p.id}
+                  className={persona === p.id ? 'is-active' : ''}
+                  onClick={() => onChangePersona(p.id)}
+                >
+                  {ui.personas[p.id]}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={`toggle-row ${a11yMode ? 'is-on' : ''}`}
+              onClick={onToggleA11y}
+              aria-pressed={a11yMode}
+            >
+              <Accessibility size={20} />
+              <span>{a11yMode ? ui.easyModeOn : ui.easyMode}</span>
+              <span className="toggle-row__switch" aria-hidden="true" />
+            </button>
+
+            <button type="button" className="toggle-row" onClick={onOpenAdmin}>
+              <BarChart3 size={20} />
+              <span>{ui.deptInsights}</span>
+            </button>
+          </section>
+        </div>
+      )}
+
+      {onboardStep !== null && (
+        <div className="onboard" role="dialog" aria-modal="true" aria-label={ui.onboarding[onboardStep].title}>
+          <div className="onboard__card">
+            <div className={`onboard__art step-${onboardStep}`} aria-hidden="true">
+              {onboardStep === 0 && <Languages size={44} />}
+              {onboardStep === 1 && (
+                <div className="onboard__labels">
+                  <span className="is-history">
+                    <ShieldCheck size={16} /> {ui.recordedHistory}
+                  </span>
+                  <span className="is-folklore">
+                    <BookOpen size={16} /> {ui.localFolklore}
+                  </span>
+                </div>
+              )}
+              {onboardStep === 2 && <WifiOff size={44} />}
+            </div>
+            <h2>{ui.onboarding[onboardStep].title}</h2>
+            <p>{ui.onboarding[onboardStep].body}</p>
+            <div className="onboard__dots" aria-hidden="true">
+              {ui.onboarding.map((_, i) => (
+                <span key={i} className={i === onboardStep ? 'is-active' : ''} />
+              ))}
+            </div>
+            <div className="onboard__actions">
+              <button type="button" className="text-btn" onClick={finishOnboarding}>
+                {ui.onboardingSkip}
+              </button>
+              <button
+                type="button"
+                className="btn-primary btn-primary--compact"
+                onClick={() =>
+                  onboardStep < ui.onboarding.length - 1 ? setOnboardStep(onboardStep + 1) : finishOnboarding()
+                }
+              >
+                {onboardStep < ui.onboarding.length - 1 ? ui.onboardingNext : ui.onboardingStart}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <EmergencyModal
         open={sosOpen}

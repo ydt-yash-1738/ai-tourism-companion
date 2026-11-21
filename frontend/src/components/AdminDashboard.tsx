@@ -63,13 +63,13 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
       <div className="admin-shell__inner">
         <header className="admin-shell__header">
           <div>
-            <h1>UP Tourism Department — Visitor Insights (UC-9)</h1>
+            <h1>UP Tourism Department — Visitor Insights</h1>
             <p>
               Privacy-first aggregated telemetry for Agra (zero PII) · Synthetic test baseline + live interactions
             </p>
           </div>
 
-          <div className="filter-row" style={{ marginBottom: 0 }}>
+          <div className="admin-actions">
             <button
               type="button"
               className={`pill-btn ${includeSynthetic ? 'is-active' : ''}`}

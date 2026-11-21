@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CitySelectorView } from './components/CitySelectorView';
 import { CompanionShell } from './components/CompanionShell';
-import { getMonuments, getOfflinePack } from './services/api';
+import { SERVER_STATUS_EVENT, getMonuments, getOfflinePack, pingServer } from './services/api';
 import { getOrCreateSessionHash, loadOfflinePack, saveOfflinePack } from './services/offlineStore';
 import type { Monument, OfflinePack, PersonaType } from './types/api';
 
@@ -18,6 +18,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState<boolean>(() =>
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
+  const [serverReachable, setServerReachable] = useState<boolean>(true);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [monuments, setMonuments] = useState<Monument[]>([]);
   const [monumentsRetry, setMonumentsRetry] = useState(0);
@@ -48,6 +49,21 @@ export default function App() {
   const monumentsReqKey =
     screen === 'companion' && isOnline ? `companion|${monumentsRetry}` : null;
   const monumentsLoading = Boolean(monumentsReqKey && monumentsSettledKey !== monumentsReqKey);
+
+  // Track whether the API is actually reachable, not just whether the phone has a network
+  useEffect(() => {
+    const onStatus = (e: Event) => setServerReachable((e as CustomEvent<boolean>).detail);
+    window.addEventListener(SERVER_STATUS_EVENT, onStatus);
+    return () => window.removeEventListener(SERVER_STATUS_EVENT, onStatus);
+  }, []);
+
+  useEffect(() => {
+    if (!isOnline || serverReachable) return;
+    const timer = window.setInterval(() => {
+      void pingServer();
+    }, 20000);
+    return () => window.clearInterval(timer);
+  }, [isOnline, serverReachable]);
 
   useEffect(() => {
     if (!monumentsReqKey) return;
@@ -114,6 +130,7 @@ export default function App() {
         persona={persona}
         a11yMode={a11yMode}
         isOnline={isOnline}
+        serverReachable={serverReachable}
         sessionHash={sessionHash}
         userCoords={userCoords}
         monuments={activeMonuments}
