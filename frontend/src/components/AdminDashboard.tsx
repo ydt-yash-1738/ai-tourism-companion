@@ -33,6 +33,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
+  const [usingBundledDemo, setUsingBundledDemo] = useState(false);
 
   const reqKey = `${includeSynthetic}|${refreshCount}`;
   const loading = settledKey !== reqKey;
@@ -43,10 +44,25 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
       .then((res) => {
         if (!active) return;
         setSummary(res);
+        setUsingBundledDemo(false);
         setError('');
         setSettledKey(reqKey);
       })
-      .catch((err) => {
+      .catch(async (err) => {
+        if (!active) return;
+        // Server unreachable: fall back to the synthetic demo summary bundled with the app
+        try {
+          const res = await fetch(`${import.meta.env.BASE_URL}packs/agra-insights.json`);
+          if (res.ok && active) {
+            setSummary((await res.json()) as AnalyticsSummary);
+            setUsingBundledDemo(true);
+            setError('');
+            setSettledKey(reqKey);
+            return;
+          }
+        } catch {
+          // fall through to the error state
+        }
         if (!active) return;
         setError(err instanceof Error ? err.message : 'Unable to fetch analytics summary.');
         setSettledKey(reqKey);
@@ -122,6 +138,15 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
             retryLabel="Retry"
             onRetry={() => setRefreshCount((n) => n + 1)}
             secondaryAction={{ label: 'Back to App', onClick: onBack }}
+          />
+        )}
+
+        {usingBundledDemo && (
+          <FallbackNoticeBanner
+            message="Server unreachable: showing the synthetic demo dataset bundled with the app. Live visitor events appear when the server is connected."
+            retryLabel="Retry"
+            onRetry={() => setRefreshCount((n) => n + 1)}
+            variant="info"
           />
         )}
 

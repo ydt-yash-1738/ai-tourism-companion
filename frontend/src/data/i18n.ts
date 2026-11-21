@@ -2,6 +2,38 @@ import type { PersonaType } from '../types/api';
 
 export interface UiStrings {
   govTag: string;
+  tabHeroes: Record<'tour' | 'camera' | 'nearby' | 'facilities', { eyebrow: string; title: string }>;
+  photoCreditsLabel: string;
+  locationActive: string;
+  refreshLocation: string;
+  exploreMonumentsHeading: string;
+  exploreMonumentsSub: string;
+  askAboutMonument: string;
+  curatedTopicsHeading: string;
+  curatedTopicsSub: string;
+  newChat: string;
+  stepFreeBadge: string;
+  stairsBadge: string;
+  guideWelcomeBadge: string;
+  loadingAudio: string;
+  retry: string;
+  loadingTours: string;
+  loadingNearby: string;
+  loadingFacilities: string;
+  loadingEmergency: string;
+  loadingMonuments: string;
+  translating: string;
+  analyzingPhoto: string;
+  serverErrorTitle: string;
+  serverErrorDesc: string;
+  offlineFallbackNotice: string;
+  offlinePackFailed: string;
+  downloadingPack: string;
+  nowShowing: string;
+  noNearbyMatched: string;
+  noFacilitiesMatched: string;
+  resetFilters: string;
+
   appTitle: string;
   deptInsights: string;
   eyebrow: string;
@@ -10,8 +42,6 @@ export interface UiStrings {
   launchAgra: string;
   detectGps: string;
   detectingGps: string;
-  locationActive: string;
-  refreshLocation: string;
   locDefaultNotice: string;
   citiesHeading: string;
   citiesSub: string;
@@ -46,39 +76,12 @@ export interface UiStrings {
   guideHeading: string;
   guideSub: string;
   allMonuments: string;
-  exploreMonumentsHeading: string;
-  exploreMonumentsSub: string;
-  askAboutMonument: string;
-  curatedTopicsHeading: string;
-  curatedTopicsSub: string;
-  newChat: string;
-  stepFreeBadge: string;
-  stairsBadge: string;
-  guideWelcomeBadge: string;
   recordedHistory: string;
   localFolklore: string;
   sourceLabel: string;
   attributionLabel: string;
   readAloud: string;
   stopAudio: string;
-  loadingAudio: string;
-  retry: string;
-  loadingTours: string;
-  loadingNearby: string;
-  loadingFacilities: string;
-  loadingEmergency: string;
-  loadingMonuments: string;
-  translating: string;
-  analyzingPhoto: string;
-  serverErrorTitle: string;
-  serverErrorDesc: string;
-  offlineFallbackNotice: string;
-  offlinePackFailed: string;
-  downloadingPack: string;
-  nowShowing: string;
-  noNearbyMatched: string;
-  noFacilitiesMatched: string;
-  resetFilters: string;
   gapNotice: string;
   gapNoticeOffline: string;
   serverUnreachable: string;
@@ -179,6 +182,42 @@ export interface UiStrings {
 }
 
 const EN: UiStrings = {
+  tabHeroes: {
+    tour: { eyebrow: 'Self-guided audio tour', title: 'Walk the Taj at your own pace' },
+    camera: { eyebrow: 'Point and ask', title: 'What am I looking at?' },
+    nearby: { eyebrow: 'Beyond the monument', title: 'Crafts, food and hidden gems nearby' },
+    facilities: { eyebrow: 'Comfort and safety', title: 'Toilets, water, help and parking' },
+  },
+  photoCreditsLabel: 'Photo credits',
+  locationActive: 'Location Active',
+  refreshLocation: 'Refresh Location',
+  exploreMonumentsHeading: 'Explore Agra Monuments',
+  exploreMonumentsSub: 'Tap any monument to focus the AI Guide and hear its verified history & folklore.',
+  askAboutMonument: 'Ask Guide',
+  curatedTopicsHeading: 'History vs. Folklore & Curated Stories',
+  curatedTopicsSub: 'Every answer clearly separates ASI/UNESCO records from popular legends.',
+  newChat: 'Explore Monuments',
+  stepFreeBadge: 'Step-Free',
+  stairsBadge: 'Has Stairs',
+  guideWelcomeBadge: 'UNESCO Dual Heritage · Taj Mahal & Agra Fort',
+  loadingAudio: 'Loading audio...',
+  retry: 'Try Again',
+  loadingTours: 'Loading walking routes & audio stops...',
+  loadingNearby: 'Discovering nearby heritage & UP ODOP crafts...',
+  loadingFacilities: 'Finding nearest public facilities...',
+  loadingEmergency: 'Checking nearest live emergency units...',
+  loadingMonuments: 'Loading monuments...',
+  translating: 'Translating...',
+  analyzingPhoto: 'Analyzing monument architecture & verified records...',
+  serverErrorTitle: 'Unable to reach heritage server',
+  serverErrorDesc: 'The server may be waking up or your connection is unstable. Tap retry to load again.',
+  offlineFallbackNotice: 'Live server unreachable — showing saved offline data.',
+  offlinePackFailed: 'Could not download offline pack. Check your connection and try again.',
+  downloadingPack: 'Saving...',
+  nowShowing: 'Featured Heritage',
+  noNearbyMatched: 'No nearby places matched those filters.',
+  noFacilitiesMatched: 'No facilities matched those filters.',
+  resetFilters: 'Reset Filters',
   govTag: 'Prototype for UP Tourism · UP AI Mission',
   appTitle: 'UP AI Heritage Companion',
   deptInsights: 'Dept. Insights',
@@ -189,8 +228,6 @@ const EN: UiStrings = {
   launchAgra: 'Launch Agra Companion',
   detectGps: 'Detect My Location',
   detectingGps: 'Detecting GPS...',
-  locationActive: 'Location Active',
-  refreshLocation: 'Refresh Location',
   locDefaultNotice: 'Location not provided — select an active UP heritage destination below to begin.',
   citiesHeading: 'Heritage Destinations Across Uttar Pradesh',
   citiesSub: 'Agra (Taj Mahal & Agra Fort) is live right now; additional UP heritage circuits are pre-mapped below.',
@@ -200,7 +237,7 @@ const EN: UiStrings = {
   exploreFeatures: 'Explore 9/9 Companion Features',
   packPlanned: 'Destination Pack Planned',
   footerText:
-    'Built for UP AI Mission · Department of IT & Electronics, Government of Uttar Pradesh · Public & ASI-Grounded Heritage Data',
+    'Prototype built for the UP AI Mission · Public and ASI-grounded heritage data',
 
   companionTitle: 'Agra Heritage Companion',
   upTourismLabel: 'UP Tourism',
@@ -232,39 +269,12 @@ const EN: UiStrings = {
   guideHeading: 'Ask Anything About Agra Heritage',
   guideSub: 'Answers ground in ASI/UNESCO sources and separate recorded history from folklore.',
   allMonuments: 'All Agra Monuments',
-  exploreMonumentsHeading: 'Explore Agra Monuments',
-  exploreMonumentsSub: 'Tap any monument to focus the AI Guide and hear its verified history & folklore.',
-  askAboutMonument: 'Ask Guide',
-  curatedTopicsHeading: 'History vs. Folklore & Curated Stories',
-  curatedTopicsSub: 'Every answer clearly separates ASI/UNESCO records from popular legends.',
-  newChat: 'Explore Monuments',
-  stepFreeBadge: 'Step-Free',
-  stairsBadge: 'Has Stairs',
-  guideWelcomeBadge: 'UNESCO Dual Heritage · Taj Mahal & Agra Fort',
   recordedHistory: 'Recorded History',
   localFolklore: 'Local Folklore & Tradition',
   sourceLabel: 'Source: ',
   attributionLabel: 'Attribution: ',
   readAloud: 'Read Aloud',
   stopAudio: 'Stop',
-  loadingAudio: 'Loading audio...',
-  retry: 'Try Again',
-  loadingTours: 'Loading walking routes & audio stops...',
-  loadingNearby: 'Discovering nearby heritage & UP ODOP crafts...',
-  loadingFacilities: 'Finding nearest public facilities...',
-  loadingEmergency: 'Checking nearest live emergency units...',
-  loadingMonuments: 'Loading monuments...',
-  translating: 'Translating...',
-  analyzingPhoto: 'Analyzing monument architecture & verified records...',
-  serverErrorTitle: 'Unable to reach heritage server',
-  serverErrorDesc: 'The server may be waking up or your connection is unstable. Tap retry to load again.',
-  offlineFallbackNotice: 'Live server unreachable — showing saved offline data.',
-  offlinePackFailed: 'Could not download offline pack. Check your connection and try again.',
-  downloadingPack: 'Saving...',
-  nowShowing: 'Featured Heritage',
-  noNearbyMatched: 'No nearby places matched those filters.',
-  noFacilitiesMatched: 'No facilities matched those filters.',
-  resetFilters: 'Reset Filters',
   gapNotice: 'Logged as a knowledge gap for the UP Tourism Department content team.',
   gapNoticeOffline: 'Not in your downloaded pack. Ask again when you are connected for a full answer.',
   serverUnreachable: 'Server unreachable',
@@ -354,6 +364,7 @@ const EN: UiStrings = {
   onboardingNext: 'Next',
   onboardingStart: 'Start exploring',
   onboardingSkip: 'Skip',
+
   searchingRecords: 'Searching verified heritage records...',
   chatPlaceholder: 'Type or speak a question about Taj Mahal or Agra Fort...',
   starters: [
@@ -374,7 +385,7 @@ const EN: UiStrings = {
   identifyBtn: 'Identify Monument',
   identifyingBtn: 'Identifying...',
   offlineCameraErr:
-    'Live camera image recognition requires network access. Use Audio Tour or Guide tabs while offline.',
+    'Offline, the camera identifies monuments by your location. Turn on location (or "Use demo GPS") and try again.',
 
   tourHeading: 'Self-Guided Audio Tour',
   tourSub: 'Pick a walking route based on your available time; play audio automatically by GPS or step-by-step.',
@@ -434,6 +445,42 @@ const EN: UiStrings = {
 
 const HI: UiStrings = {
   ...EN,
+  tabHeroes: {
+    tour: { eyebrow: 'ऑडियो पैदल यात्रा', title: 'अपनी गति से ताज घूमें' },
+    camera: { eyebrow: 'दिखाएँ और पूछें', title: 'मैं क्या देख रहा हूँ?' },
+    nearby: { eyebrow: 'स्मारक के आगे', title: 'आस-पास के शिल्प, व्यंजन और स्थल' },
+    facilities: { eyebrow: 'सुविधा और सुरक्षा', title: 'शौचालय, पानी, सहायता और पार्किंग' },
+  },
+  photoCreditsLabel: 'फ़ोटो श्रेय',
+  locationActive: 'स्थान सक्रिय है',
+  refreshLocation: 'स्थान रीफ़्रेश करें',
+  exploreMonumentsHeading: 'आगरा के प्रमुख स्मारक देखें',
+  exploreMonumentsSub: 'किसी भी स्मारक पर टैप करें और उसका प्रमाणित इतिहास व लोककथा जानें।',
+  askAboutMonument: 'गाइड से पूछें',
+  curatedTopicsHeading: 'इतिहास बनाम लोककथा एवं विशेष विषय',
+  curatedTopicsSub: 'हर उत्तर में प्रमाणित इतिहास और लोककथा अलग-अलग दिखाई जाती है।',
+  newChat: 'स्मारक देखें',
+  stepFreeBadge: 'सुगम मार्ग',
+  stairsBadge: 'सीढ़ियाँ',
+  guideWelcomeBadge: 'यूनेस्को युगल विरासत · ताजमहल एवं आगरा किला',
+  loadingAudio: 'ऑडियो लोड हो रहा है...',
+  retry: 'पुनः प्रयास करें',
+  loadingTours: 'पैदल यात्रा मार्ग और ऑडियो पड़ाव लोड हो रहे हैं...',
+  loadingNearby: 'आस-पास के स्थल और यूपी ODOP शिल्प लोड हो रहे हैं...',
+  loadingFacilities: 'निकटतम सार्वजनिक सुविधाएँ खोजी जा रही हैं...',
+  loadingEmergency: 'निकटतम आपातकालीन केंद्र जाँचे जा रहे हैं...',
+  loadingMonuments: 'स्मारक लोड हो रहे हैं...',
+  translating: 'अनुवाद हो रहा है...',
+  analyzingPhoto: 'स्मारक की वास्तुकला और अभिलेखों का विश्लेषण जारी...',
+  serverErrorTitle: 'विरासत सर्वर से संपर्क नहीं हो सका',
+  serverErrorDesc: 'सर्वर शुरू हो रहा हो सकता है या नेटवर्क धीमा है। पुनः प्रयास करें।',
+  offlineFallbackNotice: 'लाइव सर्वर उपलब्ध नहीं — सहेजा गया ऑफ़लाइन डेटा दिखाया जा रहा है।',
+  offlinePackFailed: 'ऑफ़लाइन पैक डाउनलोड नहीं हो सका। नेटवर्क जाँचें और पुनः प्रयास करें।',
+  downloadingPack: 'सहेज रहे हैं...',
+  nowShowing: 'प्रमुख विरासत',
+  noNearbyMatched: 'इन फ़िल्टर से कोई निकटतम स्थान नहीं मिला।',
+  noFacilitiesMatched: 'इन फ़िल्टर से कोई सुविधा नहीं मिली।',
+  resetFilters: 'फ़िल्टर हटाएँ',
   govTag: 'यूपी पर्यटन हेतु प्रोटोटाइप · यूपी एआई मिशन',
   appTitle: 'एआई पर्यटन साथी',
   deptInsights: 'विभाग डैशबोर्ड',
@@ -443,8 +490,6 @@ const HI: UiStrings = {
   launchAgra: 'आगरा विरासत साथी खोलें',
   detectGps: 'मेरा स्थान पहचानें',
   detectingGps: 'लोकेशन जाँच जारी...',
-  locationActive: 'स्थान सक्रिय है',
-  refreshLocation: 'स्थान रीफ़्रेश करें',
   locDefaultNotice: 'स्थान उपलब्ध नहीं होने पर नीचे उत्तर प्रदेश के विरासत शहरों में से आगरा चुनें।',
   citiesHeading: 'उत्तर प्रदेश के प्रमुख विरासत शहर',
   citiesSub: 'वर्तमान में आगरा सक्रिय है; अन्य शहर आगामी चरण में जुड़ेंगे।',
@@ -453,7 +498,7 @@ const HI: UiStrings = {
   comingSoon: 'शीघ्र उपलब्ध',
   exploreFeatures: 'सभी 9 सुविधाएँ देखें',
   packPlanned: 'आगामी चरण में',
-  footerText: 'उत्तर प्रदेश एआई मिशन · सूचना प्रौद्योगिकी एवं इलेक्ट्रॉनिक्स विभाग, उत्तर प्रदेश सरकार',
+  footerText: 'उत्तर प्रदेश एआई मिशन हेतु निर्मित प्रोटोटाइप · सार्वजनिक एवं ASI आधारित विरासत डेटा',
 
   companionTitle: 'आगरा विरासत साथी',
   upTourismLabel: 'उ.प्र. पर्यटन',
@@ -473,39 +518,12 @@ const HI: UiStrings = {
   guideHeading: 'अपना विरासत प्रश्न पूछें',
   guideSub: 'प्रत्येक उत्तर में प्रमाणित इतिहास और लोककथाएँ अलग-अलग दिखाई जाती हैं।',
   allMonuments: 'पूरा आगरा क्षेत्र',
-  exploreMonumentsHeading: 'आगरा के प्रमुख स्मारक देखें',
-  exploreMonumentsSub: 'किसी भी स्मारक पर टैप करें और उसका प्रमाणित इतिहास व लोककथा जानें।',
-  askAboutMonument: 'गाइड से पूछें',
-  curatedTopicsHeading: 'इतिहास बनाम लोककथा एवं विशेष विषय',
-  curatedTopicsSub: 'हर उत्तर में प्रमाणित इतिहास और लोककथा अलग-अलग दिखाई जाती है।',
-  newChat: 'स्मारक देखें',
-  stepFreeBadge: 'सुगम मार्ग',
-  stairsBadge: 'सीढ़ियाँ',
-  guideWelcomeBadge: 'यूनेस्को युगल विरासत · ताजमहल एवं आगरा किला',
   recordedHistory: 'प्रमाणित इतिहास',
   localFolklore: 'लोककथा एवं परंपरा',
   sourceLabel: 'स्रोत: ',
   attributionLabel: 'संदर्भ: ',
   readAloud: 'सुनें',
   stopAudio: 'रोकें',
-  loadingAudio: 'ऑडियो लोड हो रहा है...',
-  retry: 'पुनः प्रयास करें',
-  loadingTours: 'पैदल यात्रा मार्ग और ऑडियो पड़ाव लोड हो रहे हैं...',
-  loadingNearby: 'आस-पास के स्थल और यूपी ODOP शिल्प लोड हो रहे हैं...',
-  loadingFacilities: 'निकटतम सार्वजनिक सुविधाएँ खोजी जा रही हैं...',
-  loadingEmergency: 'निकटतम आपातकालीन केंद्र जाँचे जा रहे हैं...',
-  loadingMonuments: 'स्मारक लोड हो रहे हैं...',
-  translating: 'अनुवाद हो रहा है...',
-  analyzingPhoto: 'स्मारक की वास्तुकला और अभिलेखों का विश्लेषण जारी...',
-  serverErrorTitle: 'विरासत सर्वर से संपर्क नहीं हो सका',
-  serverErrorDesc: 'सर्वर शुरू हो रहा हो सकता है या नेटवर्क धीमा है। पुनः प्रयास करें।',
-  offlineFallbackNotice: 'लाइव सर्वर उपलब्ध नहीं — सहेजा गया ऑफ़लाइन डेटा दिखाया जा रहा है।',
-  offlinePackFailed: 'ऑफ़लाइन पैक डाउनलोड नहीं हो सका। नेटवर्क जाँचें और पुनः प्रयास करें।',
-  downloadingPack: 'सहेज रहे हैं...',
-  nowShowing: 'प्रमुख विरासत',
-  noNearbyMatched: 'इन फ़िल्टर से कोई निकटतम स्थान नहीं मिला।',
-  noFacilitiesMatched: 'इन फ़िल्टर से कोई सुविधा नहीं मिली।',
-  resetFilters: 'फ़िल्टर हटाएँ',
   gapNotice: 'यह प्रश्न पर्यटन विभाग डैशबोर्ड में सामग्री सुधार हेतु दर्ज किया गया है।',
   gapNoticeOffline: 'यह जानकारी डाउनलोड किए गए पैक में नहीं है। नेटवर्क मिलने पर दोबारा पूछें।',
   serverUnreachable: 'सर्वर उपलब्ध नहीं',
@@ -594,6 +612,7 @@ const HI: UiStrings = {
   onboardingNext: 'आगे',
   onboardingStart: 'शुरू करें',
   onboardingSkip: 'छोड़ें',
+
   searchingRecords: 'विरासत अभिलेख खोजे जा रहे हैं...',
   chatPlaceholder: 'अपना प्रश्न लिखें या माइक दबाकर बोलें...',
   starters: [
@@ -653,6 +672,9 @@ const HI: UiStrings = {
 
 const MR: UiStrings = {
   ...EN,
+  locationActive: 'स्थान सक्रिय आहे',
+  loadingAudio: 'ऑडिओ लोड होत आहे...',
+  retry: 'पुन्हा प्रयत्न करा',
   appTitle: 'यूपी एआय वारसा सोबती',
   deptInsights: 'विभाग डॅशबोर्ड',
   eyebrow: 'डिजिटल इंडिया उपक्रम · बहुभाषिक वारसा मार्गदर्शक',
@@ -661,7 +683,6 @@ const MR: UiStrings = {
   launchAgra: 'आग्रा सोबती उघडा',
   detectGps: 'माझे स्थान शोधा',
   detectingGps: 'GPS शोधत आहे...',
-  locationActive: 'स्थान सक्रिय आहे',
   locDefaultNotice: 'स्थान उपलब्ध नाही — सुरू करण्यासाठी खालील आग्रा पर्याय निवडा.',
   citiesHeading: 'उत्तर प्रदेशातील वारसा शहरे',
   citiesSub: 'सध्या आग्रा कार्यरत आहे; इतर शहरे लवकरच जोडली जातील.',
@@ -695,8 +716,6 @@ const MR: UiStrings = {
   attributionLabel: 'संदर्भ: ',
   readAloud: 'ऐका',
   stopAudio: 'थांबवा',
-  loadingAudio: 'ऑडिओ लोड होत आहे...',
-  retry: 'पुन्हा प्रयत्न करा',
   gapNotice: 'हा प्रश्न पर्यटन विभागाच्या डॅशबोर्डवर नोंदवला गेला आहे.',
   searchingRecords: 'ऐतिहासिक नोंदी शोधत आहे...',
   chatPlaceholder: 'ताजमहाल किंवा आग्रा किल्ल्याबद्दल विचारा किंवा बोला...',
@@ -755,6 +774,9 @@ const MR: UiStrings = {
 
 const TA: UiStrings = {
   ...EN,
+  locationActive: 'இடம் செயலில் உள்ளது',
+  loadingAudio: 'ஆடியோ ஏற்றப்படுகிறது...',
+  retry: 'மீண்டும் முயல்க',
   appTitle: 'உ.பி. AI பாரம்பரிய தோழன்',
   deptInsights: 'துறை புள்ளிவிவரம்',
   eyebrow: 'டிஜிட்டல் இந்தியா · பன்மொழி பாரம்பரிய வழிகாட்டி',
@@ -763,7 +785,6 @@ const TA: UiStrings = {
   launchAgra: 'ஆக்ரா தோழனைத் திற',
   detectGps: 'என் இடத்தைக் கண்டறி',
   detectingGps: 'GPS கண்டறியப்படுகிறது...',
-  locationActive: 'இடம் செயலில் உள்ளது',
   locDefaultNotice: 'இடம் கிடைக்கவில்லை — தொடங்க கீழே உள்ள ஆக்ராவைத் தேர்ந்தெடுக்கவும்.',
   citiesHeading: 'உத்தரப் பிரதேச பாரம்பரிய நகரங்கள்',
   citiesSub: 'தற்போது ஆக்ரா நேரலையில் உள்ளது; பிற நகரங்கள் விரைவில் இணையும்.',
@@ -797,8 +818,6 @@ const TA: UiStrings = {
   attributionLabel: 'குறிப்பு: ',
   readAloud: 'ஒலிபரப்பு',
   stopAudio: 'நிறுத்து',
-  loadingAudio: 'ஆடியோ ஏற்றப்படுகிறது...',
-  retry: 'மீண்டும் முயல்க',
   gapNotice: 'இது சுற்றுலாத் துறை உள்ளடக்கக் குழுவுக்குப் பதிவு செய்யப்பட்டது.',
   searchingRecords: 'ஆவணங்கள் தேடப்படுகின்றன...',
   chatPlaceholder: 'தாஜ்மஹால் அல்லது ஆக்ரா கோட்டை பற்றி கேளுங்கள்...',
@@ -857,13 +876,15 @@ const TA: UiStrings = {
 
 const BN: UiStrings = {
   ...EN,
+  locationActive: 'অবস্থান সক্রিয়',
+  loadingAudio: 'অডিও লোড হচ্ছে...',
+  retry: 'আবার চেষ্টা করুন',
   appTitle: 'ইউপি এআই ঐতিহ্য সঙ্গী',
   deptInsights: 'দপ্তর ড্যাশবোর্ড',
   eyebrow: 'ডিজিটাল ইন্ডিয়া উদ্যোগ · বহুভাষিক গাইড',
   heroHeadline: 'উত্তর প্রদেশের জীবন্ত ঐতিহ্য জানুন আপনার নিজের ভাষায়।',
   launchAgra: 'আগ্রা সঙ্গী খুলুন',
   detectGps: 'আমার অবস্থান খুঁজুন',
-  locationActive: 'অবস্থান সক্রিয়',
   citiesHeading: 'উত্তর প্রদেশের ঐতিহ্যবাহী শহরসমূহ',
   liveBadge: '১টি শহর সক্রিয়',
   liveNow: 'সক্রিয়',
@@ -875,8 +896,6 @@ const BN: UiStrings = {
   localFolklore: 'লোককথা ও ঐতিহ্য',
   readAloud: 'শুনুন',
   stopAudio: 'থামান',
-  loadingAudio: 'অডিও লোড হচ্ছে...',
-  retry: 'আবার চেষ্টা করুন',
   playAudioStory: 'অডিও শুনুন',
   prevStop: 'পূর্ববর্তী',
   nextStop: 'পরবর্তী',
@@ -892,13 +911,15 @@ const BN: UiStrings = {
 
 const TE: UiStrings = {
   ...EN,
+  locationActive: 'స్థానం సక్రియంగా ఉంది',
+  loadingAudio: 'ఆడియో లోడ్ అవుతోంది...',
+  retry: 'మళ్లీ ప్రయత్నించండి',
   appTitle: 'యూపీ AI వారసత్వ సహాయకుడు',
   deptInsights: 'శాఖ గణాంకాలు',
   eyebrow: 'డిజిటల్ ఇండియా · బహుభాషా వారసత్వ మార్గదర్శి',
   heroHeadline: 'ప్రతి కట్టడం కథను మీ స్వంత భాషలో తెలుసుకోండి.',
   launchAgra: 'ఆగ్రా సహాయకుడిని తెరవండి',
   detectGps: 'నా స్థానాన్ని గుర్తించు',
-  locationActive: 'స్థానం సక్రియంగా ఉంది',
   citiesHeading: 'ఉత్తర ప్రదేశ్ వారసత్వ నగరాలు',
   liveBadge: '1 నగరం సిద్ధం',
   liveNow: 'సిద్ధం',
@@ -910,8 +931,6 @@ const TE: UiStrings = {
   localFolklore: 'జానపద కథలు & సంప్రదాయం',
   readAloud: 'వినండి',
   stopAudio: 'ఆపండి',
-  loadingAudio: 'ఆడియో లోడ్ అవుతోంది...',
-  retry: 'మళ్లీ ప్రయత్నించండి',
   playAudioStory: 'ఆడియో కథ వినండి',
   prevStop: 'ముందు',
   nextStop: 'తర్వాత',
@@ -927,13 +946,15 @@ const TE: UiStrings = {
 
 const UR: UiStrings = {
   ...EN,
+  locationActive: 'مقام فعال ہے',
+  loadingAudio: 'آڈیو لوڈ ہو رہا ہے...',
+  retry: 'دوبارہ کوشش کریں',
   appTitle: 'یوپی اے آئی ورثہ ساتھی',
   deptInsights: 'محکمہ تجزیات',
   eyebrow: 'ڈیجیٹل انڈیا · کثیر لسانی رہنما',
   heroHeadline: 'اتر پردیش کے تاریخی ورثے کی کہانی اپنی زبان میں جانیں۔',
   launchAgra: 'آگرہ ساتھی کھولیں',
   detectGps: 'میرا مقام تلاش کریں',
-  locationActive: 'مقام فعال ہے',
   citiesHeading: 'اتر پردیش کے تاریخی شہر',
   liveNow: 'دستیاب',
   comingSoon: 'جلد آرہا ہے',
@@ -944,8 +965,6 @@ const UR: UiStrings = {
   localFolklore: 'لوک داستانیں و روایات',
   readAloud: 'سنیں',
   stopAudio: 'روکیں',
-  loadingAudio: 'آڈیو لوڈ ہو رہا ہے...',
-  retry: 'دوبارہ کوشش کریں',
   playAudioStory: 'آڈیو کہانی سنیں',
   chatPlaceholder: 'تاج محل یا آگرہ قلعہ کے بارے میں پوچھیں...',
   starters: [
@@ -959,12 +978,14 @@ const UR: UiStrings = {
 
 const FR: UiStrings = {
   ...EN,
+  locationActive: 'Position active',
+  loadingAudio: 'Chargement audio...',
+  retry: 'Réessayer',
   appTitle: 'Compagnon Patrimoine UP',
   deptInsights: 'Analytique',
   heroHeadline: "L'histoire de chaque monument, racontée dans votre langue.",
   launchAgra: "Ouvrir le Guide d'Agra",
   detectGps: 'Détecter ma position',
-  locationActive: 'Position active',
   citiesHeading: "Villes Patrimoniales de l'Uttar Pradesh",
   liveNow: 'Actif',
   comingSoon: 'Bientôt',
@@ -975,8 +996,6 @@ const FR: UiStrings = {
   localFolklore: 'Folklore et traditions',
   readAloud: 'Écouter',
   stopAudio: 'Arrêter',
-  loadingAudio: 'Chargement audio...',
-  retry: 'Réessayer',
   playAudioStory: "Écouter l'audio",
   prevStop: 'Précédent',
   nextStop: 'Suivant',
@@ -992,12 +1011,14 @@ const FR: UiStrings = {
 
 const JA: UiStrings = {
   ...EN,
+  locationActive: '現在地取得済み',
+  loadingAudio: '音声を読み込み中...',
+  retry: '再試行',
   appTitle: 'UP遺産AIコンパニオン',
   deptInsights: '観光統計',
   heroHeadline: 'すべての歴史遺産の物語を、あなたの言葉で。',
   launchAgra: 'アグラ案内を開始',
   detectGps: '現在地を検出',
-  locationActive: '現在地取得済み',
   citiesHeading: 'ウッタル・プラデーシュ州の遺産都市',
   liveNow: '公開中',
   comingSoon: '近日公開',
@@ -1008,8 +1029,6 @@ const JA: UiStrings = {
   localFolklore: '伝承・伝説',
   readAloud: '読み上げ',
   stopAudio: '停止',
-  loadingAudio: '音声を読み込み中...',
-  retry: '再試行',
   playAudioStory: '音声ガイド再生',
   prevStop: '前へ',
   nextStop: '次へ',
@@ -1025,12 +1044,14 @@ const JA: UiStrings = {
 
 const ES: UiStrings = {
   ...EN,
+  locationActive: 'Ubicación activa',
+  loadingAudio: 'Cargando audio...',
+  retry: 'Reintentar',
   appTitle: 'Guía IA de Patrimonio UP',
   deptInsights: 'Estadísticas',
   heroHeadline: 'La historia de cada monumento, explicada en tu propio idioma.',
   launchAgra: 'Abrir Guía de Agra',
   detectGps: 'Detectar mi ubicación',
-  locationActive: 'Ubicación activa',
   citiesHeading: 'Ciudades Patrimoniales de Uttar Pradesh',
   liveNow: 'Activo',
   comingSoon: 'Próximamente',
@@ -1041,8 +1062,6 @@ const ES: UiStrings = {
   localFolklore: 'Folclore y tradición',
   readAloud: 'Escuchar',
   stopAudio: 'Detener',
-  loadingAudio: 'Cargando audio...',
-  retry: 'Reintentar',
   playAudioStory: 'Reproducir audio',
   prevStop: 'Anterior',
   nextStop: 'Siguiente',

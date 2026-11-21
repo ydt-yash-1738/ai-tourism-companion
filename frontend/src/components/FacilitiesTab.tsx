@@ -1,6 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Accessibility, Clock, Loader2, Navigation, PhoneCall } from 'lucide-react';
-import { getFacilityMedia } from '../data/agraMedia';
+import {
+  Accessibility,
+  Car,
+  Clock,
+  CupSoda,
+  Droplets,
+  Info,
+  Loader2,
+  MapPin,
+  Navigation,
+  PhoneCall,
+  ShieldCheck,
+  Stethoscope,
+  Toilet,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { getFacilities } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
@@ -14,6 +29,19 @@ import {
   SkeletonCards,
 } from './ApiStateCard';
 import { LeafletMap, type MapPinItem } from './LeafletMap';
+
+// Facilities are shown with clear type icons rather than photos, so a visitor
+// in need is never shown a picture of the wrong building.
+const FACILITY_ICONS: Record<string, LucideIcon> = {
+  toilet: Toilet,
+  drinking_water: Droplets,
+  medical: Stethoscope,
+  police: ShieldCheck,
+  parking: Car,
+  food: UtensilsCrossed,
+  help_desk: Info,
+  cafe: CupSoda,
+};
 
 interface FacilitiesTabProps {
   language: string;
@@ -54,7 +82,6 @@ export function FacilitiesTab({
   const [apiError, setApiError] = useState<string | null>(null);
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   const refLat = userCoords?.lat ?? 27.1751;
   const refLng = userCoords?.lng ?? 78.0421;
@@ -146,10 +173,6 @@ export function FacilitiesTab({
       return translatedMap[`${baseLang}::${enText}`] || enText;
     }
     return enText;
-  };
-
-  const markImageLoaded = (slug: string) => {
-    setLoadedImages((prev) => (prev[slug] ? prev : { ...prev, [slug]: true }));
   };
 
   const mapPins: MapPinItem[] = facilities.map((f) => ({
@@ -282,21 +305,12 @@ export function FacilitiesTab({
 
               <div className="cards-grid">
                 {facilities.map((item) => {
-                  const media = getFacilityMedia(item.slug);
-                  const isLoaded = Boolean(loadedImages[item.slug]);
+                  const Icon = FACILITY_ICONS[item.facility_type] ?? MapPin;
 
                   return (
                     <article key={item.slug} className="info-card has-media">
-                      <div className="info-card__media">
-                        <img
-                          className={`info-card__img ${isLoaded ? 'is-loaded' : ''}`}
-                          src={media.image}
-                          alt={media.alt}
-                          style={{ objectPosition: media.objectPosition }}
-                          loading="lazy"
-                          onLoad={() => markImageLoaded(item.slug)}
-                          onError={() => markImageLoaded(item.slug)}
-                        />
+                      <div className={`info-card__media facility-art is-${item.facility_type}`}>
+                        <Icon className="facility-art__icon" size={46} aria-hidden="true" />
                         <div className="info-card__media-scrim" aria-hidden="true" />
                         <div className="info-card__media-top">
                           <div className="info-card__media-badges">

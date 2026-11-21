@@ -38,142 +38,81 @@ export interface VisitorSnapshotTile {
 }
 
 const DEFAULT_AGRA_MEDIA: LocationMediaItem = {
-  image: '/images/heritage/agra.jpg',
+  image: '/images/taj-mahal.webp',
   alt: 'Taj Mahal white marble mausoleum and reflecting pool in Agra',
   objectPosition: 'center 42%',
 };
 
 export const NEARBY_MEDIA_MAP: Record<string, LocationMediaItem> = {
   'mehtab-bagh': {
-    image: '/images/nearby/mehtab-bagh.jpg',
+    image: '/images/nearby/mehtab-bagh.webp',
     alt: 'Mehtab Bagh riverfront garden framing the Taj Mahal across the Yamuna River',
     objectPosition: 'center 45%',
   },
   'itimad-ud-daulah-baby-taj': {
-    image: '/images/nearby/itimad-ud-daulah-baby-taj.jpg',
+    image: '/images/nearby/itimad-ud-daulah-baby-taj.webp',
     alt: 'Tomb of Itimad-ud-Daulah (Baby Taj) white marble Pietra Dura mausoleum in Agra',
     objectPosition: 'center 40%',
   },
   'parchinkari-artisan-hub': {
-    image: '/images/nearby/parchinkari-artisan-hub.jpg',
-    alt: 'Taj Ganj Parchinkari marble floral stone inlay craft panel',
+    image: '/images/nearby/parchinkari-artisan-hub.webp',
+    alt: 'Carved marble flowers and stone inlay inside the Taj Mahal',
     objectPosition: 'center center',
   },
   'agra-odop-leather-emporium': {
-    image: '/images/nearby/agra-odop-leather-emporium.jpg',
-    alt: 'Traditional handcrafted embroidered Indian Mojari and Jutti leather footwear',
+    image: '/images/nearby/agra-odop-leather-emporium.webp',
+    alt: 'Handcrafted embroidered leather juttis on display at a crafts market',
     objectPosition: 'center center',
   },
   'sadar-bazaar-chaat-gali': {
-    image: '/images/nearby/sadar-bazaar-chaat-gali.jpg',
-    alt: 'Crispy Agra street chaat Aloo Tikki served with mint and tamarind chutneys',
+    image: '/images/nearby/sadar-bazaar-chaat-gali.webp',
+    alt: 'A plate of papri chaat, a favourite North Indian street snack',
     objectPosition: 'center 52%',
   },
   'agra-petha-heritage-lane': {
-    image: '/images/nearby/agra-petha-heritage-lane.jpg',
+    image: '/images/nearby/agra-petha-heritage-lane.webp',
     alt: 'Traditional golden saffron Agra Petha ash-gourd sweets',
     objectPosition: 'center center',
   },
   'kinari-bazaar-heritage': {
-    image: '/images/nearby/kinari-bazaar-heritage.jpg',
-    alt: 'Historic old city market street leading to Jama Masjid in Agra',
+    image: '/images/nearby/kinari-bazaar-heritage.webp',
+    alt: 'Jama Masjid, Agra, beside the old Kinari Bazaar',
     objectPosition: 'center 38%',
-  },
-  'taj-mahotsav-shilpgram': {
-    image: '/images/nearby/taj-mahotsav-shilpgram.jpg',
-    alt: 'Handicraft stalls and cultural bazaar showcase at Shilpgram Craft Village',
-    objectPosition: 'center 45%',
-  },
-};
-
-export const FACILITY_MEDIA_MAP: Record<string, LocationMediaItem> = {
-  'taj-west-gate-accessible-toilet': {
-    image: '/images/facilities/taj-west-gate-accessible-toilet.jpg',
-    alt: 'Taj Mahal West Gate entry plaza where public and accessible restrooms are located',
-    objectPosition: 'center 42%',
-  },
-  'taj-east-gate-toilet-water': {
-    image: '/images/facilities/taj-east-gate-toilet-water.jpg',
-    alt: 'Taj Mahal East Gate forecourt entrance, restrooms, and cloakroom plaza',
-    objectPosition: 'center 42%',
-  },
-  'taj-shilpgram-parking': {
-    image: '/images/facilities/taj-shilpgram-parking.jpg',
-    alt: 'Electric shuttles and rickshaw transit zone connecting Shilpgram Parking to Taj East Gate',
-    objectPosition: 'center 48%',
-  },
-  'taj-ro-drinking-water': {
-    image: '/images/facilities/taj-ro-drinking-water.jpg',
-    alt: 'Jilaukhana Forecourt courtyard near the Great Gate hosting ASI RO drinking water station',
-    objectPosition: 'center 45%',
-  },
-  'taj-asi-medical-first-aid': {
-    image: '/images/facilities/taj-asi-medical-first-aid.jpg',
-    alt: 'Eastern Arcade inside the Taj Mahal Jilaukhana Forecourt housing the ASI First-Aid post',
-    objectPosition: 'center 42%',
-  },
-  'sn-medical-college-hospital': {
-    image: '/images/facilities/sn-medical-college-hospital.jpg',
-    alt: 'Uttar Pradesh government hospital campus serving emergency medical care',
-    objectPosition: 'center 45%',
-  },
-  'taj-ganj-tourist-police': {
-    image: '/images/facilities/taj-ganj-tourist-police.jpg',
-    alt: 'Taj Ganj approach road and South Gate corridor near the Tourist Police booth',
-    objectPosition: 'center 45%',
-  },
-  'up-tourism-help-desk': {
-    image: '/images/facilities/up-tourism-help-desk.jpg',
-    alt: 'Taj Mahal West Gate visitor entry plaza and UP Tourism help desk zone',
-    objectPosition: 'center 48%',
-  },
-  'agra-fort-gate-facilities': {
-    image: '/images/facilities/agra-fort-gate-facilities.jpg',
-    alt: 'Agra Fort Amar Singh Gate outer entrance plaza with restrooms, water, and parking',
-    objectPosition: 'center 40%',
-  },
-  'taj-east-gate-food-plaza': {
-    image: '/images/facilities/taj-east-gate-food-plaza.jpg',
-    alt: 'Freshly prepared North Indian vegetarian thali served at Taj Ganj clean food plaza',
-    objectPosition: 'center center',
   },
 };
 
 export const MONUMENT_MEDIA_MAP: Record<string, LocationMediaItem> = {
   'darwaza-i-rauza': {
-    image: '/images/monuments/darwaza-i-rauza.jpg',
+    image: '/images/monuments/darwaza-i-rauza.webp',
     alt: 'Darwaza-i-Rauza red sandstone southern Great Gate of the Taj Mahal',
     objectPosition: 'center 35%',
   },
   'taj-mahal-mausoleum': DEFAULT_AGRA_MEDIA,
   'taj-mahal-mosque-jawab': {
-    image: '/images/monuments/taj-mahal-mosque-jawab.jpg',
+    image: '/images/monuments/taj-mahal-mosque-jawab.webp',
     alt: 'Twin red sandstone Taj Mosque and Jawab pavilion flanking the marble plinth',
     objectPosition: 'center 45%',
   },
   'amar-singh-gate': {
-    image: '/images/monuments/amar-singh-gate.jpg',
+    image: '/images/monuments/amar-singh-gate.webp',
     alt: 'Amar Singh Gate red sandstone defensive bastion entrance at Agra Fort',
     objectPosition: 'center 38%',
   },
   'jahangiri-mahal': {
-    image: '/images/monuments/jahangiri-mahal.jpg',
+    image: '/images/monuments/jahangiri-mahal.webp',
     alt: 'Jahangiri Mahal red sandstone palace courtyard inside Agra Fort',
     objectPosition: 'center 42%',
   },
   'musamman-burj': {
-    image: '/images/monuments/musamman-burj.jpg',
+    image: '/images/monuments/musamman-burj.webp',
     alt: 'Musamman Burj white marble octagonal pavilion at Agra Fort',
     objectPosition: 'center 38%',
   },
 };
 
-export function getNearbyMedia(slug: string): LocationMediaItem {
-  return NEARBY_MEDIA_MAP[slug] || DEFAULT_AGRA_MEDIA;
-}
-
-export function getFacilityMedia(slug: string): LocationMediaItem {
-  return FACILITY_MEDIA_MAP[slug] || DEFAULT_AGRA_MEDIA;
+/** Photo for a nearby place, or null when no verified photo exists (an illustrated tile is shown). */
+export function getNearbyMedia(slug: string): LocationMediaItem | null {
+  return NEARBY_MEDIA_MAP[slug] ?? null;
 }
 
 export function getMonumentMedia(slug: string): LocationMediaItem {

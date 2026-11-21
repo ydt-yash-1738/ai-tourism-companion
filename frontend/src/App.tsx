@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminDashboard } from './components/AdminDashboard';
+import { useScrollParallax } from './hooks/useScrollParallax';
 import { CitySelectorView } from './components/CitySelectorView';
 import { CompanionShell } from './components/CompanionShell';
 import { SERVER_STATUS_EVENT, getMonuments, getOfflinePack, pingServer } from './services/api';
@@ -9,6 +10,7 @@ import type { Monument, OfflinePack, PersonaType } from './types/api';
 type AppScreen = 'landing' | 'companion' | 'admin';
 
 export default function App() {
+  useScrollParallax();
   const [screen, setScreen] = useState<AppScreen>(() =>
     window.location.hash === '#admin' ? 'admin' : 'landing',
   );
@@ -21,13 +23,8 @@ export default function App() {
   const [serverReachable, setServerReachable] = useState<boolean>(true);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [monuments, setMonuments] = useState<Monument[]>([]);
-  const [monumentsRetry, setMonumentsRetry] = useState(0);
-  const [monumentsSettledKey, setMonumentsSettledKey] = useState<string | null>(null);
-  const [monumentsError, setMonumentsError] = useState<string | null>(null);
-
   const [offlinePack, setOfflinePack] = useState<OfflinePack | null>(() => loadOfflinePack('agra'));
   const [downloadingPack, setDownloadingPack] = useState(false);
-  const [offlinePackError, setOfflinePackError] = useState<string | null>(null);
 
   const sessionHash = useMemo(() => getOrCreateSessionHash(), []);
 
@@ -45,10 +42,6 @@ export default function App() {
       window.removeEventListener('offline', goOffline);
     };
   }, []);
-
-  const monumentsReqKey =
-    screen === 'companion' && isOnline ? `companion|${monumentsRetry}` : null;
-  const monumentsLoading = Boolean(monumentsReqKey && monumentsSettledKey !== monumentsReqKey);
 
   // First launch: load the content pack bundled inside the app so everything
   // works with no network and no backend. A later online download refreshes it.
@@ -84,24 +77,17 @@ export default function App() {
   }, [isOnline, serverReachable]);
 
   useEffect(() => {
-    if (!monumentsReqKey) return;
+    if (screen !== 'companion' || !isOnline) return;
     let active = true;
     getMonuments('agra')
       .then((list) => {
-        if (!active) return;
-        setMonuments(list);
-        setMonumentsError(null);
-        setMonumentsSettledKey(monumentsReqKey);
+        if (active) setMonuments(list);
       })
-      .catch((err) => {
-        if (!active) return;
-        setMonumentsError(err instanceof Error ? err.message : 'Unable to load monuments.');
-        setMonumentsSettledKey(monumentsReqKey);
-      });
+      .catch(() => undefined);
     return () => {
       active = false;
     };
-  }, [monumentsReqKey]);
+  }, [screen, isOnline]);
 
   const activeMonuments = monuments.length > 0 ? monuments : (offlinePack?.monuments ?? []);
 
@@ -114,17 +100,11 @@ export default function App() {
   const handleDownloadOfflinePack = async () => {
     if (downloadingPack || !isOnline) return;
     setDownloadingPack(true);
-    setOfflinePackError(null);
     try {
       const pack = await getOfflinePack('agra');
       saveOfflinePack('agra', pack);
       setOfflinePack(pack);
       setMonuments(pack.monuments);
-      setMonumentsError(null);
-    } catch (err) {
-      setOfflinePackError(
-        err instanceof Error ? err.message : 'Could not download offline pack.',
-      );
     } finally {
       setDownloadingPack(false);
     }
@@ -152,13 +132,8 @@ export default function App() {
         sessionHash={sessionHash}
         userCoords={userCoords}
         monuments={activeMonuments}
-        monumentsLoading={monumentsLoading && activeMonuments.length === 0}
-        monumentsError={monumentsError}
-        onRetryMonuments={() => setMonumentsRetry((n) => n + 1)}
         offlinePack={offlinePack}
         downloadingPack={downloadingPack}
-        offlinePackError={offlinePackError}
-        onDismissOfflinePackError={() => setOfflinePackError(null)}
         onChangeLanguage={setLanguage}
         onChangePersona={setPersona}
         onToggleA11y={() => setA11yMode((v) => !v)}

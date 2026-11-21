@@ -12,7 +12,6 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
-  RefreshCw,
   ScanLine,
   ShieldCheck,
   Sparkles,
@@ -29,7 +28,9 @@ import {
 import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
 import { useReveal } from '../hooks/useReveal';
-import { CityHeritageSketch, UpHeritageCrest } from './HeritageSketchIcons';
+import { UpHeritageCrest } from './HeritageSketchIcons';
+import { PHOTO_CREDITS } from '../data/photoCredits';
+import { HeritageCarousel } from './HeritageCarousel';
 import { ScrollStory } from './ScrollStory';
 
 interface CitySelectorViewProps {
@@ -55,41 +56,36 @@ export function CitySelectorView({
 }: CitySelectorViewProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
-  const baseLang = language.toLowerCase().split('-')[0];
-  const translationKey = baseLang !== 'en' && baseLang !== 'hi' ? baseLang : null;
-
   useReveal([language]);
   const [locating, setLocating] = useState(false);
-  const [locationGranted, setLocationGranted] = useState(false);
   const [customNotice, setCustomNotice] = useState<string | null>(null);
   const [translatedCities, setTranslatedCities] = useState<
     Record<string, { name: string; monument: string; tagline: string }>
   >({});
 
   useEffect(() => {
-    if (!translationKey) return;
+    const baseLang = language.toLowerCase().split('-')[0];
+    if (baseLang === 'en' || baseLang === 'hi') return;
 
     let active = true;
     const flat = UP_HERITAGE_CITIES.flatMap((c) => [c.name, c.monumentLabel, c.tagline]);
-    translateBatchCached(flat, translationKey)
-      .then((res) => {
-        if (!active) return;
-        const next: Record<string, { name: string; monument: string; tagline: string }> = {};
-        UP_HERITAGE_CITIES.forEach((city, idx) => {
-          const offset = idx * 3;
-          next[city.slug] = {
-            name: res[offset] || city.name,
-            monument: res[offset + 1] || city.monumentLabel,
-            tagline: res[offset + 2] || city.tagline,
-          };
-        });
-        setTranslatedCities(next);
-      })
-      .catch(() => undefined);
+    translateBatchCached(flat, baseLang).then((res) => {
+      if (!active) return;
+      const next: Record<string, { name: string; monument: string; tagline: string }> = {};
+      UP_HERITAGE_CITIES.forEach((city, idx) => {
+        const offset = idx * 3;
+        next[city.slug] = {
+          name: res[offset] || city.name,
+          monument: res[offset + 1] || city.monumentLabel,
+          tagline: res[offset + 2] || city.tagline,
+        };
+      });
+      setTranslatedCities(next);
+    });
     return () => {
       active = false;
     };
-  }, [translationKey]);
+  }, [language]);
 
   // If browser permission is already granted, silently fetch coordinates without hijacking navigation
   useEffect(() => {
@@ -98,7 +94,6 @@ export function CitySelectorView({
     isGeolocationAlreadyGranted()
       .then((granted) => {
         if (!granted || !active) return null;
-        setLocationGranted(true);
         return requestBrowserLocation();
       })
       .then((res) => {
@@ -135,7 +130,6 @@ export function CitySelectorView({
     setLocating(false);
 
     if (res.coords) {
-      setLocationGranted(true);
       onLocationDetected(res.coords);
       const agra = UP_HERITAGE_CITIES.find((c) => c.slug === 'agra')!;
       const distMeters = haversineMeters(res.coords.lat, res.coords.lng, agra.lat, agra.lng);
@@ -231,37 +225,9 @@ export function CitySelectorView({
                 <span>{ui.ctaBegin}</span>
                 <ArrowRight size={18} />
               </button>
-              <button
-                type="button"
-                className="btn-glass"
-                onClick={handleDetectLocation}
-                disabled={locating}
-                title={
-                  userCoords || locationGranted
-                    ? isHi
-                      ? 'वर्तमान स्थान रीफ़्रेश करें'
-                      : 'Tap to refresh your GPS location'
-                    : undefined
-                }
-              >
-                {locating ? (
-                  <Loader2 size={17} className="spin-icon" />
-                ) : userCoords ? (
-                  <CheckCircle2 size={17} />
-                ) : locationGranted ? (
-                  <RefreshCw size={16} />
-                ) : (
-                  <MapPin size={17} />
-                )}
-                <span>
-                  {locating
-                    ? ui.detectingGps
-                    : userCoords
-                      ? ui.locationActive
-                      : locationGranted
-                        ? ui.refreshLocation
-                        : ui.detectGps}
-                </span>
+              <button type="button" className="btn-glass" onClick={handleDetectLocation} disabled={locating}>
+                {locating ? <Loader2 size={17} className="spin-icon" /> : <MapPin size={17} />}
+                <span>{locating ? ui.detectingGps : ui.detectGps}</span>
               </button>
             </div>
             <p className="hero-actions__notice" role="status">
@@ -345,49 +311,27 @@ export function CitySelectorView({
           <h2>{ui.destHeading}</h2>
           <p>{ui.destSub}</p>
         </header>
-        <div className="dest-rail" role="list">
-          {UP_HERITAGE_CITIES.map((city) => {
-            const tr = translationKey ? translatedCities[city.slug] : null;
-            const cityName = isHi ? city.nameHi : tr?.name || city.name;
-            const monumentLabel = isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel;
-            const tagline = isHi ? city.taglineHi : tr?.tagline || city.tagline;
-            const body = (
-              <>
-                <div className="dest-card__art">
-                  <CityHeritageSketch city={city.slug} />
-                  <span className={`dest-card__badge ${city.clickable ? 'is-live' : ''}`}>
-                    {city.clickable ? ui.liveNow : ui.comingSoon}
-                  </span>
-                </div>
-                <div className="dest-card__body">
-                  <h3>{cityName}</h3>
-                  <span className="dest-card__monument">{monumentLabel}</span>
-                  <p>{tagline}</p>
-                  {city.clickable && (
-                    <span className="dest-card__go">
-                      {ui.exploreFeatures}
-                      <ArrowRight size={15} />
-                    </span>
-                  )}
-                </div>
-              </>
-            );
-            return city.clickable ? (
-              <button
-                key={city.slug}
-                type="button"
-                role="listitem"
-                className="dest-card is-live"
-                onClick={() => onSelectAgra(userCoords)}
-              >
-                {body}
-              </button>
-            ) : (
-              <div key={city.slug} role="listitem" className="dest-card" aria-label={`${city.name}, ${ui.comingSoon}`}>
-                {body}
-              </div>
-            );
-          })}
+        <div data-reveal>
+          <HeritageCarousel
+            label={ui.destHeading}
+            ctaLabel={ui.ctaBegin}
+            onSelectLive={() => onSelectAgra(userCoords)}
+            slides={UP_HERITAGE_CITIES.map((city) => {
+              const baseLang = language.toLowerCase().split('-')[0];
+              const tr = baseLang !== 'en' && baseLang !== 'hi' ? translatedCities[city.slug] : null;
+              return {
+                id: city.slug,
+                image: city.image,
+                imageAlt: city.imageAlt,
+                objectPosition: city.objectPosition,
+                title: isHi ? city.nameHi : tr?.name || city.name,
+                subtitle: isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel,
+                body: isHi ? city.taglineHi : tr?.tagline || city.tagline,
+                badge: city.clickable ? ui.liveNow : ui.comingSoon,
+                live: city.clickable,
+              };
+            })}
+          />
         </div>
       </section>
 
@@ -411,17 +355,22 @@ export function CitySelectorView({
         <div className="tricolour-bar" />
         <p>{ui.footerSources}</p>
         <p className="landing-footer__fine">{ui.footerText}</p>
-        <p className="landing-footer__fine">
-          Taj Mahal photo: Yann, edited by Jim Carter, via{' '}
-          <a href="https://commons.wikimedia.org/wiki/File:Taj_Mahal_(Edited).jpeg" target="_blank" rel="noreferrer">
-            Wikimedia Commons
-          </a>
-          ,{' '}
-          <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
-            CC BY-SA 4.0
-          </a>
-          .
-        </p>
+        <details className="credits">
+          <summary>
+            {ui.photoCreditsLabel} ({PHOTO_CREDITS.length})
+          </summary>
+          <ul>
+            {PHOTO_CREDITS.map((c) => (
+              <li key={c.source}>
+                <strong>{c.subject}</strong>: {c.author},{' '}
+                <a href={c.source} target="_blank" rel="noreferrer">
+                  Wikimedia Commons
+                </a>
+                , {c.license}
+              </li>
+            ))}
+          </ul>
+        </details>
       </footer>
     </div>
   );

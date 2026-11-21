@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Clock, IndianRupee, Loader2, MapPin, Navigation, Square, Volume2 } from 'lucide-react';
+import { Award, Clock, IndianRupee, Loader2, MapPin, Navigation, Square, Volume2, Sparkles } from 'lucide-react';
 import { getNearbyMedia } from '../data/agraMedia';
 import { getUiText } from '../data/i18n';
 import { getNearbyPlaces } from '../services/api';
@@ -318,16 +318,21 @@ export function NearbyTab({ language, isOnline, userCoords, offlinePack }: Nearb
 
                 return (
                   <article key={place.slug} className="info-card has-media">
-                    <div className="info-card__media">
-                      <img
-                        className={`info-card__img ${isLoaded ? 'is-loaded' : ''}`}
-                        src={media.image}
-                        alt={media.alt}
-                        style={{ objectPosition: media.objectPosition }}
-                        loading="lazy"
-                        onLoad={() => markImageLoaded(place.slug)}
-                        onError={() => markImageLoaded(place.slug)}
-                      />
+                    <div className={`info-card__media ${media ? '' : 'facility-art is-food'}`}>
+                      {media ? (
+                        <img
+                          data-parallax="0.08"
+                          className={`info-card__img ${isLoaded ? 'is-loaded' : ''}`}
+                          src={media.image}
+                          alt={media.alt}
+                          style={{ objectPosition: media.objectPosition }}
+                          loading="lazy"
+                          onLoad={() => markImageLoaded(place.slug)}
+                          onError={() => markImageLoaded(place.slug)}
+                        />
+                      ) : (
+                        <Sparkles className="facility-art__icon" size={46} aria-hidden="true" />
+                      )}
                       <div className="info-card__media-scrim" aria-hidden="true" />
                       <div className="info-card__media-top">
                         <div className="info-card__media-badges">

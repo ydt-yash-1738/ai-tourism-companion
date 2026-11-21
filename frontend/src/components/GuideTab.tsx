@@ -1,20 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Accessibility,
   AlertTriangle,
+  ArrowRight,
   BookOpen,
   ChevronRight,
+  Clock,
+  Compass,
   Landmark,
   Loader2,
   Mic,
   Send,
   ShieldCheck,
-  Sparkles,
   Square,
   Volume2,
   WifiOff,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { PERSONA_OPTIONS } from '../data/upCities';
+import {
+  AGRA_VISITOR_SNAPSHOT,
+  GUIDE_MONUMENT_SPOTLIGHTS,
+  GUIDE_TOPIC_CARDS,
+  getMonumentMedia,
+} from '../data/agraMedia';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
 import { offlineLocalChatSearch } from '../services/offlineStore';
@@ -28,7 +37,6 @@ interface GuideTabProps {
   isOnline: boolean;
   sessionHash: string;
   monuments: Monument[];
-  monumentsLoading?: boolean;
   offlinePack: OfflinePack | null;
   onChangePersona: (p: PersonaType) => void;
 }
@@ -49,23 +57,18 @@ export function GuideTab({
   isOnline,
   sessionHash,
   monuments,
-  monumentsLoading = false,
   offlinePack,
   onChangePersona,
 }: GuideTabProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
-
   const [selectedMonument, setSelectedMonument] = useState<string>('');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<string>('');
-  const [audioState, setAudioState] = useState<{
-    id: string;
-    status: 'loading' | 'playing';
-  } | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatTurn[]>([]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -90,22 +93,19 @@ export function GuideTab({
       }
       micStreamRef.current?.getTracks().forEach((t) => t.stop());
       browserSpeechRef.current?.stop();
-      stopSpeaking();
     };
   }, []);
 
-  const sendQuestion = async (rawQuestion: string) => {
+  const sendQuestion = async (rawQuestion: string, monumentOverride?: string) => {
     const question = rawQuestion.trim();
     if (!question || loading) return;
 
     setVoiceStatus('');
     const userMsg: ChatTurn = { id: `u_${++msgSeqRef.current}`, role: 'user', text: question };
-    const nextHistory = [...messages, userMsg]
-      .slice(-6)
-      .map((m) => ({
-        role: m.role,
-        content: m.role === 'assistant' && m.response ? m.response.answer_summary : m.text,
-      }));
+    const nextHistory = [...messages, userMsg].slice(-6).map((m) => ({
+      role: m.role,
+      content: m.role === 'assistant' && m.response ? m.response.answer_summary : m.text,
+    }));
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
@@ -122,7 +122,7 @@ export function GuideTab({
             language,
             persona,
             simple_language: simpleLanguage,
-            monument_slug: selectedMonument || null,
+            monument_slug: (monumentOverride ?? selectedMonument) || null,
             session_hash: sessionHash,
             conversation_history: nextHistory,
           });
@@ -200,6 +200,23 @@ export function GuideTab({
               setVoiceStatus('');
               return;
             }
+            if (stt.fallback_to_device) {
+              // Server has no cloud speech service: listen again with the device recogniser
+              const device = startBrowserSpeechFallback(
+                language,
+                (transcript) => {
+                  setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+                  setVoiceStatus('');
+                },
+                () => setRecording(false),
+              );
+              if (device) {
+                browserSpeechRef.current = device;
+                setRecording(true);
+                setVoiceStatus(isHi ? 'कृपया दोबारा बोलें...' : 'Please say that once more...');
+                return;
+              }
+            }
             setVoiceStatus(
               stt.transcript.trim() === '' && !stt.fallback_to_device
                 ? isHi
@@ -253,9 +270,9 @@ export function GuideTab({
   };
 
   const handleReadAloud = async (turn: ChatTurn) => {
-    if (audioState?.id === turn.id) {
+    if (speakingId === turn.id) {
       stopSpeaking();
-      setAudioState(null);
+      setSpeakingId(null);
       return;
     }
 
@@ -269,15 +286,18 @@ export function GuideTab({
     const fullText = [turn.text, historyPart, folklorePart].filter(Boolean).join(' ');
 
     const needsAutoTranslate = Boolean(r && r.language !== language);
+    setSpeakingId(turn.id);
     await speakText(
       fullText,
       language,
       (state) => {
-        setAudioState(state === 'idle' ? null : { id: turn.id, status: state });
+        if (state === 'idle') setSpeakingId(null);
       },
       { autoTranslate: needsAutoTranslate },
     );
   };
+
+  const tr = (en: string, hi: string) => (isHi && hi ? hi : en);
 
   const monumentName = (slug: string | null | undefined) => {
     const m = monuments.find((x) => x.slug === slug);
@@ -288,7 +308,7 @@ export function GuideTab({
   return (
     <div className="guide-layout">
       <div className="photo-banner">
-        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" />
+        <img src={`${import.meta.env.BASE_URL}images/taj-mahal-banner.webp`} alt="" aria-hidden="true" data-parallax="0.2" />
         <div className="guide-banner">
           <span className="guide-banner__eyebrow">
             <span className="dot-live" />
@@ -304,12 +324,6 @@ export function GuideTab({
             <h3>{ui.guideHeading}</h3>
             <p>{ui.guideSub}</p>
           </div>
-          {monumentsLoading && monuments.length === 0 && (
-            <span className="translating-pill" role="status">
-              <Loader2 size={13} className="spin-icon" />
-              <span>{ui.loadingMonuments}</span>
-            </span>
-          )}
         </div>
 
         <div className="segmented segmented--scroll" role="radiogroup" aria-label={ui.styleLabel}>
@@ -353,37 +367,121 @@ export function GuideTab({
         </div>
 
         {messages.length === 0 && (
-          <div className="starter-grid">
-            {ui.starters.map((q, i) => (
-              <button
-                key={q}
-                type="button"
-                className="starter-card"
-                style={{ ['--i' as string]: i }}
-                onClick={() => sendQuestion(q)}
-              >
-                <Sparkles size={16} aria-hidden="true" />
-                <span>{q}</span>
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
-            ))}
+          <div className="guide-discovery">
+            <section>
+              <div className="guide-section-head">
+                <div>
+                  <h3>{ui.exploreMonumentsHeading}</h3>
+                  <p>{ui.exploreMonumentsSub}</p>
+                </div>
+              </div>
+              <div className="guide-monument-grid">
+                {GUIDE_MONUMENT_SPOTLIGHTS.map((item) => {
+                  const media = getMonumentMedia(item.slug);
+                  return (
+                    <button
+                      key={item.slug}
+                      type="button"
+                      className={`guide-monument-card ${selectedMonument === item.slug ? 'is-selected' : ''}`}
+                      onClick={() => {
+                        setSelectedMonument(item.slug);
+                        void sendQuestion(tr(item.promptEn, item.promptHi), item.slug);
+                      }}
+                    >
+                      <div className="guide-monument-card__media">
+                        <img
+                          data-parallax="0.1"
+                          className="guide-monument-card__img is-loaded"
+                          src={media.image}
+                          alt={media.alt}
+                          style={{ objectPosition: media.objectPosition }}
+                          loading="lazy"
+                        />
+                        <div className="guide-monument-card__scrim" aria-hidden="true" />
+                        <div className="guide-monument-card__top">
+                          <span className="guide-monument-card__pill">
+                            <Clock size={11} />
+                            <span>~{item.visitDurationMin} min</span>
+                          </span>
+                          <span className={`guide-monument-card__pill ${item.stepFree ? 'is-step-free' : 'is-stairs'}`}>
+                            <Accessibility size={11} />
+                            <span>{item.stepFree ? ui.stepFreeBadge : ui.stairsBadge}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="guide-monument-card__body">
+                        <h4>{tr(item.name, item.nameHi)}</h4>
+                        <p>{tr(item.shortSummary, item.shortSummaryHi)}</p>
+                        <div className="guide-monument-card__cta">
+                          <span>{ui.askAboutMonument}</span>
+                          <ArrowRight size={14} />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <div className="guide-section-head">
+                <div>
+                  <h3>{ui.curatedTopicsHeading}</h3>
+                  <p>{ui.curatedTopicsSub}</p>
+                </div>
+              </div>
+              <div className="guide-topic-grid">
+                {GUIDE_TOPIC_CARDS.map((topic) => {
+                  const focusSlug = topic.id === 'musamman-burj-story' ? 'musamman-burj' : '';
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      className={`guide-topic-card is-${topic.accent}`}
+                      disabled={loading}
+                      onClick={() => {
+                        setSelectedMonument(focusSlug);
+                        void sendQuestion(tr(topic.questionEn, topic.questionHi), focusSlug);
+                      }}
+                    >
+                      <span className="guide-topic-card__badge">{tr(topic.badgeEn, topic.badgeHi)}</span>
+                      <h4>{tr(topic.titleEn, topic.titleHi)}</h4>
+                      <p>{tr(topic.descEn, topic.descHi)}</p>
+                      <span className="guide-topic-card__ask">
+                        <span>{ui.askAboutMonument}</span>
+                        <ArrowRight size={14} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="guide-snapshot-grid" aria-label="Agra visitor quick facts">
+              {AGRA_VISITOR_SNAPSHOT.map((tile, idx) => {
+                const Icon = idx === 0 ? Clock : idx === 1 ? Compass : ShieldCheck;
+                return (
+                  <div key={tile.id} className="guide-snapshot-tile">
+                    <div className="guide-snapshot-tile__head">
+                      <Icon size={15} color="var(--saffron-deep)" />
+                      <span>{tr(tile.titleEn, tile.titleHi)}</span>
+                    </div>
+                    <p>{tr(tile.bodyEn, tile.bodyHi)}</p>
+                  </div>
+                );
+              })}
+            </section>
           </div>
         )}
       </section>
 
       <div className="chat-stream" aria-live="polite" ref={streamRef}>
-        {messages.map((turn) => {
-          if (turn.role === 'user') {
-            return (
-              <div key={turn.id} className="chat-bubble is-user">
-                {turn.text}
-              </div>
-            );
-          }
-
-          const turnAudioStatus = audioState?.id === turn.id ? audioState.status : 'idle';
-
-          return (
+        {messages.map((turn) =>
+          turn.role === 'user' ? (
+            <div key={turn.id} className="chat-bubble is-user">
+              {turn.text}
+            </div>
+          ) : (
             <article key={turn.id} className="answer-card">
               <header className="answer-card__meta">
                 <span className={`answer-card__source ${turn.fromDevice ? 'is-device' : ''}`}>
@@ -444,21 +542,10 @@ export function GuideTab({
               <footer className="answer-card__actions">
                 <button
                   type="button"
-                  className={`soft-btn ${
-                    turnAudioStatus === 'playing'
-                      ? 'is-playing'
-                      : turnAudioStatus === 'loading'
-                        ? 'is-audio-loading'
-                        : ''
-                  }`}
+                  className={`soft-btn ${speakingId === turn.id ? 'is-playing' : ''}`}
                   onClick={() => handleReadAloud(turn)}
                 >
-                  {turnAudioStatus === 'loading' ? (
-                    <>
-                      <Loader2 size={16} className="spin-icon" />
-                      {ui.loadingAudio}
-                    </>
-                  ) : turnAudioStatus === 'playing' ? (
+                  {speakingId === turn.id ? (
                     <>
                       <span className="audio-eq" aria-hidden="true">
                         <span />
@@ -487,8 +574,8 @@ export function GuideTab({
                 </div>
               )}
             </article>
-          );
-        })}
+          ),
+        )}
 
         {loading && (
           <div className="answer-card answer-card--loading" role="status">

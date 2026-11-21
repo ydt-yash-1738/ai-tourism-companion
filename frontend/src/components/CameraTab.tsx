@@ -10,9 +10,10 @@ import {
   Volume2,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
+import { offlineVisionFallback } from '../services/offlineStore';
 import { postVisionAsk } from '../services/api';
 import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
-import type { PersonaType, VisionResponse } from '../types/api';
+import type { PersonaType, VisionResponse, OfflinePack } from '../types/api';
 import { ErrorStateCard, LoadingStateCard, SkeletonCards } from './ApiStateCard';
 
 interface CameraTabProps {
@@ -22,6 +23,7 @@ interface CameraTabProps {
   isOnline: boolean;
   sessionHash: string;
   userCoords: { lat: number; lng: number } | null;
+  offlinePack: OfflinePack | null;
 }
 
 export function CameraTab({
@@ -31,6 +33,7 @@ export function CameraTab({
   isOnline,
   sessionHash,
   userCoords,
+  offlinePack,
 }: CameraTabProps) {
   const ui = getUiText(language);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -63,8 +66,17 @@ export function CameraTab({
 
   const handleIdentify = async () => {
     if (!imageFile || loading) return;
+    const tryOffline = () => {
+      const local = offlineVisionFallback(offlinePack, effectiveCoords, language, persona);
+      if (local) {
+        setResult(local);
+        setError('');
+        return true;
+      }
+      return false;
+    };
     if (!isOnline) {
-      setError(ui.offlineCameraErr);
+      if (!tryOffline()) setError(ui.offlineCameraErr);
       return;
     }
 
@@ -86,7 +98,9 @@ export function CameraTab({
       });
       setResult(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Vision identification failed.');
+      if (!tryOffline()) {
+        setError(err instanceof Error ? err.message : 'Vision identification failed.');
+      }
     } finally {
       setLoading(false);
     }

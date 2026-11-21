@@ -1,4 +1,12 @@
+import { Capacitor } from '@capacitor/core';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { LANGUAGE_OPTIONS } from '../data/upCities';
+
+// Android's WebView has no Web Speech engine, so the installed app uses the
+// phone's native text-to-speech and speech recogniser, which also work offline
+// when the language pack is on the device.
+const isNative = Capacitor.isNativePlatform();
 import { postVoiceTTS } from './api';
 
 export type AudioPlaybackState = 'idle' | 'loading' | 'playing';
@@ -25,7 +33,9 @@ export function stopSpeaking(): void {
     activeTtsAbort = null;
   }
   clearCurrentAudio();
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  if (isNative) {
+    void TextToSpeech.stop().catch(() => undefined);
+  } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
 }
@@ -105,6 +115,18 @@ export async function speakText(
 
   if (token !== activePlaybackToken) {
     return 'cancelled';
+  }
+
+  if (isNative) {
+    const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === languageCode);
+    onStateChange?.('playing');
+    try {
+      await TextToSpeech.speak({ text: textForDeviceFallback, lang: langMeta?.bcp47 || 'en-IN', rate: 0.96 });
+    } catch {
+      // No voice for this language on the device: finish quietly
+    }
+    if (token === activePlaybackToken) onStateChange?.('idle');
+    return token === activePlaybackToken ? 'device' : 'cancelled';
   }
 
   return new Promise<'device' | 'cancelled'>((resolve) => {
@@ -196,6 +218,35 @@ export function startBrowserSpeechFallback(
     SpeechRecognition?: new () => SpeechRecognitionInstanceLike;
     webkitSpeechRecognition?: new () => SpeechRecognitionInstanceLike;
   };
+  if (isNative) {
+    const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === languageCode);
+    let stopped = false;
+    void (async () => {
+      try {
+        const perm = await SpeechRecognition.requestPermissions();
+        if (perm.speechRecognition !== 'granted') return;
+        const res = await SpeechRecognition.start({
+          language: langMeta?.bcp47 || 'en-IN',
+          maxResults: 1,
+          partialResults: false,
+          popup: true,
+        });
+        const first = res?.matches?.[0] || '';
+        if (!stopped && first.trim()) onTranscript(first.trim());
+      } catch {
+        // recogniser unavailable or cancelled
+      } finally {
+        onDone();
+      }
+    })();
+    return {
+      stop: () => {
+        stopped = true;
+        void SpeechRecognition.stop().catch(() => undefined);
+      },
+    };
+  }
+
   const Ctor = win.SpeechRecognition || win.webkitSpeechRecognition;
   if (!Ctor) return null;
 

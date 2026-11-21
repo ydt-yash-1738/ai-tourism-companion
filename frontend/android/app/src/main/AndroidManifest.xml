@@ -54,6 +54,13 @@
 
     <!-- One-tap emergency calls open the phone dialer -->
     <queries>
+        <!-- Native speech recogniser and text-to-speech engines -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.DIAL" />
             <data android:scheme="tel" />

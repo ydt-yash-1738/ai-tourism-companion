@@ -46,15 +46,10 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 6500
   const controller = new AbortController();
   const externalSignal = init?.signal;
   const onExternalAbort = () => controller.abort();
-
   if (externalSignal) {
-    if (externalSignal.aborted) {
-      controller.abort();
-    } else {
-      externalSignal.addEventListener('abort', onExternalAbort, { once: true });
-    }
+    if (externalSignal.aborted) controller.abort();
+    else externalSignal.addEventListener('abort', onExternalAbort, { once: true });
   }
-
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     let res: Response;
@@ -64,7 +59,8 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 6500
         signal: controller.signal,
       });
     } catch (err) {
-      reportServerStatus(false);
+      // A cancelled request says nothing about whether the server is reachable
+      if (!(externalSignal?.aborted)) reportServerStatus(false);
       throw err;
     }
     reportServerStatus(true);
@@ -75,9 +71,7 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 6500
     return (await res.json()) as T;
   } finally {
     window.clearTimeout(timer);
-    if (externalSignal) {
-      externalSignal.removeEventListener('abort', onExternalAbort);
-    }
+    externalSignal?.removeEventListener('abort', onExternalAbort);
   }
 }
 
