@@ -161,7 +161,7 @@ export function CompanionShell({
               type="button"
               className={`icon-btn ${offlinePack ? 'is-ready' : ''}`}
               onClick={onDownloadOfflinePack}
-              disabled={downloadingPack || !!offlinePack || workingOffline}
+              disabled={downloadingPack || workingOffline}
               aria-label={offlinePack ? ui.offlineReady : ui.offlinePack}
               title={offlinePack ? ui.offlineReady : ui.offlinePack}
             >

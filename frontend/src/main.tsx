@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import '@fontsource/inter/400.css';
@@ -21,3 +23,9 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+
+if (Capacitor.isNativePlatform()) {
+  document.documentElement.classList.add('is-native');
+  void StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined);
+  void StatusBar.setBackgroundColor({ color: '#0B1B33' }).catch(() => undefined);
+}

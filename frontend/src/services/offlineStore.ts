@@ -33,7 +33,11 @@ export function getOrCreateSessionHash(): string {
 }
 
 export function saveOfflinePack(slug: string, pack: OfflinePack): void {
-  localStorage.setItem(`${PACK_KEY_PREFIX}${slug}`, JSON.stringify(pack));
+  try {
+    localStorage.setItem(`${PACK_KEY_PREFIX}${slug}`, JSON.stringify(pack));
+  } catch {
+    // Storage full or unavailable: the pack still works for this session from memory
+  }
 }
 
 export function loadOfflinePack(slug: string): OfflinePack | null {

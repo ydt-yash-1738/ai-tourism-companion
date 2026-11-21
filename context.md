@@ -82,9 +82,9 @@
   - [x] Build Tourism Department Analytics Dashboard (`#admin`, `AdminDashboard.tsx`) with Recharts (`UC-9`)
   - [x] Full 10-language UI i18n (`frontend/src/data/i18n.ts`) + cached batch translation (`translateCache.ts`) + auto-translated Sarvam AI / Web Speech TTS across `en, hi, mr, ta, bn, te, ur, fr, ja, es`
   - [x] Readable typography (`Outfit` + `Inter` + Indic `Noto Sans` scripts) and Android/mobile-optimized SCSS layouts (swipeable filter bars, non-zooming 16px inputs, compact featured city grid, safe-area bottom nav)
-  - [ ] Add Capacitor (`@capacitor/core`, `@capacitor/cli`, `@capacitor/android`) & native plugins (`camera`, `geolocation`, `network`, `filesystem`) and sync Android Studio project
+  - [x] Capacitor 8 Android project (`frontend/android`), status bar + splash plugins, camera/mic/location permissions, bundled Agra offline pack, custom icon & splash (see `frontend/ANDROID.md`)
 - [ ] **Phase 4 — Verification & Demo Readiness:**
-  - [ ] Build Android APK via Android Studio (using Android Studio's bundled JDK 17/21)
+  - [x] Debug and signed release APKs built from the command line (`npm run android:debug` / `android:release`)
   - [ ] Test Airplane Mode offline fallback on Android device
   - [ ] Add a second UP destination pack (e.g., `lucknow` or `varanasi`) if time permits to demonstrate multi-site scalability
 
