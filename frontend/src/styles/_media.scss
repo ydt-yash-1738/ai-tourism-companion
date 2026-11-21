@@ -877,3 +877,23 @@ body.a11y-mode {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+// Scroll-driven parallax (hooks/useScrollParallax.ts). The element drifts from
+// -A to +A while its frame crosses the viewport, A = factor × (half a screen):
+// the same motion as the JavaScript fallback, but run on the compositor.
+@keyframes parallaxDrift {
+  from {
+    transform: translate3d(0, calc(var(--pf, 0.15) * -55vh), 0) scale(var(--ps, 1));
+  }
+
+  to {
+    transform: translate3d(0, calc(var(--pf, 0.15) * 55vh), 0) scale(var(--ps, 1));
+  }
+}
+
+// doubled class: outranks older `animation: none` rules on parallax photos
+.parallax-css.parallax-css[data-parallax] {
+  animation: parallaxDrift linear both;
+  animation-timeline: view();
+  animation-range: cover;
+}

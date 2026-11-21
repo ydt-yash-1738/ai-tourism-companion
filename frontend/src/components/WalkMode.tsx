@@ -105,8 +105,13 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
       if (cancelled || run !== runRef.current) return;
       if (voiceOn) {
         setProgress(0);
-        await speakText(narration, language, (s) => setAudio(s), { onProgress: setProgress, rate: speed });
-        window.setTimeout(next, 700);
+        // wait for the whole narration (the cloud voice otherwise returns as soon as it starts)
+        const result = await speakText(narration, language, (s) => setAudio(s), {
+          onProgress: setProgress,
+          rate: speed,
+          waitUntilDone: true,
+        });
+        if (result !== 'cancelled') window.setTimeout(next, 700);
       } else {
         const ms = Math.max(4000, (narration.length / 15 / speed) * 1000);
         const started = performance.now();

@@ -1580,3 +1580,25 @@
 .walk__sv ~ .walk__walking {
   background: linear-gradient(180deg, rgba(7, 17, 31, 0.92), rgba(7, 17, 31, 0.8));
 }
+
+// --- Touch devices: no live blur ------------------------------------------------
+// A backdrop blur over content that is scrolling must be recomputed every frame,
+// which is the costliest thing a phone GPU does here. On touch screens the glass
+// becomes a plain tint of the same colour; desktop keeps the frosted glass.
+@media (hover: none) and (pointer: coarse) {
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  // controls over the hero photo relied on the blur for contrast
+  .story .glass-select,
+  .story .glass-icon-btn,
+  .story .btn-glass,
+  .landing-topbar__crest,
+  .story__picker button:not(.is-active) {
+    background: rgba(8, 18, 32, 0.48);
+  }
+}

@@ -401,11 +401,25 @@ function drawInstance(inst: Instance, t: number) {
   inst.ctx.drawImage(renderer.domElement, 0, full.y - h, w, h, 0, 0, w, h);
 }
 
+// While the page scrolls, hold the last drawn frame: the scroll gets the whole
+// frame budget, and the avatar picks up again a moment after scrolling stops.
+let lastScrollAt = -Infinity;
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'scroll',
+    () => {
+      lastScrollAt = performance.now();
+    },
+    { passive: true, capture: true },
+  );
+}
+
 function frame(now: number) {
   rafId = 0;
   const live = [...instances].filter((i) => i.visible);
   if (!live.length) return;
-  if (now - lastFrame >= 1000 / FPS - 2) {
+  const scrolling = now - lastScrollAt < 180;
+  if (!scrolling && now - lastFrame >= 1000 / FPS - 2) {
     lastFrame = now;
     for (const inst of live) drawInstance(inst, now / 1000);
   }

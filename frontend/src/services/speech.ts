@@ -14,8 +14,14 @@ export type AudioPlaybackState = 'idle' | 'loading' | 'playing';
 let currentAudio: HTMLAudioElement | null = null;
 let activePlaybackToken = 0;
 let activeTtsAbort: AbortController | null = null;
+/** resolves the pending "wait until done" promise when audio ends or is stopped */
+let finishCurrentAudio: (() => void) | null = null;
 
 function clearCurrentAudio(): void {
+  if (finishCurrentAudio) {
+    finishCurrentAudio();
+    finishCurrentAudio = null;
+  }
   if (currentAudio) {
     currentAudio.onplaying = null;
     currentAudio.onended = null;
@@ -50,6 +56,11 @@ export async function speakText(
     onProgress?: (fraction: number) => void;
     /** Speaking speed multiplier (1 = normal) */
     rate?: number;
+    /**
+     * Resolve only when the audio has finished (or was stopped). By default the
+     * cloud voice resolves as soon as playback starts.
+     */
+    waitUntilDone?: boolean;
   },
 ): Promise<'sarvam' | 'device' | 'cancelled'> {
   stopSpeaking();
@@ -99,13 +110,24 @@ export async function speakText(
             options?.onProgress?.(audio.currentTime / audio.duration);
           }
         };
+        const finished = new Promise<void>((resolve) => {
+          finishCurrentAudio = resolve;
+        });
+        const done = () => {
+          if (finishCurrentAudio) {
+            finishCurrentAudio();
+            finishCurrentAudio = null;
+          }
+        };
         audio.onended = () => {
           if (currentAudio === audio) currentAudio = null;
           if (token === activePlaybackToken) onStateChange?.('idle');
+          done();
         };
         audio.onerror = () => {
           if (currentAudio === audio) currentAudio = null;
           if (token === activePlaybackToken) onStateChange?.('idle');
+          done();
         };
         await audio.play();
         if (token !== activePlaybackToken) {
@@ -113,6 +135,10 @@ export async function speakText(
           return 'cancelled';
         }
         markPlaying();
+        if (options?.waitUntilDone) {
+          await finished;
+          return token === activePlaybackToken ? 'sarvam' : 'cancelled';
+        }
         return 'sarvam';
       }
     }
