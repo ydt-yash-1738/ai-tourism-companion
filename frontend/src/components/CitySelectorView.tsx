@@ -3,10 +3,21 @@ import {
   Accessibility,
   ArrowRight,
   BarChart3,
+  BookOpen,
+  CheckCircle2,
+  ChevronDown,
   Compass,
+  Headphones,
+  Languages,
+  LifeBuoy,
   Loader2,
   MapPin,
+  MessageCircle,
+  ScanLine,
   ShieldCheck,
+  Sparkles,
+  Store,
+  WifiOff,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
 import { LANGUAGE_OPTIONS, UP_HERITAGE_CITIES } from '../data/upCities';
@@ -17,11 +28,9 @@ import {
 } from '../services/geolocation';
 import { haversineMeters } from '../services/offlineStore';
 import { translateBatchCached } from '../services/translateCache';
-import {
-  CityHeritageSketch,
-  HeritageJaliBackdrop,
-  UpHeritageCrest,
-} from './HeritageSketchIcons';
+import { useReveal } from '../hooks/useReveal';
+import { CityHeritageSketch, UpHeritageCrest } from './HeritageSketchIcons';
+import { ParallaxScene } from './ParallaxScene';
 
 interface CitySelectorViewProps {
   language: string;
@@ -46,6 +55,7 @@ export function CitySelectorView({
 }: CitySelectorViewProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
+  useReveal([language]);
   const [locating, setLocating] = useState(false);
   const [customNotice, setCustomNotice] = useState<string | null>(null);
   const [translatedCities, setTranslatedCities] = useState<
@@ -151,172 +161,224 @@ export function CitySelectorView({
     }
   };
 
-  return (
-    <div className="landing-shell">
-      <div className="tricolour-bar" />
+  const features = [MessageCircle, ScanLine, ShieldCheck, Headphones, Store, LifeBuoy, WifiOff, Accessibility];
 
-      <header className="gov-masthead">
-        <div className="gov-masthead__inner">
-          <div className="gov-masthead__brand">
-            <div className="gov-masthead__crest">
+  return (
+    <div className="landing">
+      <ParallaxScene variant="hero">
+        <header className="landing-topbar">
+          <div className="landing-topbar__brand">
+            <div className="landing-topbar__crest">
               <UpHeritageCrest />
             </div>
-            <div>
-              <div className="gov-masthead__gov-tag">{ui.govTag}</div>
-              <h1 className="gov-masthead__title">{ui.appTitle}</h1>
+            <div className="landing-topbar__titles">
+              <span className="landing-topbar__tag">{ui.govTag}</span>
+              <span className="landing-topbar__title">{ui.appTitle}</span>
             </div>
           </div>
-
-          <div className="gov-masthead__actions">
-            <select
-              className="lang-select"
-              value={language}
-              onChange={(e) => onChangeLanguage(e.target.value)}
-              aria-label="Choose language"
-            >
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {opt.nativeLabel}
-                </option>
-              ))}
-            </select>
-
+          <div className="landing-topbar__actions">
+            <label className="glass-select">
+              <Languages size={16} aria-hidden="true" />
+              <select
+                value={language}
+                onChange={(e) => onChangeLanguage(e.target.value)}
+                aria-label="Choose language"
+              >
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.nativeLabel}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
-              className={`pill-btn ${a11yMode ? 'is-emerald' : ''}`}
+              className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
               onClick={onToggleA11y}
               aria-pressed={a11yMode}
+              aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
+              title={a11yMode ? ui.easyModeOn : ui.easyMode}
             >
-              <Accessibility size={16} />
-              <span>{a11yMode ? ui.easyModeOn : ui.easyMode}</span>
-            </button>
-
-            <button type="button" className="pill-btn" onClick={onOpenAdmin}>
-              <BarChart3 size={16} />
-              <span>{ui.deptInsights}</span>
+              <Accessibility size={18} />
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="landing-hero">
-        <div className="landing-hero__panel">
-          <HeritageJaliBackdrop className="landing-hero__jali" />
-
-          <div className="landing-hero__eyebrow">
+        <div className="hero-copy">
+          <span className="hero-copy__kicker">
             <span className="dot-live" />
-            <span>{ui.eyebrow}</span>
-          </div>
+            {ui.heroKicker}
+          </span>
+          <h1 className="hero-copy__title">
+            {ui.heroTitleA} <em>{ui.heroTitleB}</em>
+          </h1>
+          <p className="hero-copy__lead">{ui.heroLead}</p>
+        </div>
 
-          <h2 className="landing-hero__headline">{ui.heroHeadline}</h2>
-          <p className="landing-hero__sub">{ui.heroSub}</p>
-
-          <div className="landing-hero__cta-row">
-            <button
-              type="button"
-              className="pill-btn is-saffron"
-              onClick={() => onSelectAgra(userCoords)}
-            >
-              <Compass size={17} />
-              <span>{ui.launchAgra}</span>
-              <ArrowRight size={16} />
+        <div className="hero-actions">
+          <div className="hero-actions__row">
+            <button type="button" className="btn-primary" onClick={() => onSelectAgra(userCoords)}>
+              <Compass size={19} />
+              <span>{ui.ctaBegin}</span>
+              <ArrowRight size={18} />
             </button>
-
-            <button
-              type="button"
-              className="pill-btn"
-              onClick={handleDetectLocation}
-              disabled={locating}
-            >
-              {locating ? <Loader2 size={16} className="spin-icon" /> : <MapPin size={16} />}
+            <button type="button" className="btn-glass" onClick={handleDetectLocation} disabled={locating}>
+              {locating ? <Loader2 size={17} className="spin-icon" /> : <MapPin size={17} />}
               <span>{locating ? ui.detectingGps : ui.detectGps}</span>
             </button>
           </div>
-
-          <div className="landing-hero__loc-banner" role="status">
-            <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+          <p className="hero-actions__notice" role="status">
+            <ShieldCheck size={15} aria-hidden="true" />
             <span>{customNotice || activeLocationNotice || ui.locDefaultNotice}</span>
+          </p>
+          <span className="hero-actions__cue" aria-hidden="true">
+            <ChevronDown size={18} />
+            {ui.scrollCue}
+          </span>
+        </div>
+      </ParallaxScene>
+
+      <section className="stat-strip" aria-label="Highlights">
+        {ui.stats.map((stat, i) => (
+          <div key={stat.label} className="stat-strip__item" data-reveal style={{ ['--i' as string]: i }}>
+            <strong>{stat.value}</strong>
+            <span>{stat.label}</span>
+          </div>
+        ))}
+      </section>
+
+      <section className="landing-section">
+        <header className="section-head" data-reveal>
+          <h2>{ui.featuresHeading}</h2>
+          <p>{ui.featuresSub}</p>
+        </header>
+        <div className="feature-grid">
+          {ui.features.map((f, i) => {
+            const Icon = features[i] ?? Sparkles;
+            return (
+              <article key={f.title} className="feature-card" data-reveal style={{ ['--i' as string]: i % 4 }}>
+                <span className={`feature-card__icon tone-${i % 4}`}>
+                  <Icon size={22} />
+                </span>
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="trust-section">
+        <div className="trust-section__inner">
+          <div className="trust-section__copy" data-reveal>
+            <span className="section-kicker">{ui.trustKicker}</span>
+            <h2>{ui.trustHeading}</h2>
+            <p>{ui.trustSub}</p>
+            <ul className="trust-points">
+              {ui.trustPoints.map((pt) => (
+                <li key={pt}>
+                  <CheckCircle2 size={18} aria-hidden="true" />
+                  <span>{pt}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="trust-demo" data-reveal aria-label="Example answer">
+            <div className="trust-demo__q">{ui.trustSampleQ}</div>
+            <div className="evidence evidence--history">
+              <div className="evidence__label">
+                <ShieldCheck size={15} />
+                {ui.recordedHistory}
+              </div>
+              <p>{ui.trustHistoryText}</p>
+              <cite>{ui.trustHistorySource}</cite>
+            </div>
+            <div className="evidence evidence--folklore">
+              <div className="evidence__label">
+                <BookOpen size={15} />
+                {ui.localFolklore}
+              </div>
+              <p>{ui.trustFolkText}</p>
+              <cite>{ui.trustFolkSource}</cite>
+            </div>
           </div>
         </div>
       </section>
 
-      <main className="city-section">
-        <div className="city-section__header">
-          <div>
-            <h2>{ui.citiesHeading}</h2>
-            <p>{ui.citiesSub}</p>
-          </div>
-          <div className="city-section__legend">
-            <span className="badge-live">● {ui.liveBadge}</span>
-          </div>
-        </div>
-
-        <div className="city-grid">
+      <section className="landing-section">
+        <header className="section-head" data-reveal>
+          <h2>{ui.destHeading}</h2>
+          <p>{ui.destSub}</p>
+        </header>
+        <div className="dest-rail" role="list">
           {UP_HERITAGE_CITIES.map((city) => {
             const baseLang = language.toLowerCase().split('-')[0];
             const tr = baseLang !== 'en' && baseLang !== 'hi' ? translatedCities[city.slug] : null;
             const cityName = isHi ? city.nameHi : tr?.name || city.name;
             const monumentLabel = isHi ? city.monumentLabelHi : tr?.monument || city.monumentLabel;
             const tagline = isHi ? city.taglineHi : tr?.tagline || city.tagline;
-
+            const body = (
+              <>
+                <div className="dest-card__art">
+                  <CityHeritageSketch city={city.slug} />
+                  <span className={`dest-card__badge ${city.clickable ? 'is-live' : ''}`}>
+                    {city.clickable ? ui.liveNow : ui.comingSoon}
+                  </span>
+                </div>
+                <div className="dest-card__body">
+                  <h3>{cityName}</h3>
+                  <span className="dest-card__monument">{monumentLabel}</span>
+                  <p>{tagline}</p>
+                  {city.clickable && (
+                    <span className="dest-card__go">
+                      {ui.exploreFeatures}
+                      <ArrowRight size={15} />
+                    </span>
+                  )}
+                </div>
+              </>
+            );
             return city.clickable ? (
               <button
                 key={city.slug}
                 type="button"
-                className="city-card is-active"
+                role="listitem"
+                className="dest-card is-live"
                 onClick={() => onSelectAgra(userCoords)}
               >
-                <div className="city-card__top">
-                  <div className="city-card__sketch-box">
-                    <CityHeritageSketch city={city.slug} />
-                  </div>
-                  <span className="city-card__status">{ui.liveNow}</span>
-                </div>
-
-                <div>
-                  <div className="city-card__name">{cityName}</div>
-                  <div className="city-card__monument">{monumentLabel}</div>
-                </div>
-
-                <p className="city-card__desc">{tagline}</p>
-
-                <div className="city-card__footer">
-                  <span>{ui.exploreFeatures}</span>
-                  <ArrowRight size={16} />
-                </div>
+                {body}
               </button>
             ) : (
-              <div
-                key={city.slug}
-                className="city-card is-placeholder"
-                role="region"
-                aria-disabled="true"
-                aria-label={`${city.name} — ${ui.comingSoon}`}
-              >
-                <div className="city-card__top">
-                  <div className="city-card__sketch-box">
-                    <CityHeritageSketch city={city.slug} />
-                  </div>
-                  <span className="city-card__status">{ui.comingSoon}</span>
-                </div>
-
-                <div>
-                  <div className="city-card__name">{cityName}</div>
-                  <div className="city-card__monument">{monumentLabel}</div>
-                </div>
-
-                <p className="city-card__desc">{tagline}</p>
-
-                <div className="city-card__footer">
-                  <span>{ui.packPlanned}</span>
-                </div>
+              <div key={city.slug} role="listitem" className="dest-card" aria-label={`${city.name}, ${ui.comingSoon}`}>
+                {body}
               </div>
             );
           })}
         </div>
-      </main>
+      </section>
 
-      <footer className="gov-footer">{ui.footerText}</footer>
+      <section className="dept-section" data-reveal>
+        <div className="dept-section__art" aria-hidden="true">
+          {[62, 88, 45, 74, 96, 58, 80].map((h, i) => (
+            <span key={i} style={{ height: `${h}%`, ['--i' as string]: i }} />
+          ))}
+        </div>
+        <div className="dept-section__copy">
+          <h2>{ui.deptHeading}</h2>
+          <p>{ui.deptSub}</p>
+          <button type="button" className="btn-light" onClick={onOpenAdmin}>
+            <BarChart3 size={18} />
+            <span>{ui.deptCta}</span>
+          </button>
+        </div>
+      </section>
+
+      <footer className="landing-footer">
+        <div className="tricolour-bar" />
+        <p>{ui.footerSources}</p>
+        <p className="landing-footer__fine">{ui.footerText}</p>
+      </footer>
     </div>
   );
 }

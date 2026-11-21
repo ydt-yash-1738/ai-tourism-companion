@@ -6,6 +6,7 @@ import type {
   OfflinePack,
   PersonaType,
 } from '../types/api';
+import { GAP_THRESHOLD, rankChunks } from './offlineSearch';
 
 const PACK_KEY_PREFIX = 'up_tourism_offline_pack_v1_';
 const SESSION_KEY = 'up_tourism_anon_session';
@@ -81,20 +82,8 @@ export function offlineLocalChatSearch(
     };
   }
 
-  const tokens = question
-    .toLowerCase()
-    .split(/[\s,?.!।]+/)
-    .filter((t) => t.length >= 2);
-
-  const scored = pack.knowledge_chunks
-    .map((chunk) => {
-      const hay = `${chunk.title} ${chunk.title_hi} ${chunk.content} ${chunk.content_hi} ${chunk.tags.join(' ')}`.toLowerCase();
-      const score = tokens.reduce((acc, tok) => acc + (hay.includes(tok) ? 1 : 0), 0);
-      return { chunk, score };
-    })
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4);
+  const ranked = rankChunks(pack.knowledge_chunks, pack.monuments ?? [], question);
+  const scored = ranked.coverage >= GAP_THRESHOLD ? ranked.chunks.map((chunk) => ({ chunk })) : [];
 
   if (!scored.length) {
     return {
@@ -126,14 +115,22 @@ export function offlineLocalChatSearch(
 
   const lead = scored[0].chunk;
   const leadText = isHi && lead.content_hi ? lead.content_hi : lead.content;
+  const leadSentences = leadText.split(/(?<=[.।])\s+/).filter(Boolean);
+  let summary = leadSentences[0] || leadText;
+  if (lead.content_type !== 'RECORDED_HISTORY') {
+    summary = isHi
+      ? `स्थानीय परंपरा के अनुसार (यह दर्ज इतिहास नहीं है): ${summary}`
+      : `According to local tradition (this is not recorded history): ${summary}`;
+  }
+  const leadMonument = pack.monuments?.find((m) => m.id === lead.monument_id);
 
   return {
-    answer_summary: leadText,
+    answer_summary: summary,
     verified_history: verified,
     folklore_legends: folklore,
     follow_up_suggestions: [],
     is_knowledge_gap: false,
-    matched_monument_slug: null,
+    matched_monument_slug: leadMonument?.slug ?? null,
     language,
     persona,
     simple_language: simpleLanguage,

@@ -36,14 +36,27 @@ function resolveApiBaseUrl(): string {
 
 const BASE_URL = resolveApiBaseUrl();
 
+export const SERVER_STATUS_EVENT = 'companion:server-status';
+
+function reportServerStatus(reachable: boolean) {
+  window.dispatchEvent(new CustomEvent<boolean>(SERVER_STATUS_EVENT, { detail: reachable }));
+}
+
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 65000): Promise<T> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      ...init,
-      signal: controller.signal,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${BASE_URL}${path}`, {
+        ...init,
+        signal: controller.signal,
+      });
+    } catch (err) {
+      reportServerStatus(false);
+      throw err;
+    }
+    reportServerStatus(true);
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
       throw new Error(`API ${res.status}: ${detail || res.statusText}`);
@@ -51,6 +64,15 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 6500
     return (await res.json()) as T;
   } finally {
     window.clearTimeout(timer);
+  }
+}
+
+export async function pingServer(): Promise<boolean> {
+  try {
+    await requestJson<unknown>('/health', undefined, 8000);
+    return true;
+  } catch {
+    return false;
   }
 }
 

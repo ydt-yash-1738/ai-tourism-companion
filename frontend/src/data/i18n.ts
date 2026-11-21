@@ -51,6 +51,45 @@ export interface UiStrings {
   readAloud: string;
   stopAudio: string;
   gapNotice: string;
+  gapNoticeOffline: string;
+  serverUnreachable: string;
+  answeredOnDevice: string;
+  sourceVerified: string;
+  sourceAi: string;
+  heroKicker: string;
+  heroTitleA: string;
+  heroTitleB: string;
+  heroLead: string;
+  ctaBegin: string;
+  scrollCue: string;
+  stats: Array<{ value: string; label: string }>;
+  featuresHeading: string;
+  featuresSub: string;
+  features: Array<{ title: string; body: string }>;
+  trustKicker: string;
+  trustHeading: string;
+  trustSub: string;
+  trustSampleQ: string;
+  trustHistoryText: string;
+  trustHistorySource: string;
+  trustFolkText: string;
+  trustFolkSource: string;
+  trustPoints: string[];
+  destHeading: string;
+  destSub: string;
+  deptHeading: string;
+  deptSub: string;
+  deptCta: string;
+  footerSources: string;
+  settingsTitle: string;
+  languageLabel: string;
+  greeting: string;
+  greetingSub: string;
+  onboarding: Array<{ title: string; body: string }>;
+  onboardingNext: string;
+  onboardingStart: string;
+  onboardingSkip: string;
+
   searchingRecords: string;
   chatPlaceholder: string;
   starters: string[];
@@ -104,7 +143,7 @@ export interface UiStrings {
 }
 
 const EN: UiStrings = {
-  govTag: 'Government of Uttar Pradesh · UP Tourism & AI Mission',
+  govTag: 'Prototype for UP Tourism · UP AI Mission',
   appTitle: 'UP AI Heritage Companion',
   deptInsights: 'Dept. Insights',
   eyebrow: 'Digital India Initiative · Multilingual Heritage Guide',
@@ -161,7 +200,73 @@ const EN: UiStrings = {
   attributionLabel: 'Attribution: ',
   readAloud: 'Read Aloud',
   stopAudio: 'Stop',
-  gapNotice: 'Logged as a knowledge gap for the UP Tourism Department content team (UC-9).',
+  gapNotice: 'Logged as a knowledge gap for the UP Tourism Department content team.',
+  gapNoticeOffline: 'Not in your downloaded pack. Ask again when you are connected for a full answer.',
+  serverUnreachable: 'Server unreachable',
+  answeredOnDevice: 'Answered on this device from the offline pack',
+  sourceVerified: 'Verified sources',
+  sourceAi: 'Verified sources · AI narrated',
+  heroKicker: 'AI heritage companion · Agra is live',
+  heroTitleA: 'Every monument has a story.',
+  heroTitleB: 'Hear it in your language.',
+  heroLead:
+    'Ask by voice, text or camera. Get verified history kept apart from legend, a walking tour sized to your time, nearby crafts and food, and help in one tap, even without signal.',
+  ctaBegin: 'Begin at the Taj Mahal',
+  scrollCue: 'Scroll to explore',
+  stats: [
+    { value: '10', label: 'languages, Hindi & English first' },
+    { value: '2', label: 'labels: recorded history or folklore' },
+    { value: '0', label: 'bars of signal needed offline' },
+    { value: '1', label: 'tap to reach police & hospital' },
+  ],
+  featuresHeading: 'One companion for the whole visit',
+  featuresSub: 'Built around what visitors at UP heritage sites actually need, from the gate to the last stop.',
+  features: [
+    { title: 'Ask anything', body: 'Type or speak in your language and go deeper with follow-up questions.' },
+    { title: 'Point your camera', body: 'Photograph a gateway, carving or inscription to learn what it is.' },
+    { title: 'History, not hearsay', body: 'Every answer separates recorded history from legend, with its source.' },
+    { title: 'Audio walking tour', body: 'A route sized to the time you have, with a story at each stop.' },
+    { title: 'Nearby & ODOP', body: 'Crafts, food and sites around you, matched to your interests and budget.' },
+    { title: 'Facilities & SOS', body: 'Toilets, water, parking and medical help nearby, plus one-tap emergency.' },
+    { title: 'Works offline', body: 'Download the site pack once and keep exploring with no signal.' },
+    { title: 'Accessible for all', body: 'Large text, simple words, read-aloud and step-free routes.' },
+  ],
+  trustKicker: 'Trust by design',
+  trustHeading: 'History and legend, clearly told apart',
+  trustSub:
+    'Signboards are short and stories vary from guide to guide. The companion answers only from curated public sources and labels every statement.',
+  trustSampleQ: 'Is the Black Taj Mahal story true?',
+  trustHistoryText:
+    'Excavations at Mehtab Bagh found the remains of a moonlit garden aligned with the Taj, not the foundations of a second tomb.',
+  trustHistorySource: 'Archaeological Survey of India',
+  trustFolkText:
+    'Local tradition says Shah Jahan planned a black marble twin across the Yamuna for himself.',
+  trustFolkSource: 'Agra oral tradition, recorded by Tavernier',
+  trustPoints: [
+    'Answers come only from curated ASI, UNESCO and UP Tourism sources',
+    'If the companion does not know, it says so and flags the gap for the department',
+    'Religious and cultural sentiments are respected at every site',
+  ],
+  destHeading: 'Built for every UP heritage destination',
+  destSub: 'Agra is live today. Each new destination is a content pack, not a new app.',
+  deptHeading: 'Insights for UP Tourism',
+  deptSub:
+    'An anonymised dashboard shows what visitors ask, which languages they use, the facilities they look for, and where information is missing.',
+  deptCta: 'Open the department dashboard',
+  footerSources: 'Content from public sources: ASI, UNESCO World Heritage Centre, UP Tourism, UP ODOP. Analytics use synthetic test data only.',
+  settingsTitle: 'Your preferences',
+  languageLabel: 'Language',
+  greeting: 'Namaste! Welcome to Agra',
+  greetingSub: 'Taj Mahal · Agra Fort · UNESCO World Heritage',
+  onboarding: [
+    { title: 'Your guide, in your language', body: 'Ask by voice, text or camera in Hindi, English and 8 more languages.' },
+    { title: 'History or legend? Always labelled', body: 'Green means recorded history with its source. Amber means folklore or tradition.' },
+    { title: 'Ready without signal', body: 'Download the offline pack. SOS, maps and key stories keep working.' },
+  ],
+  onboardingNext: 'Next',
+  onboardingStart: 'Start exploring',
+  onboardingSkip: 'Skip',
+
   searchingRecords: 'Searching verified heritage records...',
   chatPlaceholder: 'Type or speak a question about Taj Mahal or Agra Fort...',
   starters: [
@@ -171,7 +276,7 @@ const EN: UiStrings = {
     'Are there step-free routes and shoe cover rules here?',
   ],
 
-  cameraHeading: 'Point Camera & Ask (UC-2)',
+  cameraHeading: 'Point Camera & Ask',
   cameraSub: 'Take or upload a photo of a monument, gateway, carving, or inlay panel to identify it.',
   chooseAnotherPhoto: 'Choose Another Photo',
   capturePhoto: 'Capture or Upload Photo',
@@ -184,7 +289,7 @@ const EN: UiStrings = {
   offlineCameraErr:
     'Live camera image recognition requires network access. Use Audio Tour or Guide tabs while offline.',
 
-  tourHeading: 'Self-Guided Audio Tour (UC-4)',
+  tourHeading: 'Self-Guided Audio Tour',
   tourSub: 'Pick a walking route based on your available time; play audio automatically by GPS or step-by-step.',
   anyTime: 'Any Time',
   stepFreeOnly: 'Step-Free Only',
@@ -196,7 +301,7 @@ const EN: UiStrings = {
   noToursMatched: 'No tour routes matched those filters. Try widening the duration or turning off Step-Free Only.',
   stopLabel: 'Stop',
 
-  nearbyHeading: 'Personalised Nearby Attractions & UP ODOP (UC-5)',
+  nearbyHeading: 'Personalised Nearby Attractions & UP ODOP',
   nearbySub: 'Tailored local sites, markets, cuisine, and One District One Product crafts with official timings and fees.',
   odopOnly: 'UP ODOP Only',
   timingsLabel: 'Timings:',
@@ -221,7 +326,7 @@ const EN: UiStrings = {
   budgetLow: 'Budget-Friendly',
   budgetMed: 'Moderate',
 
-  facilitiesHeading: 'Nearby Public Facilities (UC-6)',
+  facilitiesHeading: 'Nearby Public Facilities',
   facilitiesSub: 'Locate toilets, RO water, electric shuttle parking, medical rooms, police booths, and food plazas.',
   wheelchairAccessible: 'Wheelchair Accessible',
   facilityTypes: {
@@ -242,7 +347,7 @@ const EN: UiStrings = {
 
 const HI: UiStrings = {
   ...EN,
-  govTag: 'उत्तर प्रदेश सरकार · पर्यटन एवं यूपी एआई मिशन',
+  govTag: 'यूपी पर्यटन हेतु प्रोटोटाइप · यूपी एआई मिशन',
   appTitle: 'एआई पर्यटन साथी',
   deptInsights: 'विभाग डैशबोर्ड',
   eyebrow: 'डिजिटल इंडिया पहल · बहुभाषी विरासत मार्गदर्शक',
@@ -285,7 +390,72 @@ const HI: UiStrings = {
   attributionLabel: 'संदर्भ: ',
   readAloud: 'सुनें',
   stopAudio: 'रोकें',
-  gapNotice: 'यह प्रश्न पर्यटन विभाग डैशबोर्ड (UC-9) में सामग्री सुधार हेतु दर्ज किया गया है।',
+  gapNotice: 'यह प्रश्न पर्यटन विभाग डैशबोर्ड में सामग्री सुधार हेतु दर्ज किया गया है।',
+  gapNoticeOffline: 'यह जानकारी डाउनलोड किए गए पैक में नहीं है। नेटवर्क मिलने पर दोबारा पूछें।',
+  serverUnreachable: 'सर्वर उपलब्ध नहीं',
+  answeredOnDevice: 'ऑफ़लाइन पैक से इसी फ़ोन पर उत्तर',
+  sourceVerified: 'सत्यापित स्रोत',
+  sourceAi: 'सत्यापित स्रोत · एआई द्वारा वर्णित',
+  heroKicker: 'एआई विरासत साथी · आगरा अब उपलब्ध',
+  heroTitleA: 'हर स्मारक की एक कहानी है।',
+  heroTitleB: 'सुनिए अपनी भाषा में।',
+  heroLead:
+    'बोलकर, लिखकर या कैमरे से पूछें। सत्यापित इतिहास और लोककथा अलग-अलग, आपके समय के अनुसार पैदल यात्रा, पास के शिल्प व व्यंजन, और एक टैप में सहायता, नेटवर्क न हो तब भी।',
+  ctaBegin: 'ताजमहल से शुरू करें',
+  scrollCue: 'नीचे देखें',
+  stats: [
+    { value: '10', label: 'भाषाएँ, हिंदी व अंग्रेज़ी प्राथमिक' },
+    { value: '2', label: 'लेबल: दर्ज इतिहास या लोककथा' },
+    { value: '0', label: 'ऑफ़लाइन के लिए नेटवर्क आवश्यक' },
+    { value: '1', label: 'टैप में पुलिस व अस्पताल' },
+  ],
+  featuresHeading: 'पूरी यात्रा के लिए एक साथी',
+  featuresSub: 'उत्तर प्रदेश के विरासत स्थलों पर पर्यटकों की वास्तविक ज़रूरतों के अनुसार बनाया गया।',
+  features: [
+    { title: 'कुछ भी पूछें', body: 'अपनी भाषा में लिखें या बोलें, और आगे के प्रश्न पूछें।' },
+    { title: 'कैमरा दिखाएँ', body: 'द्वार, नक्काशी या शिलालेख की फ़ोटो लें और जानें वह क्या है।' },
+    { title: 'इतिहास, अफ़वाह नहीं', body: 'हर उत्तर में दर्ज इतिहास और लोककथा अलग, स्रोत सहित।' },
+    { title: 'ऑडियो पैदल यात्रा', body: 'आपके समय के अनुसार मार्ग, हर पड़ाव पर एक कहानी।' },
+    { title: 'आसपास व ओडीओपी', body: 'आपकी रुचि और बजट के अनुसार शिल्प, भोजन और स्थल।' },
+    { title: 'सुविधाएँ व SOS', body: 'शौचालय, पानी, पार्किंग, चिकित्सा सहायता और एक-टैप आपातकाल।' },
+    { title: 'ऑफ़लाइन भी', body: 'एक बार साइट पैक डाउनलोड करें, बिना नेटवर्क घूमते रहें।' },
+    { title: 'सबके लिए सुलभ', body: 'बड़े अक्षर, सरल शब्द, पढ़कर सुनाना और बिना सीढ़ी के मार्ग।' },
+  ],
+  trustKicker: 'भरोसे के साथ',
+  trustHeading: 'इतिहास और किंवदंती, स्पष्ट रूप से अलग',
+  trustSub:
+    'सूचना पट्ट छोटे होते हैं और कहानियाँ गाइड के अनुसार बदलती हैं। यह साथी केवल चुने हुए सार्वजनिक स्रोतों से उत्तर देता है और हर कथन पर लेबल लगाता है।',
+  trustSampleQ: 'क्या काले ताजमहल की कहानी सच है?',
+  trustHistoryText:
+    'मेहताब बाग की खुदाई में ताज की सीध में एक चाँदनी उद्यान के अवशेष मिले, किसी दूसरे मकबरे की नींव नहीं।',
+  trustHistorySource: 'भारतीय पुरातत्व सर्वेक्षण',
+  trustFolkText: 'जनश्रुति के अनुसार शाहजहाँ यमुना पार अपने लिए काले संगमरमर का ताज बनवाना चाहते थे।',
+  trustFolkSource: 'आगरा की मौखिक परंपरा, टैवर्नियर द्वारा दर्ज',
+  trustPoints: [
+    'उत्तर केवल ASI, यूनेस्को और यूपी पर्यटन के चुने हुए स्रोतों से',
+    'जानकारी न होने पर साथी स्पष्ट बताता है और विभाग के लिए दर्ज करता है',
+    'हर स्थल की धार्मिक व सांस्कृतिक भावनाओं का सम्मान',
+  ],
+  destHeading: 'उत्तर प्रदेश के हर विरासत गंतव्य के लिए',
+  destSub: 'आगरा आज उपलब्ध है। हर नया गंतव्य एक सामग्री पैक है, नया ऐप नहीं।',
+  deptHeading: 'यूपी पर्यटन के लिए अंतर्दृष्टि',
+  deptSub:
+    'गुमनाम डैशबोर्ड दिखाता है कि पर्यटक क्या पूछते हैं, कौन सी भाषाएँ उपयोग करते हैं, कौन सी सुविधाएँ खोजते हैं और कहाँ जानकारी कम है।',
+  deptCta: 'विभाग डैशबोर्ड खोलें',
+  footerSources: 'सामग्री सार्वजनिक स्रोतों से: ASI, यूनेस्को, यूपी पर्यटन, यूपी ओडीओपी। विश्लेषण में केवल कृत्रिम परीक्षण डेटा।',
+  settingsTitle: 'आपकी पसंद',
+  languageLabel: 'भाषा',
+  greeting: 'नमस्ते! आगरा में आपका स्वागत है',
+  greetingSub: 'ताजमहल · आगरा किला · यूनेस्को विश्व धरोहर',
+  onboarding: [
+    { title: 'आपका गाइड, आपकी भाषा में', body: 'हिंदी, अंग्रेज़ी और 8 अन्य भाषाओं में बोलकर, लिखकर या कैमरे से पूछें।' },
+    { title: 'इतिहास या किंवदंती? हमेशा लेबल', body: 'हरा यानी स्रोत सहित दर्ज इतिहास। पीला यानी लोककथा या परंपरा।' },
+    { title: 'बिना नेटवर्क भी तैयार', body: 'ऑफ़लाइन पैक डाउनलोड करें। SOS, नक्शे और मुख्य कहानियाँ चलती रहेंगी।' },
+  ],
+  onboardingNext: 'आगे',
+  onboardingStart: 'शुरू करें',
+  onboardingSkip: 'छोड़ें',
+
   searchingRecords: 'विरासत अभिलेख खोजे जा रहे हैं...',
   chatPlaceholder: 'अपना प्रश्न लिखें या माइक दबाकर बोलें...',
   starters: [
@@ -295,7 +465,7 @@ const HI: UiStrings = {
     'ताजमहल खुलने का समय और शुक्रवार के नियम क्या हैं?',
   ],
 
-  cameraHeading: 'कैमरा दिखाएँ और पहचानें (UC-2)',
+  cameraHeading: 'कैमरा दिखाएँ और पहचानें',
   cameraSub: 'किसी भी इमारत, द्वार, नक्काशी या शिलालेख की फ़ोटो अपलोड करें।',
   chooseAnotherPhoto: 'दूसरी फ़ोटो चुनें',
   capturePhoto: 'फ़ोटो लें या अपलोड करें',
@@ -307,7 +477,7 @@ const HI: UiStrings = {
   identifyingBtn: 'पहचान जारी...',
   offlineCameraErr: 'लाइव कैमरा पहचान के लिए इंटरनेट आवश्यक है।',
 
-  tourHeading: 'स्व-निर्देशित ऑडियो टूर (UC-4)',
+  tourHeading: 'स्व-निर्देशित ऑडियो टूर',
   tourSub: 'अपने समय व सुगम मार्ग के अनुसार पैदल यात्रा चुनें।',
   anyTime: 'सभी समय',
   stepFreeOnly: 'केवल रैंप/सुगम मार्ग',
@@ -319,7 +489,7 @@ const HI: UiStrings = {
   noToursMatched: 'इन फ़िल्टर के लिए कोई यात्रा मार्ग नहीं मिला।',
   stopLabel: 'पड़ाव',
 
-  nearbyHeading: 'आस-पास के आकर्षण एवं यूपी ODOP (UC-5)',
+  nearbyHeading: 'आस-पास के आकर्षण एवं यूपी ODOP',
   nearbySub: 'अपनी रुचि व बजट के अनुसार आधिकारिक समय व शुल्क सहित सुझाव पाएं।',
   odopOnly: 'केवल UP ODOP',
   timingsLabel: 'समय:',
@@ -333,7 +503,7 @@ const HI: UiStrings = {
   budgetLow: 'किफायती',
   budgetMed: 'मध्यम',
 
-  facilitiesHeading: 'निकटतम सुविधाएँ (UC-6)',
+  facilitiesHeading: 'निकटतम सुविधाएँ',
   facilitiesSub: 'शौचालय, पेयजल, पार्किंग, चिकित्सा और पुलिस सहायता देखें।',
   wheelchairAccessible: 'व्हीलचेयर सुगम',
   facilityTypes: { '': 'सभी', toilet: 'शौचालय', drinking_water: 'पेयजल', parking: 'पार्किंग', medical: 'चिकित्सा', police: 'पुलिस', help_desk: 'सहायता', food: 'भोजन' },
@@ -345,7 +515,6 @@ const HI: UiStrings = {
 
 const MR: UiStrings = {
   ...EN,
-  govTag: 'उत्तर प्रदेश शासन · पर्यटन व एआय मिशन',
   appTitle: 'यूपी एआय वारसा सोबती',
   deptInsights: 'विभाग डॅशबोर्ड',
   eyebrow: 'डिजिटल इंडिया उपक्रम · बहुभाषिक वारसा मार्गदर्शक',
@@ -397,7 +566,7 @@ const MR: UiStrings = {
     'येथील रॅम्प मार्ग आणि प्रवेश नियम काय आहेत?',
   ],
 
-  cameraHeading: 'कॅमेरा दाखवा आणि विचारा (UC-2)',
+  cameraHeading: 'कॅमेरा दाखवा आणि विचारा',
   cameraSub: 'कोणत्याही वास्तूचा, दरवाजाचा किंवा कोरीव कामाचा फोटो अपलोड करा.',
   chooseAnotherPhoto: 'दुसरा फोटो निवडा',
   capturePhoto: 'फोटो काढा / अपलोड करा',
@@ -408,7 +577,7 @@ const MR: UiStrings = {
   identifyBtn: 'वास्तू ओळखा',
   identifyingBtn: 'ओळखत आहे...',
 
-  tourHeading: 'स्वयं-मार्गदर्शित ऑडिओ टूर (UC-4)',
+  tourHeading: 'स्वयं-मार्गदर्शित ऑडिओ टूर',
   tourSub: 'वेळेनुसार आणि सुगम मार्गानुसार चालण्याची सफर निवडा.',
   anyTime: 'सर्व वेळ',
   stepFreeOnly: 'पायऱ्यांशिवाय मार्ग',
@@ -419,7 +588,7 @@ const MR: UiStrings = {
   jumpToStop: 'या थांब्यावर जा',
   stopLabel: 'थांबा',
 
-  nearbyHeading: 'जवळपासची ठिकाणे आणि यूपी ODOP (UC-5)',
+  nearbyHeading: 'जवळपासची ठिकाणे आणि यूपी ODOP',
   nearbySub: 'आवडीनुसार व बजेटनुसार अधिकृत वेळा व प्रवेश शुल्कासह शिफारसी.',
   odopOnly: 'फक्त UP ODOP',
   timingsLabel: 'वेळ:',
@@ -433,7 +602,7 @@ const MR: UiStrings = {
   budgetLow: 'परवडणारे',
   budgetMed: 'मध्यम',
 
-  facilitiesHeading: 'जवळपासच्या सार्वजनिक सुविधा (UC-6)',
+  facilitiesHeading: 'जवळपासच्या सार्वजनिक सुविधा',
   facilitiesSub: 'स्वच्छतागृहे, पिण्याचे पाणी, पार्किंग, वैद्यकीय मदत व पोलीस चौकी शोधा.',
   wheelchairAccessible: 'व्हीलचेअर सुगम',
   facilityTypes: { '': 'सर्व', toilet: 'स्वच्छतागृह', drinking_water: 'पाणी', parking: 'पार्किंग', medical: 'वैद्यकीय', police: 'पोलीस', help_desk: 'मदत केंद्र', food: 'भोजन' },
@@ -445,7 +614,6 @@ const MR: UiStrings = {
 
 const TA: UiStrings = {
   ...EN,
-  govTag: 'உத்தரப் பிரதேச அரசு · சுற்றுலா & AI இயக்கம்',
   appTitle: 'உ.பி. AI பாரம்பரிய தோழன்',
   deptInsights: 'துறை புள்ளிவிவரம்',
   eyebrow: 'டிஜிட்டல் இந்தியா · பன்மொழி பாரம்பரிய வழிகாட்டி',
@@ -487,7 +655,7 @@ const TA: UiStrings = {
   attributionLabel: 'குறிப்பு: ',
   readAloud: 'ஒலிபரப்பு',
   stopAudio: 'நிறுத்து',
-  gapNotice: 'இது சுற்றுலாத் துறை உள்ளடக்கக் குழுவுக்குப் பதிவு செய்யப்பட்டது (UC-9).',
+  gapNotice: 'இது சுற்றுலாத் துறை உள்ளடக்கக் குழுவுக்குப் பதிவு செய்யப்பட்டது.',
   searchingRecords: 'ஆவணங்கள் தேடப்படுகின்றன...',
   chatPlaceholder: 'தாஜ்மஹால் அல்லது ஆக்ரா கோட்டை பற்றி கேளுங்கள்...',
   starters: [
@@ -497,7 +665,7 @@ const TA: UiStrings = {
     'சக்கர நாற்காலி வசதி மற்றும் காலணி விதிகள் என்ன?',
   ],
 
-  cameraHeading: 'கேமரா காட்டி கேளுங்கள் (UC-2)',
+  cameraHeading: 'கேமரா காட்டி கேளுங்கள்',
   cameraSub: 'கட்டிடம், நுழைவாயில் அல்லது சிற்பத்தின் புகைப்படத்தைப் பதிவேற்றவும்.',
   chooseAnotherPhoto: 'வேறு படம் தேர்ந்தெடு',
   capturePhoto: 'புகைப்படம் எடு / பதிவேற்று',
@@ -508,7 +676,7 @@ const TA: UiStrings = {
   identifyBtn: 'நினைவிடத்தை அடையாளம் காண்',
   identifyingBtn: 'கண்டறிகிறது...',
 
-  tourHeading: 'சுய-வழிகாட்டி ஆடியோ சுற்றுலா (UC-4)',
+  tourHeading: 'சுய-வழிகாட்டி ஆடியோ சுற்றுலா',
   tourSub: 'நேரம் மற்றும் படியற்ற பாதை அடிப்படையில் நடைப்பயணத்தைத் தேர்ந்தெடுக்கவும்.',
   anyTime: 'எல்லா நேரமும்',
   stepFreeOnly: 'படிகள் இல்லாத பாதை',
@@ -519,7 +687,7 @@ const TA: UiStrings = {
   jumpToStop: 'இங்கு செல்',
   stopLabel: 'நிறுத்தம்',
 
-  nearbyHeading: 'அருகிலுள்ள இடங்கள் & UP ODOP (UC-5)',
+  nearbyHeading: 'அருகிலுள்ள இடங்கள் & UP ODOP',
   nearbySub: 'உங்கள் விருப்பம் மற்றும் பட்ஜெட்டுக்கு ஏற்ப அதிகாரப்பூர்வ நேரங்களுடன் பரிந்துரைகள்.',
   odopOnly: 'UP ODOP மட்டும்',
   timingsLabel: 'நேரம்:',
@@ -533,7 +701,7 @@ const TA: UiStrings = {
   budgetLow: 'குறைந்த செலவு',
   budgetMed: 'நடுத்தரம்',
 
-  facilitiesHeading: 'அருகிலுள்ள பொது வசதிகள் (UC-6)',
+  facilitiesHeading: 'அருகிலுள்ள பொது வசதிகள்',
   facilitiesSub: 'கழிப்பறை, குடிநீர், பார்க்கிங், மருத்துவம் & காவல் உதவி.',
   wheelchairAccessible: 'சக்கர நாற்காலி வசதி',
   facilityTypes: { '': 'அனைத்தும்', toilet: 'கழிப்பறை', drinking_water: 'தண்ணீர்', parking: 'பார்க்கிங்', medical: 'மருத்துவம்', police: 'காவல்', help_desk: 'உதவி மையம்', food: 'உணவு' },
@@ -545,7 +713,6 @@ const TA: UiStrings = {
 
 const BN: UiStrings = {
   ...EN,
-  govTag: 'উত্তর প্রদেশ সরকার · পর্যটন ও এআই মিশন',
   appTitle: 'ইউপি এআই ঐতিহ্য সঙ্গী',
   deptInsights: 'দপ্তর ড্যাশবোর্ড',
   eyebrow: 'ডিজিটাল ইন্ডিয়া উদ্যোগ · বহুভাষিক গাইড',
@@ -578,7 +745,6 @@ const BN: UiStrings = {
 
 const TE: UiStrings = {
   ...EN,
-  govTag: 'ఉత్తర ప్రదేశ్ ప్రభుత్వం · పర్యాటక & AI మిషన్',
   appTitle: 'యూపీ AI వారసత్వ సహాయకుడు',
   deptInsights: 'శాఖ గణాంకాలు',
   eyebrow: 'డిజిటల్ ఇండియా · బహుభాషా వారసత్వ మార్గదర్శి',
@@ -611,7 +777,6 @@ const TE: UiStrings = {
 
 const UR: UiStrings = {
   ...EN,
-  govTag: 'حکومت اتر پردیش · سیاحت و اے آئی مشن',
   appTitle: 'یوپی اے آئی ورثہ ساتھی',
   deptInsights: 'محکمہ تجزیات',
   eyebrow: 'ڈیجیٹل انڈیا · کثیر لسانی رہنما',

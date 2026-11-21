@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   BookOpen,
+  ChevronRight,
+  Landmark,
   Loader2,
   Mic,
   Send,
@@ -9,8 +11,11 @@ import {
   Sparkles,
   Square,
   Volume2,
+  WifiOff,
 } from 'lucide-react';
 import { getUiText } from '../data/i18n';
+import { PERSONA_OPTIONS } from '../data/upCities';
+import { ParallaxScene } from './ParallaxScene';
 import { postChat, postVoiceSTT } from '../services/api';
 import { convertBlobToWav16k } from '../services/audioRecorder';
 import { offlineLocalChatSearch } from '../services/offlineStore';
@@ -25,6 +30,7 @@ interface GuideTabProps {
   sessionHash: string;
   monuments: Monument[];
   offlinePack: OfflinePack | null;
+  onChangePersona: (p: PersonaType) => void;
 }
 
 interface ChatTurn {
@@ -32,6 +38,8 @@ interface ChatTurn {
   role: 'user' | 'assistant';
   text: string;
   response?: ChatResponse;
+  /** True when the answer came from the on-device offline pack, not the server */
+  fromDevice?: boolean;
 }
 
 export function GuideTab({
@@ -42,6 +50,7 @@ export function GuideTab({
   sessionHash,
   monuments,
   offlinePack,
+  onChangePersona,
 }: GuideTabProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
@@ -86,6 +95,7 @@ export function GuideTab({
 
     try {
       let res: ChatResponse;
+      let fromDevice = false;
       if (isOnline) {
         try {
           res = await postChat({
@@ -100,9 +110,11 @@ export function GuideTab({
           });
         } catch {
           res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+          fromDevice = true;
         }
       } else {
         res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+        fromDevice = true;
       }
 
       const botMsg: ChatTurn = {
@@ -110,6 +122,7 @@ export function GuideTab({
         role: 'assistant',
         text: res.answer_summary,
         response: res,
+        fromDevice,
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
@@ -249,141 +262,185 @@ export function GuideTab({
     );
   };
 
-  return (
-    <div className="tab-panel guide-layout">
-      <div className="section-card">
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 10,
-          }}
-        >
-          <div>
-            <h2 style={{ fontSize: 'calc(1.35rem * var(--text-scale))', color: 'var(--navy-deep)' }}>
-              {ui.guideHeading}
-            </h2>
-            <p style={{ margin: '2px 0 0', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
-              {ui.guideSub}
-            </p>
-          </div>
+  const monumentName = (slug: string | null | undefined) => {
+    const m = monuments.find((x) => x.slug === slug);
+    if (!m) return null;
+    return isHi && m.name_hi ? m.name_hi : m.name;
+  };
 
-          <select
-            className="lang-select"
-            value={selectedMonument}
-            onChange={(e) => setSelectedMonument(e.target.value)}
-            aria-label="Filter by specific monument"
-          >
-            <option value="">{ui.allMonuments}</option>
-            {monuments.map((m) => (
-              <option key={m.slug} value={m.slug}>
-                {isHi && m.name_hi ? m.name_hi : m.name}
-              </option>
-            ))}
-          </select>
+  return (
+    <div className="guide-layout">
+      <ParallaxScene variant="banner">
+        <div className="guide-banner">
+          <span className="guide-banner__eyebrow">
+            <span className="dot-live" />
+            {ui.greetingSub}
+          </span>
+          <h2>{ui.greeting}</h2>
+        </div>
+      </ParallaxScene>
+
+      <section className="guide-intro">
+        <div className="guide-intro__head">
+          <div>
+            <h3>{ui.guideHeading}</h3>
+            <p>{ui.guideSub}</p>
+          </div>
         </div>
 
-        <div className="starter-chips">
-          {ui.starters.map((q) => (
-            <button key={q} type="button" className="chip-btn" onClick={() => sendQuestion(q)}>
-              {q}
+        <div className="segmented segmented--scroll" role="radiogroup" aria-label={ui.styleLabel}>
+          {PERSONA_OPTIONS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              role="radio"
+              aria-checked={persona === p.id}
+              className={persona === p.id ? 'is-active' : ''}
+              onClick={() => onChangePersona(p.id)}
+            >
+              {ui.personas[p.id]}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="chat-stream">
+        <div className="chip-rail" role="radiogroup" aria-label="Filter by monument">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={selectedMonument === ''}
+            className={`place-chip ${selectedMonument === '' ? 'is-active' : ''}`}
+            onClick={() => setSelectedMonument('')}
+          >
+            <Landmark size={15} />
+            {ui.allMonuments}
+          </button>
+          {monuments.map((m) => (
+            <button
+              key={m.slug}
+              type="button"
+              role="radio"
+              aria-checked={selectedMonument === m.slug}
+              className={`place-chip ${selectedMonument === m.slug ? 'is-active' : ''}`}
+              onClick={() => setSelectedMonument(m.slug)}
+            >
+              {isHi && m.name_hi ? m.name_hi : m.name}
+            </button>
+          ))}
+        </div>
+
+        {messages.length === 0 && (
+          <div className="starter-grid">
+            {ui.starters.map((q, i) => (
+              <button
+                key={q}
+                type="button"
+                className="starter-card"
+                style={{ ['--i' as string]: i }}
+                onClick={() => sendQuestion(q)}
+              >
+                <Sparkles size={16} aria-hidden="true" />
+                <span>{q}</span>
+                <ChevronRight size={16} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <div className="chat-stream" aria-live="polite">
         {messages.map((turn) =>
           turn.role === 'user' ? (
             <div key={turn.id} className="chat-bubble is-user">
               {turn.text}
             </div>
           ) : (
-            <article key={turn.id} className="chat-bubble is-assistant">
-              <div className="chat-bubble__meta">
-                <span>
-                  {turn.response?.mode === 'gemini'
-                    ? '✦ Grounded Gemini + Neon pgvector'
-                    : 'Offline / Local Knowledge Cache'}
-                  {turn.response?.matched_monument_slug
-                    ? ` · ${turn.response.matched_monument_slug}`
-                    : ''}
+            <article key={turn.id} className="answer-card">
+              <header className="answer-card__meta">
+                <span className={`answer-card__source ${turn.fromDevice ? 'is-device' : ''}`}>
+                  {turn.fromDevice ? <WifiOff size={13} /> : <ShieldCheck size={13} />}
+                  {turn.fromDevice
+                    ? ui.answeredOnDevice
+                    : turn.response?.mode === 'gemini'
+                      ? ui.sourceAi
+                      : ui.sourceVerified}
                 </span>
-                <button
-                  type="button"
-                  className={`pill-btn ${speakingId === turn.id ? 'is-saffron' : ''}`}
-                  style={{ minHeight: 34, padding: '4px 10px', fontSize: '0.78rem' }}
-                  onClick={() => handleReadAloud(turn)}
-                >
-                  {speakingId === turn.id ? <Square size={13} /> : <Volume2 size={14} />}
-                  <span>{speakingId === turn.id ? ui.stopAudio : ui.readAloud}</span>
-                </button>
-              </div>
-
-              <p className="chat-bubble__summary">{turn.text}</p>
-
-              {turn.response &&
-                (turn.response.verified_history.length > 0 ||
-                  turn.response.folklore_legends.length > 0) && (
-                  <div className="split-grid">
-                    {turn.response.verified_history.length > 0 && (
-                      <div className="fact-box">
-                        <div className="fact-box__heading">
-                          <ShieldCheck size={15} />
-                          <span>{ui.recordedHistory}</span>
-                        </div>
-                        {turn.response.verified_history.map((item, idx) => (
-                          <div key={idx} className="fact-box__item">
-                            <p>{item.text}</p>
-                            <cite>
-                              {ui.sourceLabel}
-                              {item.source}
-                            </cite>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {turn.response.folklore_legends.length > 0 && (
-                      <div className="folklore-box">
-                        <div className="folklore-box__heading">
-                          <BookOpen size={15} />
-                          <span>{ui.localFolklore}</span>
-                        </div>
-                        {turn.response.folklore_legends.map((item, idx) => (
-                          <div key={idx} className="folklore-box__item">
-                            <p>{item.text}</p>
-                            <cite>
-                              {ui.attributionLabel}
-                              {item.attribution}
-                            </cite>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                {monumentName(turn.response?.matched_monument_slug) && (
+                  <span className="answer-card__place">
+                    <Landmark size={13} />
+                    {monumentName(turn.response?.matched_monument_slug)}
+                  </span>
                 )}
+              </header>
 
-              {turn.response?.is_knowledge_gap && (
-                <div className="gap-notice">
-                  <AlertTriangle size={15} style={{ verticalAlign: 'text-bottom', marginRight: 6 }} />
-                  {ui.gapNotice}
+              <p className="answer-card__summary">{turn.text}</p>
+
+              {turn.response && turn.response.verified_history.length > 0 && (
+                <div className="evidence evidence--history">
+                  <div className="evidence__label">
+                    <ShieldCheck size={15} />
+                    {ui.recordedHistory}
+                  </div>
+                  {turn.response.verified_history.map((item, idx) => (
+                    <div key={idx} className="evidence__item">
+                      <p>{item.text}</p>
+                      <cite>{item.source}</cite>
+                    </div>
+                  ))}
                 </div>
               )}
 
+              {turn.response && turn.response.folklore_legends.length > 0 && (
+                <div className="evidence evidence--folklore">
+                  <div className="evidence__label">
+                    <BookOpen size={15} />
+                    {ui.localFolklore}
+                  </div>
+                  {turn.response.folklore_legends.map((item, idx) => (
+                    <div key={idx} className="evidence__item">
+                      <p>{item.text}</p>
+                      <cite>{item.attribution}</cite>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {turn.response?.is_knowledge_gap && (
+                <div className="gap-notice">
+                  <AlertTriangle size={16} aria-hidden="true" />
+                  <span>{turn.fromDevice ? ui.gapNoticeOffline : ui.gapNotice}</span>
+                </div>
+              )}
+
+              <footer className="answer-card__actions">
+                <button
+                  type="button"
+                  className={`soft-btn ${speakingId === turn.id ? 'is-playing' : ''}`}
+                  onClick={() => handleReadAloud(turn)}
+                >
+                  {speakingId === turn.id ? (
+                    <>
+                      <span className="audio-eq" aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                      {ui.stopAudio}
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 size={16} />
+                      {ui.readAloud}
+                    </>
+                  )}
+                </button>
+              </footer>
+
               {turn.response && turn.response.follow_up_suggestions.length > 0 && (
-                <div className="starter-chips">
+                <div className="followups">
                   {turn.response.follow_up_suggestions.map((sug) => (
-                    <button
-                      key={sug}
-                      type="button"
-                      className="chip-btn"
-                      onClick={() => sendQuestion(sug)}
-                    >
-                      <Sparkles size={13} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
+                    <button key={sug} type="button" className="followup-chip" onClick={() => sendQuestion(sug)}>
                       {sug}
+                      <ChevronRight size={14} aria-hidden="true" />
                     </button>
                   ))}
                 </div>
@@ -393,31 +450,25 @@ export function GuideTab({
         )}
 
         {loading && (
-          <div className="chat-bubble is-assistant">
-            <Loader2 size={18} className="spin-icon" style={{ marginRight: 8 }} />
+          <div className="answer-card answer-card--loading" role="status">
+            <span className="typing" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
             <span>{ui.searchingRecords}</span>
           </div>
         )}
       </div>
 
       {voiceStatus && (
-        <div
-          role="status"
-          style={{
-            padding: '7px 12px',
-            borderRadius: 12,
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            background: recording || transcribing ? 'var(--navy-tint)' : 'var(--terracotta-tint)',
-            color: recording || transcribing ? 'var(--navy)' : 'var(--terracotta)',
-          }}
-        >
+        <div className={`voice-status ${recording || transcribing ? 'is-live' : 'is-warn'}`} role="status">
           {voiceStatus}
         </div>
       )}
 
       <form
-        className="chat-composer"
+        className="composer"
         onSubmit={(e) => {
           e.preventDefault();
           sendQuestion(input);
@@ -425,39 +476,26 @@ export function GuideTab({
       >
         <button
           type="button"
-          className={`pill-btn ${recording ? 'mic-recording' : ''}`}
+          className={`composer__mic ${recording ? 'is-recording' : ''}`}
           disabled={transcribing}
           onClick={handleToggleMic}
           aria-label={recording ? 'Stop voice recording' : 'Speak your question'}
-          title={recording ? 'Stop recording' : 'Speak (Sarvam AI / Device Mic)'}
         >
-          {transcribing ? (
-            <Loader2 size={17} className="spin-icon" />
-          ) : recording ? (
-            <Square size={17} />
-          ) : (
-            <Mic size={17} />
-          )}
+          {transcribing ? <Loader2 size={20} className="spin-icon" /> : recording ? <Square size={18} /> : <Mic size={20} />}
         </button>
-
         <input
           type="text"
-          className="chat-composer__input"
+          className="composer__input"
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
             if (voiceStatus && !recording && !transcribing) setVoiceStatus('');
           }}
           placeholder={ui.chatPlaceholder}
+          aria-label={ui.chatPlaceholder}
         />
-
-        <button
-          type="submit"
-          className="pill-btn is-saffron"
-          disabled={!input.trim() || loading}
-          aria-label="Send question"
-        >
-          <Send size={17} />
+        <button type="submit" className="composer__send" disabled={!input.trim() || loading} aria-label="Send question">
+          <Send size={19} />
         </button>
       </form>
     </div>
