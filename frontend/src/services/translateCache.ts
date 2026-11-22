@@ -37,10 +37,13 @@ export async function translateBatchCached(
     const chunkIndices = missingIdx.slice(start, start + MAX_TRANSLATE_BATCH);
     try {
       const res = await postTranslate(chunkTexts, lang);
+      // translated === false: the backend fell back to the originals; show them,
+      // but do not cache them, so a later request can still get the translation
+      const cache = res.translated !== false;
       res.translations.forEach((translated, pos) => {
         const origIdx = chunkIndices[pos];
         const finalText = translated?.trim() || chunkTexts[pos];
-        clientCache.set(`${lang}::${chunkTexts[pos]}`, finalText);
+        if (cache) clientCache.set(`${lang}::${chunkTexts[pos]}`, finalText);
         out[origIdx] = finalText;
       });
     } catch {

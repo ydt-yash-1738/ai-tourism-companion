@@ -24,7 +24,7 @@ body {
   background-color: var(--bg-ivory);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: calc(15.5px * var(--text-scale));
+  font-size: calc(15.5px * var(--text-scale) * var(--font-user, 1));
   line-height: 1.58;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -138,4 +138,9 @@ h3,
 
 .spin-icon {
   animation: spinSlow 1.2s linear infinite;
+}
+
+// visitor-chosen text size (services/fontScale.ts): every rem-based size follows
+html {
+  font-size: calc(100% * var(--font-user, 1));
 }

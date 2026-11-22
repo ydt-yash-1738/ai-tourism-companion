@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Accessibility,
   ArrowRight,
   BarChart3,
   Clock,
@@ -23,6 +22,24 @@ import { useReveal } from '../hooks/useReveal';
 import { UpHeritageCrest } from './HeritageSketchIcons';
 import { PHOTO_CREDITS } from '../data/photoCredits';
 import { ScrollStory } from './ScrollStory';
+import { FontSizeControl } from './FontSizeControl';
+import { landingSrcSet } from '../data/responsiveImage';
+import { LandingMusic } from './LandingMusic';
+import ScrollStack, { ScrollStackItem } from './scrollStack/ScrollStack';
+import { LocationStory } from './LocationStory';
+
+// Soft background tint per place, drawn from its stone and setting, shown behind
+// the destination stack while that place's card is on top.
+const STACK_TINTS: Record<string, string> = {
+  agra: '#c9d8ea', // white marble under a pale sky
+  lucknow: '#ecc89c', // Awadhi sandstone
+  sarnath: '#e3a98a', // brick of the Dhamek Stupa
+  varanasi: '#a8d0d8', // Ganga at dawn
+  ayodhya: '#f1c47e', // saffron and Saryu ghats
+  'mathura-vrindavan': '#cdb6e0', // Krishna's blue-violet
+  prayagraj: '#b3c9e6', // the Sangam
+  'fatehpur-sikri': '#e5a487', // red sandstone of Buland Darwaza
+};
 
 interface CitySelectorViewProps {
   language: string;
@@ -57,11 +74,9 @@ function findNearestLiveCity(coords: GeoCoords) {
 
 export function CitySelectorView({
   language,
-  a11yMode,
   userCoords,
   onLocationDetected,
   onChangeLanguage,
-  onToggleA11y,
   onSelectDestination,
   onOpenAdmin,
 }: CitySelectorViewProps) {
@@ -70,6 +85,8 @@ export function CitySelectorView({
   const baseLang = language.toLowerCase().split('-')[0];
 
   const [filter, setFilter] = useState<DestinationFilter>('all');
+  // the destinations section: its backdrop takes the tint of the card on top
+  const destRef = useRef<HTMLElement>(null);
   const [slideIdx, setSlideIdx] = useState(0);
   const [locState, setLocState] = useState<'requesting' | 'granted' | 'denied'>(() =>
     userCoords ? 'granted' : 'requesting',
@@ -184,6 +201,7 @@ export function CitySelectorView({
     return {
       id: city.slug,
       photo: `${import.meta.env.BASE_URL}${city.image.replace(/^\//, '')}`,
+      srcSet: landingSrcSet(city.image),
       alt: city.imageAlt,
       objectPosition: city.objectPosition,
       cityName: labels.name,
@@ -276,22 +294,18 @@ export function CitySelectorView({
                   ))}
                 </select>
               </label>
-              <button
-                type="button"
-                className={`glass-icon-btn ${a11yMode ? 'is-on' : ''}`}
-                onClick={onToggleA11y}
-                aria-pressed={a11yMode}
-                aria-label={a11yMode ? ui.easyModeOn : ui.easyMode}
-                title={a11yMode ? ui.easyModeOn : ui.easyMode}
-              >
-                <Accessibility size={18} />
-              </button>
+              <FontSizeControl language={language} />
             </div>
           </header>
         }
       />
 
-      <section id="destinations" className="landing-section">
+      <LandingMusic language={language} />
+      <LocationStory language={language} />
+
+      <section id="destinations" ref={destRef} className="landing-section dest-section">
+        {/* one screen-sized layer behind the stack; only its colour changes */}
+        <div className="dest-backdrop" aria-hidden="true" />
         <div className="dest-head" data-reveal>
           <header className="section-head">
             <h2>{ui.citiesHeading}</h2>
@@ -330,90 +344,102 @@ export function CitySelectorView({
           </div>
         </div>
 
-        <div className="dest-photo-grid">
-          {visibleCities.map((city, idx) => {
+        {/* Destinations stack as you scroll: each card pins and the next slides over it */}
+        <ScrollStack
+          key={filter}
+          className="dest-stack"
+          stackPosition="12%"
+          itemDistance={48}
+          itemStackDistance={16}
+          onTopCardChange={(index) => {
+            // set straight on the element: no re-render of the landing page
+            const tint = index >= 0 ? STACK_TINTS[visibleCities[index]?.slug] : undefined;
+            destRef.current?.style.setProperty('--dest-tint', tint ?? 'var(--bg-ivory)');
+          }}
+        >
+          {visibleCities.map((city) => {
             const labels = getCityLabels(city);
             const imgSrc = `${import.meta.env.BASE_URL}${city.image.replace(/^\//, '')}`;
             const isNearest = nearestInfo?.city.slug === city.slug;
 
             if (city.clickable) {
               return (
-                <button
-                  key={city.slug}
-                  type="button"
-                  className="dest-photo-card is-live"
-                  data-reveal
-                  style={{ ['--i' as string]: idx % 3 }}
-                  onClick={() => onSelectDestination(city.slug, userCoords)}
-                >
+                <ScrollStackItem key={city.slug} itemClassName="dest-stack-item">
+                  <button
+                    type="button"
+                    className="dest-photo-card is-live"
+                    onClick={() => onSelectDestination(city.slug, userCoords)}
+                  >
+                    <div className="dest-photo-card__media">
+                      <img
+                        src={imgSrc}
+                      srcSet={landingSrcSet(city.image)}
+                      sizes="(min-width: 900px) 560px, 100vw"
+                        alt={city.imageAlt}
+                        style={{ objectPosition: city.objectPosition }}
+                        loading="eager"
+                        decoding="async"
+                      />
+                      <div className="dest-photo-card__scrim" aria-hidden="true" />
+                      <div className="dest-photo-card__badges">
+                        <span className="dest-photo-card__badge is-live">
+                          <span className="dot-live" />
+                          {ui.liveNow}
+                        </span>
+                        {isNearest && (
+                          <span className="dest-photo-card__nearest">
+                            <MapPin size={11} aria-hidden="true" />~{nearestInfo.km} km
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="dest-photo-card__body">
+                      <h3>{labels.name}</h3>
+                      <span className="dest-photo-card__monument">{labels.monument}</span>
+                      <p>{labels.tagline}</p>
+                      <div className="dest-photo-card__cta">
+                        <Compass size={16} aria-hidden="true" />
+                        <span>{ui.enterTourGuide}</span>
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </div>
+                    </div>
+                  </button>
+                </ScrollStackItem>
+              );
+            }
+
+            return (
+              <ScrollStackItem key={city.slug} itemClassName="dest-stack-item">
+                <article className="dest-photo-card is-soon">
                   <div className="dest-photo-card__media">
                     <img
                       src={imgSrc}
+                      srcSet={landingSrcSet(city.image)}
+                      sizes="(min-width: 900px) 560px, 100vw"
                       alt={city.imageAlt}
                       style={{ objectPosition: city.objectPosition }}
-                      data-parallax="0.1"
-                      loading="lazy"
+                      loading="eager"
+                      decoding="async"
                     />
                     <div className="dest-photo-card__scrim" aria-hidden="true" />
                     <div className="dest-photo-card__badges">
-                      <span className="dest-photo-card__badge is-live">
-                        <span className="dot-live" />
-                        {ui.liveNow}
-                      </span>
-                      {isNearest && (
-                        <span className="dest-photo-card__nearest">
-                          <MapPin size={11} aria-hidden="true" />~{nearestInfo.km} km
-                        </span>
-                      )}
+                      <span className="dest-photo-card__badge is-soon">{ui.comingSoon}</span>
                     </div>
                   </div>
                   <div className="dest-photo-card__body">
                     <h3>{labels.name}</h3>
                     <span className="dest-photo-card__monument">{labels.monument}</span>
                     <p>{labels.tagline}</p>
-                    <div className="dest-photo-card__cta">
-                      <Compass size={16} aria-hidden="true" />
-                      <span>{ui.enterTourGuide}</span>
-                      <ArrowRight size={16} aria-hidden="true" />
+                    <div className="dest-photo-card__soon-foot">
+                      <Clock size={14} aria-hidden="true" />
+                      <span>{ui.comingSoon}</span>
                     </div>
                   </div>
-                </button>
-              );
-            }
-
-            return (
-              <article
-                key={city.slug}
-                className="dest-photo-card is-soon"
-                data-reveal
-                style={{ ['--i' as string]: idx % 3 }}
-              >
-                <div className="dest-photo-card__media">
-                  <img
-                    src={imgSrc}
-                    alt={city.imageAlt}
-                    style={{ objectPosition: city.objectPosition }}
-                    data-parallax="0.1"
-                    loading="lazy"
-                  />
-                  <div className="dest-photo-card__scrim" aria-hidden="true" />
-                  <div className="dest-photo-card__badges">
-                    <span className="dest-photo-card__badge is-soon">{ui.comingSoon}</span>
-                  </div>
-                </div>
-                <div className="dest-photo-card__body">
-                  <h3>{labels.name}</h3>
-                  <span className="dest-photo-card__monument">{labels.monument}</span>
-                  <p>{labels.tagline}</p>
-                  <div className="dest-photo-card__soon-foot">
-                    <Clock size={14} aria-hidden="true" />
-                    <span>{ui.comingSoon}</span>
-                  </div>
-                </div>
-              </article>
+                </article>
+              </ScrollStackItem>
             );
           })}
-        </div>
+        </ScrollStack>
       </section>
 
       <footer className="landing-footer">

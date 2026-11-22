@@ -1052,3 +1052,378 @@
     border-color: var(--navy);
   }
 }
+
+// Answer style lives on the search bar (GuideTab): a small tab on the bar's top
+// edge shows the current style; it opens a menu just above the bar.
+.composer__style {
+  position: absolute;
+  left: 22px;
+  bottom: calc(100% - 1px);
+}
+
+.composer__style-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 5px;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--border-sand);
+  border-bottom: 0;
+  background: var(--surface-card);
+  color: var(--saffron-deep);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 -6px 14px rgba(11, 27, 51, 0.06);
+}
+
+.style-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: min(340px, calc(100vw - 40px));
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  border-radius: 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-sand);
+  box-shadow: 0 18px 44px rgba(11, 27, 51, 0.22);
+  z-index: 30;
+
+  &__title {
+    margin: 2px 6px 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  &__item {
+    display: grid;
+    gap: 1px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    strong {
+      font-size: 0.88rem;
+    }
+
+    span {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    &:hover {
+      background: var(--bg-parchment, #f4ede2);
+    }
+
+    &.is-active {
+      border-color: var(--saffron);
+      background: rgba(226, 105, 26, 0.07);
+
+      strong {
+        color: var(--saffron-deep);
+      }
+    }
+  }
+
+  .persona-try {
+    margin-top: 6px;
+    font-size: 0.78rem;
+  }
+}
+
+.persona-try {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--saffron);
+  background: rgba(226, 105, 26, 0.06);
+  color: var(--saffron-deep);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(226, 105, 26, 0.12);
+  }
+}
+
+// a question re-asked after the answer style changed shows that style
+.chat-bubble__style {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+// "Raahi tells it as" style pills (StyleTabs.tsx), above tour narration
+.style-tabs {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 10px;
+
+  &__label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--saffron-deep);
+  }
+
+  // all four always visible: 2 x 2 on phones, one row on wider screens
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+
+    @include m.tablet-up {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  &__pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-sand);
+    background: var(--surface-card);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    &.is-active {
+      border-color: var(--saffron);
+      background: var(--saffron);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(226, 105, 26, 0.28);
+    }
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  &.is-dark {
+    .style-tabs__label {
+      color: var(--gold-soft, #f3c77a);
+    }
+
+    .style-tabs__pill {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+
+      &.is-active {
+        background: var(--saffron);
+        border-color: var(--saffron);
+      }
+    }
+
+    .style-tabs__hint {
+      color: rgba(255, 255, 255, 0.72);
+    }
+  }
+}
+
+// Audio tour player (TourTab): progress bar, transport controls, speed
+.tour-player {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 12px 12px 10px;
+  border-radius: 18px;
+  background: var(--navy-deep, #0b1b33);
+  color: #fff;
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    input[type='range'] {
+      flex: 1;
+      height: 6px;
+      appearance: none;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        var(--saffron) 0%,
+        var(--saffron) var(--fill, 0%),
+        rgba(255, 255, 255, 0.22) var(--fill, 0%)
+      );
+      cursor: pointer;
+
+      &:disabled {
+        cursor: default;
+      }
+
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      &::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        border: 0;
+        border-radius: 50%;
+        background: #fff;
+      }
+    }
+  }
+
+  &__time {
+    min-width: 38px;
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.75);
+
+    &:last-child {
+      text-align: right;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  &__btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+
+    small {
+      position: absolute;
+      font-size: 0.5rem;
+      font-weight: 800;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+
+  &__play {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 4px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--saffron);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(226, 105, 26, 0.45);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.94);
+    }
+
+    &.is-loading {
+      opacity: 0.85;
+    }
+  }
+
+  &__speed {
+    min-width: 46px;
+    height: 32px;
+    margin-left: 4px;
+    padding: 0 10px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+}
+
+.style-menu__item strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// first-visit nudge on the search-bar style chip
+.composer__style-btn.is-new {
+  animation: styleChipPulse 1.8s ease-in-out infinite;
+}
+
+.composer__style-new {
+  margin-left: 2px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--saffron);
+  color: #fff;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@keyframes styleChipPulse {
+  0%,
+  100% {
+    box-shadow: 0 -6px 14px rgba(11, 27, 51, 0.06), 0 0 0 0 rgba(226, 105, 26, 0.45);
+  }
+  50% {
+    box-shadow: 0 -6px 14px rgba(11, 27, 51, 0.06), 0 0 0 6px rgba(226, 105, 26, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer__style-btn.is-new {
+    animation: none;
+  }
+}

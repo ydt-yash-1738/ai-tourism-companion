@@ -44,3 +44,9 @@ right to use each one before any public release:
 | facilities/agra-chaupati-food-court.webp | Agra Chaupati food court |
 | facilities/agra-taj-locker-room.webp | Taj Mahal locker room (Agra Development Authority) |
 | facilities/agra-taj-western-gate-parking-sign.webp | Taj Mahal Western Gate parking sign |
+
+Landing-page music:
+
+| file | source | artist | licence |
+| --- | --- | --- | --- |
+| audio/landing-veena-kiravani.mp3 (3-minute excerpt, faded and level-matched) | [Kiravani-L Ramakrishnan.ogg](https://commons.wikimedia.org/wiki/File:Kiravani-L_Ramakrishnan.ogg) | L. Ramakrishnan (veena, raga Kiravani) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) |
