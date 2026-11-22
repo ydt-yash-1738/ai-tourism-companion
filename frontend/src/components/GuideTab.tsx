@@ -3,29 +3,34 @@ import {
   Accessibility,
   AlertTriangle,
   ArrowRight,
+  ChevronDown,
   BookOpen,
   ChevronRight,
   Clock,
-  Compass,
   Landmark,
   Loader2,
+  MapPin,
   Mic,
+  Navigation,
   RotateCcw,
   Send,
   ShieldCheck,
+  Sparkles,
   Square,
+  UtensilsCrossed,
   Volume2,
   WifiOff,
 } from 'lucide-react';
 import { getDestinationConfig, getMonumentMedia } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
+import { ANSWER_STYLES } from '../data/answerStyles';
 import { AvatarCaption } from './AvatarCaption';
 import { GuideAvatar } from './GuideAvatar';
 import { PERSONA_OPTIONS } from '../data/upCities';
-import { postChat, postVoiceSTT } from '../services/api';
-import { convertBlobToWav16k } from '../services/audioRecorder';
-import { offlineLocalChatSearch } from '../services/offlineStore';
-import { speakText, startBrowserSpeechFallback, stopSpeaking } from '../services/speech';
+import { useVoiceInput } from '../hooks/useVoiceInput';
+import { postChat } from '../services/api';
+import { enrichChatResponseWithOfflinePack, offlineLocalChatSearch } from '../services/offlineStore';
+import { speakText, stopSpeaking } from '../services/speech';
 import { translateBatchCached } from '../services/translateCache';
 import type { ChatResponse, Monument, OfflinePack, PersonaType } from '../types/api';
 
@@ -48,6 +53,10 @@ interface ChatTurn {
   response?: ChatResponse;
   /** True when the answer came from the on-device offline pack, not the server */
   fromDevice?: boolean;
+  /** set when a question is re-asked after the answer style changed */
+  styleLabel?: string;
+  /** the answer style this answer was given in (decides what is read aloud) */
+  style?: PersonaType;
 }
 
 export function GuideTab({
@@ -70,9 +79,37 @@ export function GuideTab({
   const [selectedMonument, setSelectedMonument] = useState<string>('');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const [transcribing, setTranscribing] = useState(false);
-  const [voiceStatus, setVoiceStatus] = useState<string>('');
+  // read synchronously (state is one render behind): is an answer on its way, and
+  // was the answer style changed meanwhile (then re-ask in it once the answer lands)
+  const loadingRef = useRef(false);
+  const composerInputRef = useRef<HTMLInputElement>(null);
+  // answer-style menu on the search bar
+  const [styleMenuOpen, setStyleMenuOpen] = useState(false);
+  // a gentle nudge on the style chip until it has been opened once on this device
+  const [styleChipSeen, setStyleChipSeen] = useState(() => {
+    try {
+      return localStorage.getItem('up_style_chip_seen') === '1';
+    } catch {
+      return true;
+    }
+  });
+  const styleMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!styleMenuOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!styleMenuRef.current?.contains(e.target as Node)) setStyleMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setStyleMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [styleMenuOpen]);
+  const pendingStyleRef = useRef<PersonaType | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [speakProgress, setSpeakProgress] = useState(0);
   const [speakPlaying, setSpeakPlaying] = useState(false);
@@ -80,9 +117,23 @@ export function GuideTab({
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const micStreamRef = useRef<MediaStream | null>(null);
-  const browserSpeechRef = useRef<{ stop: () => void } | null>(null);
+  const {
+    recording,
+    transcribing,
+    voiceStatus,
+    clearVoiceStatus,
+    toggleMic: handleToggleMic,
+  } = useVoiceInput({
+    language,
+    isOnline,
+    value: input,
+    onValueChange: setInput,
+    onBeforeStart: () => {
+      stopSpeaking();
+      setSpeakingId(null);
+    },
+  });
+
   const msgSeqRef = useRef(0);
   const streamRef = useRef<HTMLDivElement>(null);
 
@@ -94,16 +145,6 @@ export function GuideTab({
     const top = last.getBoundingClientRect().top + window.scrollY - 76;
     window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
   }, [messages.length, loading]);
-
-  useEffect(() => {
-    return () => {
-      if (mediaRecorderRef.current?.state === 'recording') {
-        mediaRecorderRef.current.stop();
-      }
-      micStreamRef.current?.getTracks().forEach((t) => t.stop());
-      browserSpeechRef.current?.stop();
-    };
-  }, []);
 
   const spotlightMonuments = useMemo(() => {
     const liveBySlug = new Map(monuments.map((m) => [m.slug, m]));
@@ -141,6 +182,10 @@ export function GuideTab({
     return merged;
   }, [monuments, destConfig.monumentSpotlights]);
 
+  const visibleMonuments = selectedMonument
+    ? spotlightMonuments.filter((item) => item.slug === selectedMonument)
+    : spotlightMonuments;
+
   const translationReqKey = useMemo(() => {
     if (!needsDynamicTranslate || !isOnline) return null;
     return `${destinationSlug}|${baseLang}|${spotlightMonuments.map((m) => m.slug).join(',')}`;
@@ -157,13 +202,8 @@ export function GuideTab({
     spotlightMonuments.forEach((m) => {
       raw.push(m.name, m.shortSummary, m.promptEn);
     });
-    destConfig.topicCards.forEach((t) => {
-      raw.push(t.badgeEn, t.titleEn, t.descEn, t.questionEn);
-    });
-    destConfig.visitorSnapshot.forEach((s) => {
-      raw.push(s.titleEn, s.bodyEn);
-    });
     if (destinationSlug !== 'agra') {
+      raw.push(...destConfig.copy.startersEn);
       raw.push(
         destConfig.guideBanner.greetingEn,
         destConfig.guideBanner.greetingSubEn,
@@ -202,12 +242,24 @@ export function GuideTab({
     return enText;
   };
 
-  const sendQuestion = async (rawQuestion: string, monumentOverride?: string) => {
+  const sendQuestion = async (
+    rawQuestion: string,
+    monumentOverride?: string,
+    /** answer in this style instead of the current one (used right after a style change) */
+    personaOverride?: PersonaType,
+  ) => {
     const question = rawQuestion.trim();
-    if (!question || loading) return;
+    if (!question || loadingRef.current) return;
+    loadingRef.current = true;
+    const activePersona = personaOverride ?? persona;
 
-    setVoiceStatus('');
-    const userMsg: ChatTurn = { id: `u_${++msgSeqRef.current}`, role: 'user', text: question };
+    clearVoiceStatus();
+    const userMsg: ChatTurn = {
+      id: `u_${++msgSeqRef.current}`,
+      role: 'user',
+      text: question,
+      styleLabel: personaOverride ? ui.personas[personaOverride] : undefined,
+    };
     const nextHistory = [...messages, userMsg].slice(-6).map((m) => ({
       role: m.role,
       content: m.role === 'assistant' && m.response ? m.response.answer_summary : m.text,
@@ -226,18 +278,26 @@ export function GuideTab({
             destination_slug: destinationSlug,
             question,
             language,
-            persona,
+            persona: activePersona,
             simple_language: simpleLanguage,
             monument_slug: (monumentOverride ?? selectedMonument) || null,
             session_hash: sessionHash,
             conversation_history: nextHistory,
           });
+          res = enrichChatResponseWithOfflinePack(
+            res,
+            offlinePack,
+            question,
+            language,
+            activePersona,
+            simpleLanguage,
+          );
         } catch {
-          res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+          res = offlineLocalChatSearch(offlinePack, question, language, activePersona, simpleLanguage);
           fromDevice = true;
         }
       } else {
-        res = offlineLocalChatSearch(offlinePack, question, language, persona, simpleLanguage);
+        res = offlineLocalChatSearch(offlinePack, question, language, activePersona, simpleLanguage);
         fromDevice = true;
       }
 
@@ -247,143 +307,64 @@ export function GuideTab({
         text: res.answer_summary,
         response: res,
         fromDevice,
+        style: activePersona,
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
-    }
-  };
-
-  const handleToggleMic = async () => {
-    if (transcribing) return;
-
-    if (recording) {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
-      browserSpeechRef.current?.stop();
-      setRecording(false);
-      return;
-    }
-
-    setVoiceStatus('');
-
-    if (isOnline && 'MediaRecorder' in window && navigator.mediaDevices?.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        micStreamRef.current = stream;
-        const chunks: BlobPart[] = [];
-        const recorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = recorder;
-
-        recorder.ondataavailable = (ev) => {
-          if (ev.data.size > 0) chunks.push(ev.data);
-        };
-
-        recorder.onstop = async () => {
-          stream.getTracks().forEach((t) => t.stop());
-          micStreamRef.current = null;
-          setRecording(false);
-
-          const rawBlob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-          if (rawBlob.size === 0) {
-            setVoiceStatus(
-              isHi
-                ? 'कोई आवाज़ रिकॉर्ड नहीं हुई। कृपया माइक के पास बोलें।'
-                : 'No audio captured. Please speak closer to the microphone.',
-            );
-            return;
-          }
-
-          setTranscribing(true);
-          setVoiceStatus(isHi ? 'आपकी आवाज़ समझी जा रही है...' : 'Transcribing speech...');
-          try {
-            const wavBlob = await convertBlobToWav16k(rawBlob);
-            const stt = await postVoiceSTT(wavBlob, language);
-            if (!stt.fallback_to_device && stt.transcript.trim()) {
-              const spoken = stt.transcript.trim();
-              setInput((prev) => (prev.trim() ? `${prev.trim()} ${spoken}` : spoken));
-              setVoiceStatus('');
-              return;
-            }
-            if (stt.fallback_to_device) {
-              // Server has no cloud speech service: listen again with the device recogniser
-              const device = startBrowserSpeechFallback(
-                language,
-                (transcript) => {
-                  setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
-                  setVoiceStatus('');
-                },
-                () => setRecording(false),
-              );
-              if (device) {
-                browserSpeechRef.current = device;
-                setRecording(true);
-                setVoiceStatus(isHi ? 'कृपया दोबारा बोलें...' : 'Please say that once more...');
-                return;
-              }
-            }
-            setVoiceStatus(
-              stt.transcript.trim() === '' && !stt.fallback_to_device
-                ? isHi
-                  ? 'आवाज़ स्पष्ट नहीं थी, कृपया पुनः प्रयास करें।'
-                  : 'No clear speech detected — please try again or type your question.'
-                : stt.message || 'Voice transcription unavailable — please type your question.',
-            );
-          } catch {
-            setVoiceStatus(
-              isHi
-                ? 'वॉइस सेवा से संपर्क नहीं हो सका। कृपया टाइप करें या दोबारा बोलें।'
-                : 'Could not reach voice transcription service — please try again or type.',
-            );
-          } finally {
-            setTranscribing(false);
-          }
-        };
-
-        recorder.start(250);
-        setRecording(true);
-        setVoiceStatus(
-          isHi ? 'सुन रहे हैं... बोलने के बाद लाल बटन दबाएँ' : 'Listening... tap stop when done',
-        );
-        return;
-      } catch {
-        // Microphone denied or unsupported -> try browser Web Speech fallback
-      }
-    }
-
-    const fallback = startBrowserSpeechFallback(
-      language,
-      (transcript) => {
-        setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
-        setVoiceStatus('');
-      },
-      () => setRecording(false),
-    );
-    if (fallback) {
-      browserSpeechRef.current = fallback;
-      setRecording(true);
-      setVoiceStatus(
-        isHi ? 'सुन रहे हैं... बोलने के बाद लाल बटन दबाएँ' : 'Listening... tap stop when done',
-      );
-    } else {
-      setVoiceStatus(
-        isHi
-          ? 'माइक्रोफ़ोन उपलब्ध नहीं है। कृपया नीचे अपना प्रश्न टाइप करें।'
-          : 'Microphone permission unavailable in this browser — please type your question.',
-      );
+      const pendingStyle = pendingStyleRef.current;
+      pendingStyleRef.current = null;
+      if (pendingStyle && pendingStyle !== activePersona) void sendQuestion(question, monumentOverride, pendingStyle);
     }
   };
 
   const spokenTextFor = (turn: ChatTurn) => {
     const r = turn.response;
+    const stopsPart = r?.itinerary_stops?.length
+      ? r.itinerary_stops.map((s) => `${s.time_slot}: ${s.title}. ${s.notes}`).join(' ')
+      : '';
+    const placesPart =
+      !stopsPart && r?.recommended_places?.length
+        ? r.recommended_places.map((p) => `${p.name}. ${p.description}`).join(' ')
+        : '';
     const historyPart = r?.verified_history.length
       ? `${ui.recordedHistory}: ${r.verified_history.map((h) => h.text).join(' ')}`
       : '';
     const folklorePart = r?.folklore_legends.length
       ? `${ui.localFolklore}: ${r.folklore_legends.map((f) => f.text).join(' ')}`
       : '';
-    return [turn.text, historyPart, folklorePart].filter(Boolean).join(' ');
+    // What Raahi reads depends on the style the answer was given in
+    switch (turn.style ?? persona) {
+      case 'quick':
+        // just the answer (and a plan's stops, when it is one)
+        return [turn.text, stopsPart].filter(Boolean).join(' ');
+      case 'kids': {
+        // short for children: the answer, one story, one line of history
+        const firstSentences = (text: string, n: number) =>
+          (text.match(/[^.!?।]+[.!?।]+/g) ?? [text]).slice(0, n).join(' ').trim();
+        const firstHistory = firstSentences(r?.verified_history[0]?.text ?? '', 1);
+        const story = r?.folklore_legends[0]?.text;
+        const stories = story ? `${isHi ? 'और एक कहानी सुनो' : 'And here is a story'}: ${firstSentences(story, 2)}` : '';
+        return [turn.text, stories, firstHistory, stopsPart].filter(Boolean).join(' ');
+      }
+      case 'pilgrim':
+        return [turn.text, stopsPart, placesPart, historyPart].filter(Boolean).join(' ');
+      default:
+        // History & Arch: everything, sources included
+        return [
+          turn.text,
+          stopsPart,
+          placesPart,
+          historyPart,
+          r?.verified_history.length
+            ? `${isHi ? 'स्रोत' : 'Sources'}: ${[...new Set(r.verified_history.map((h) => h.source))].join(', ')}`
+            : '',
+          folklorePart,
+        ]
+          .filter(Boolean)
+          .join(' ');
+    }
   };
 
   const handleReadAloud = async (turn: ChatTurn) => {
@@ -449,10 +430,47 @@ export function GuideTab({
   const askPlaceholder =
     language === 'en' ? 'Ask Raahi anything…' : isHi ? 'राही से कुछ भी पूछें…' : chatPlaceholderBase;
 
+  // What each answer style does, shown under the style tabs
+  const personaHint = (id: PersonaType): string => {
+    const hints: Record<PersonaType, [string, string]> = {
+      quick: ['Short, crisp facts.', 'छोटे, सटीक तथ्य।'],
+      kids: ['Told as a simple story for children.', 'बच्चों के लिए सरल कहानी के रूप में।'],
+      scholar: ['In depth: history, architecture and sources.', 'विस्तार से: इतिहास, स्थापत्य और स्रोत।'],
+      pilgrim: ['With the spiritual meaning and etiquette of the place.', 'स्थान के आध्यात्मिक महत्व और मर्यादा के साथ।'],
+    };
+    return isHi ? hints[id][1] : hints[id][0];
+  };
+
+  // A sample question per style about this place's main monument, asked in one tap
+  const personaExample = (id: PersonaType): string => {
+    const spot = destConfig.monumentSpotlights[0];
+    const place = spot ? (isHi ? spot.nameHi : spot.name) : isHi ? destConfig.nameHi : destConfig.nameEn;
+    const examples: Record<PersonaType, [string, string]> = {
+      quick: [`Give me the key facts about the ${place}`, `${place} के मुख्य तथ्य बताइए`],
+      kids: [`Tell me the story of the ${place} like a fairy tale`, `${place} की कहानी परी-कथा की तरह सुनाइए`],
+      scholar: [`Explain the architecture and history of the ${place}`, `${place} का स्थापत्य और इतिहास समझाइए`],
+      pilgrim: [`What is the spiritual meaning of the ${place}, and how should I visit?`, `${place} का आध्यात्मिक महत्व क्या है और वहाँ कैसे जाएँ?`],
+    };
+    return isHi ? examples[id][1] : examples[id][0];
+  };
+
+  // Changing the style re-asks the last question in it, so the change shows at once
+  // Choosing a style puts that style's sample question in the chat box, ready to
+  // send; choosing another swaps it. A question the visitor typed is never replaced.
+  const handlePersonaChange = (next: PersonaType) => {
+    if (next !== persona) onChangePersona(next);
+    const current = input.trim();
+    const isSample = (['quick', 'kids', 'scholar', 'pilgrim'] as PersonaType[]).some(
+      (st) => personaExample(st) === current,
+    );
+    if (!current || isSample) setInput(personaExample(next));
+    window.setTimeout(() => composerInputRef.current?.focus(), 0);
+  };
+
   return (
     <div className="guide-layout">
       <div className="photo-banner">
-        <img src={bannerSrc} alt="" aria-hidden="true" data-parallax="0.2" />
+        <img src={bannerSrc} alt="" aria-hidden="true" />
         <div className="guide-banner">
           <span className="guide-banner__eyebrow">
             <span className="dot-live" />
@@ -495,21 +513,6 @@ export function GuideTab({
           </div>
         </div>
 
-        <div className="segmented segmented--scroll" role="radiogroup" aria-label={ui.styleLabel}>
-          {PERSONA_OPTIONS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              role="radio"
-              aria-checked={persona === p.id}
-              className={persona === p.id ? 'is-active' : ''}
-              onClick={() => onChangePersona(p.id)}
-            >
-              {ui.personas[p.id]}
-            </button>
-          ))}
-        </div>
-
         <div className="chip-rail" role="radiogroup" aria-label="Filter by monument">
           <button
             type="button"
@@ -545,7 +548,7 @@ export function GuideTab({
                 </div>
               </div>
               <div className="guide-monument-grid">
-                {spotlightMonuments.map((item) => {
+                {visibleMonuments.map((item) => {
                   const media = getMonumentMedia(item.slug, destinationSlug);
                   return (
                     <button
@@ -592,54 +595,24 @@ export function GuideTab({
               </div>
             </section>
 
-            <section>
-              <div className="guide-section-head">
-                <div>
-                  <h3>{ui.curatedTopicsHeading}</h3>
-                  <p>{ui.curatedTopicsSub}</p>
-                </div>
-              </div>
-              <div className="guide-topic-grid">
-                {destConfig.topicCards.map((topic) => {
-                  const focusSlug = topic.focusMonumentSlug || '';
-                  return (
-                    <button
-                      key={topic.id}
-                      type="button"
-                      className={`guide-topic-card is-${topic.accent}`}
-                      disabled={loading}
-                      onClick={() => {
-                        setSelectedMonument(focusSlug);
-                        void sendQuestion(tr(topic.questionEn, topic.questionHi), focusSlug);
-                      }}
-                    >
-                      <span className="guide-topic-card__badge">{tr(topic.badgeEn, topic.badgeHi)}</span>
-                      <h4>{tr(topic.titleEn, topic.titleHi)}</h4>
-                      <p>{tr(topic.descEn, topic.descHi)}</p>
-                      <span className="guide-topic-card__ask">
-                        <span>{ui.askAboutMonument}</span>
-                        <ArrowRight size={14} />
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="guide-snapshot-grid" aria-label={`${destConfig.nameEn} visitor quick facts`}>
-              {destConfig.visitorSnapshot.map((tile, idx) => {
-                const Icon = idx === 0 ? Clock : idx === 1 ? Compass : ShieldCheck;
-                return (
-                  <div key={tile.id} className="guide-snapshot-tile">
-                    <div className="guide-snapshot-tile__head">
-                      <Icon size={15} color="var(--saffron-deep)" />
-                      <span>{tr(tile.titleEn, tile.titleHi)}</span>
-                    </div>
-                    <p>{tr(tile.bodyEn, tile.bodyHi)}</p>
-                  </div>
-                );
-              })}
-            </section>
+            <div className="starter-chips" aria-label="Suggested questions">
+              {(destinationSlug === 'agra'
+                ? ui.starters
+                : destConfig.copy.startersEn.map((q, idx) =>
+                    tr(q, destConfig.copy.startersHi[idx] || ''),
+                  )
+              ).map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  className="chip-btn"
+                  disabled={loading}
+                  onClick={() => void sendQuestion(q)}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </section>
@@ -648,6 +621,7 @@ export function GuideTab({
         {messages.map((turn) =>
           turn.role === 'user' ? (
             <div key={turn.id} className="chat-bubble is-user">
+              {turn.styleLabel && <span className="chat-bubble__style">{turn.styleLabel}</span>}
               {turn.text}
             </div>
           ) : (
@@ -676,6 +650,103 @@ export function GuideTab({
                 fullTextLabel={ui.readFullText}
                 size={78}
               />
+
+              {turn.response?.itinerary_stops && turn.response.itinerary_stops.length > 0 && (
+                <div className="plan-card">
+                  <div className="plan-card__label">
+                    <Clock size={15} />
+                    {ui.itineraryHeading}
+                  </div>
+                  <div className="plan-timeline">
+                    {turn.response.itinerary_stops.map((stop, idx) => (
+                      <div key={`${stop.source_slug || stop.title}-${idx}`} className="plan-step">
+                        <span className="plan-step__num">{idx + 1}</span>
+                        <div className="plan-step__body">
+                          <div className="plan-step__meta">
+                            <span className="plan-step__time">{stop.time_slot}</span>
+                            {stop.duration_min != null && (
+                              <span className="plan-step__tag">{stop.duration_min} min</span>
+                            )}
+                            <span className={`plan-step__tag ${stop.category === 'craft' ? 'is-odop' : ''}`}>
+                              {stop.category}
+                            </span>
+                          </div>
+                          <h4>{stop.title}</h4>
+                          {stop.notes && <p>{stop.notes}</p>}
+                          {stop.accessibility_note && (
+                            <div className="plan-step__a11y">
+                              <Accessibility size={13} />
+                              <span>{stop.accessibility_note}</span>
+                            </div>
+                          )}
+                          {stop.lat != null && stop.lng != null && (
+                            <a
+                              className="plan-map-link"
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${stop.lat},${stop.lng}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Navigation size={13} />
+                              <span>{ui.openInMaps}</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {turn.response?.recommended_places && turn.response.recommended_places.length > 0 && (
+                <div className="rec-section">
+                  <div className="rec-section__label">
+                    <UtensilsCrossed size={15} />
+                    {ui.recommendedPlacesHeading}
+                  </div>
+                  <div className="rec-grid">
+                    {turn.response.recommended_places.map((place, idx) => (
+                      <div key={`${place.source_slug || place.name}-${idx}`} className="rec-card">
+                        <div className="plan-step__meta">
+                          <span className="plan-step__tag">{place.category}</span>
+                          {place.is_odop && <span className="plan-step__tag is-odop">{ui.odopBadge}</span>}
+                          {place.budget_tier && <span className="plan-step__tag">{place.budget_tier}</span>}
+                          {place.is_accessible && (
+                            <span className="plan-step__tag is-accessible">{ui.accessibleBadge}</span>
+                          )}
+                        </div>
+                        <h4>{place.name}</h4>
+                        {place.description && <p>{place.description}</p>}
+                        <div className="rec-card__details">
+                          {place.timings && (
+                            <span>
+                              <Clock size={12} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
+                              {place.timings}
+                            </span>
+                          )}
+                          {place.entry_fee_inr && <span>{place.entry_fee_inr}</span>}
+                          {place.address && (
+                            <span>
+                              <MapPin size={12} style={{ marginRight: 5, verticalAlign: 'text-bottom' }} />
+                              {place.address}
+                            </span>
+                          )}
+                        </div>
+                        {place.lat != null && place.lng != null && (
+                          <a
+                            className="plan-map-link"
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <Navigation size={13} />
+                            <span>{ui.openInMaps}</span>
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {turn.response && turn.response.verified_history.length > 0 && (
                 <div className="evidence evidence--history">
@@ -777,6 +848,58 @@ export function GuideTab({
           sendQuestion(input);
         }}
       >
+        <div className="composer__style" ref={styleMenuRef}>
+          <button
+            type="button"
+            className={`composer__style-btn ${styleChipSeen ? '' : 'is-new'}`}
+            aria-haspopup="true"
+            aria-expanded={styleMenuOpen}
+            onClick={() => {
+              setStyleMenuOpen((v) => !v);
+              if (!styleChipSeen) {
+                setStyleChipSeen(true);
+                try {
+                  localStorage.setItem('up_style_chip_seen', '1');
+                } catch {
+                  // the nudge simply shows again next visit
+                }
+              }
+            }}
+            title={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}
+          >
+            <Sparkles size={13} aria-hidden="true" />
+            <span>{ui.personas[persona]}</span>
+            <ChevronDown size={13} aria-hidden="true" />
+            {!styleChipSeen && <em className="composer__style-new">{isHi ? 'आज़माएँ' : 'Try'}</em>}
+          </button>
+          {styleMenuOpen && (
+            <div className="style-menu" role="radiogroup" aria-label={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}>
+              <p className="style-menu__title">{isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}</p>
+              {PERSONA_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={persona === p.id}
+                  className={`style-menu__item ${persona === p.id ? 'is-active' : ''}`}
+                  onClick={() => {
+                    handlePersonaChange(p.id);
+                    setStyleMenuOpen(false);
+                  }}
+                >
+                  <strong>
+                    {(() => {
+                      const Icon = ANSWER_STYLES.find((st) => st.id === p.id)?.icon;
+                      return Icon ? <Icon size={14} aria-hidden="true" /> : null;
+                    })()}
+                    {ui.personas[p.id]}
+                  </strong>
+                  <span>{personaHint(p.id)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <span className="composer__avatar" aria-hidden="true">
           <GuideAvatar variant="head" size={34} speaking={loading} />
         </span>
@@ -790,12 +913,13 @@ export function GuideTab({
           {transcribing ? <Loader2 size={20} className="spin-icon" /> : recording ? <Square size={18} /> : <Mic size={20} />}
         </button>
         <input
+          ref={composerInputRef}
           type="text"
           className="composer__input"
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
-            if (voiceStatus && !recording && !transcribing) setVoiceStatus('');
+            if (voiceStatus && !recording && !transcribing) clearVoiceStatus();
           }}
           placeholder={askPlaceholder}
           aria-label={askPlaceholder}

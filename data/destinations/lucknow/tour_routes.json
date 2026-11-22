@@ -1,0 +1,166 @@
+[
+  {
+    "slug": "quick-30m",
+    "title": "30-Minute Step-Free Nawabi Core Walk",
+    "title_hi": "30-मिनट त्वरित नवाबी दर्शन (रैंप एवं समतल मार्ग)",
+    "duration_minutes": 30,
+    "step_free": true,
+    "description": "An easy, completely step-free 30-minute circuit covering Lucknow's signature landmarks from street level: the towering Rumi Darwaza, the grand Bara Imambara gardens and facade, and the upper viewing gallery of Shahi Baoli.",
+    "description_hi": "कम समय वाले और सीढ़ी-रहित सुगम मार्ग चाहने वाले यात्रियों के लिए 30 मिनट की सैर: रूमी दरवाज़ा, बड़ा इमामबाड़ा का समतल प्रांगण और शाही बावली की ऊपरी दर्शक गैलरी।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "rumi-darwaza",
+        "duration_min": 8,
+        "audio_script_en": "Look up at the 18-metre Rumi Darwaza, erected in 1784 under Nawab Asaf-ud-Daula. Its flared crown and pointed arch take inspiration from Rum—ancient Constantinople—earning it the name Turkish Gate and making it Lucknow's enduring emblem.",
+        "audio_script_hi": "1784 में नवाब आसफ़-उद-दौला के समय बने 18 मीटर ऊँचे रूमी दरवाज़े को देखिए। 'रूम' (कॉन्स्टेंटिनोपल) की शैली से प्रेरित इस द्वार को तुर्की द्वार भी कहते हैं और यह लखनऊ की पहचान है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level paved sidewalk viewing along the Hussainabad Heritage Zone; watch for road traffic."
+      },
+      {
+        "order": 2,
+        "monument_slug": "bara-imambara",
+        "duration_min": 14,
+        "audio_script_en": "Step into the vast terraced courtyard of the Bara Imambara. Begun during the severe 1784 famine, this monument provided wages to over 20,000 residents. Ahead lies the world-famous central hall whose lakhauri-brick ceiling stands 15 metres high without a single wooden or steel beam.",
+        "audio_script_hi": "बड़ा इमामबाड़ा के विशाल प्रांगण में स्वागत है। 1784 के भीषण अकाल के दौरान शुरू हुए इस निर्माण ने 20,000 से अधिक लोगों को रोज़गार दिया। सामने स्थित मुख्य हॉल बिना किसी बीम या खंभे के मेहराबदार तकनीक पर खड़ा है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Ramps and paved paths cover the forecourt and terraced lawns; the inner hall platform has steps."
+      },
+      {
+        "order": 3,
+        "monument_slug": "shahi-baoli",
+        "duration_min": 8,
+        "audio_script_en": "On the eastern flank stands the five-storey Shahi Baoli stepwell, fed by an underground channel from the Gomti River. Notice how an upper sentry gallery looks straight down at the water—tradition and architectural design let guards spot entering guests from their reflection.",
+        "audio_script_hi": "पूर्वी हिस्से में गोमती नदी से जुड़ी पाँच मंजिला शाही बावली है। इसके ऊपरी प्रहरी कक्ष से पानी के प्रतिबिंब में मुख्य द्वार पर आने वालों को बिना दिखे देखा जा सकता था।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Upper courtyard and viewing arcade are level and step-free; descending into lower tiers uses steep steps."
+      }
+    ]
+  },
+  {
+    "slug": "classic-1hr",
+    "title": "1-Hour Step-Free Hussainabad Heritage Trail",
+    "title_hi": "1-घंटे की हुसैनाबाद विरासत यात्रा (सुगम मार्ग)",
+    "duration_minutes": 60,
+    "step_free": true,
+    "description": "A balanced one-hour step-free route linking Rumi Darwaza, Bara Imambara courtyard, Shahi Baoli, and the Hussainabad heritage promenade to the gilded Chota Imambara.",
+    "description_hi": "रूमी दरवाज़ा, बड़ा इमामबाड़ा प्रांगण, शाही बावली और हुसैनाबाद विरासत पथ से होते हुए सुनहरे गुंबद वाले छोटा इमामबाड़ा तक की एक घंटे की सीढ़ी-रहित सैर।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "rumi-darwaza",
+        "duration_min": 10,
+        "audio_script_en": "Begin at Rumi Darwaza. Local folklore recalls a great lantern atop its lotus crown lighting the Gomti plains by night, while recorded history notes it was part of Nawab Asaf-ud-Daula's 1784 famine-relief masterplan.",
+        "audio_script_hi": "रूमी दरवाज़े से शुरुआत करें। लोककथा इसके शीर्ष पर जलने वाली विशाल कंदील की बात करती है, जबकि इतिहास इसे 1784 की अकाल राहत योजना का गौरवशाली प्रवेश द्वार बताता है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Flat pedestrian zone beside the gate."
+      },
+      {
+        "order": 2,
+        "monument_slug": "bara-imambara",
+        "duration_min": 20,
+        "audio_script_en": "Enter the Bara Imambara lawns. Hear both sides of its story: historical records document twenty thousand artisans earning daily famine wages, while beloved Lucknow folklore says nobles quietly tore down part of the work at night so relief wages would continue.",
+        "audio_script_hi": "बड़ा इमामबाड़ा प्रांगण में आएँ। इतिहास बताता है कि हज़ारों श्रमिकों को यहाँ रोज़गार मिला, वहीं लोकप्रिय लोककथा कहती है कि रईस रात में निर्माण का कुछ भाग गिरा देते थे ताकि मज़दूरी चलती रहे।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Shaded courtyard arcades and paved paths are completely step-free."
+      },
+      {
+        "order": 3,
+        "monument_slug": "shahi-baoli",
+        "duration_min": 10,
+        "audio_script_en": "Inspect the tiered arches of Shahi Baoli from the upper arcade. Beyond cooling the summer air, local stories speak of the 1857 royal treasurer jumping into its waters with the state treasury keys.",
+        "audio_script_hi": "ऊपरी बरामदे से शाही बावली की मेहराबें देखें। ग्रीष्मकालीन शीतलता के साथ यहाँ 1857 के खजांची की चाबियों से जुड़ी लोककथा भी प्रसिद्ध है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Upper viewing gallery is level; avoid the inner stairs if using a wheelchair."
+      },
+      {
+        "order": 4,
+        "monument_slug": "chota-imambara",
+        "duration_min": 20,
+        "audio_script_en": "Continue west past the Clock Tower and Picture Gallery to Chota Imambara, built by Nawab Muhammad Ali Shah in 1838. Admire its golden dome, Quranic calligraphy, and sparkling Belgian crystal chandeliers that earned it the nickname Palace of Lights.",
+        "audio_script_hi": "घंटाघर और पिक्चर गैलरी के पास से होते हुए 1838 में नवाब मुहम्मद अली शाह द्वारा निर्मित छोटा इमामबाड़ा पहुँचें। इसके सुनहरे गुंबद और बेल्जियन क्रिस्टल झाड़-फ़ानूस के कारण इसे 'रोशनी का महल' कहा जाता है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level paved courtyard with entrance ramps; remove footwear before stepping inside the prayer hall."
+      }
+    ]
+  },
+  {
+    "slug": "half-day-3hr",
+    "title": "Half-Day Complete Nawabi Circuit (All 6 Landmarks)",
+    "title_hi": "अर्ध-दिवसीय संपूर्ण नवाबी विरासत परिक्रमा (सभी 6 स्थल)",
+    "duration_minutes": 180,
+    "step_free": false,
+    "description": "Experience every layer of old Lucknow's royal architecture—Rumi Darwaza, Bara Imambara's beamless hall, Shahi Baoli, climbing the Bhool Bhulaiya labyrinth, viewing Asfi Mosque, and finishing at Hussainabad's Chota Imambara.",
+    "description_hi": "रूमी दरवाज़ा, बड़ा इमामबाड़ा का मुख्य हॉल, शाही बावली, भूलभुलैया की छत, आसफ़ी मस्जिद और छोटा इमामबाड़ा तक की तीन घंटे की संपूर्ण नवाबी विरासत यात्रा।",
+    "stops": [
+      {
+        "order": 1,
+        "monument_slug": "rumi-darwaza",
+        "duration_min": 15,
+        "audio_script_en": "Start at dawn or morning light beneath Rumi Darwaza, noting the ornate Nawabi stucco floral motifs and side pavilions framing the road to Hussainabad.",
+        "audio_script_hi": "प्रातःकाल रूमी दरवाज़े से शुरुआत करें और इसकी नक्काशीदार पंखुड़ियों तथा अवधी मेहराबों का अवलोकन करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Level paved plaza beside the gateway."
+      },
+      {
+        "order": 2,
+        "monument_slug": "bara-imambara",
+        "duration_min": 40,
+        "audio_script_en": "Walk through the Bara Imambara gates marked with the twin-fish emblem of Awadh and step inside the 50-metre central hall—a marvel of lakhauri brick vaulting built without steel or timber beams.",
+        "audio_script_hi": "अवध के जुड़वाँ मछली चिह्न वाले द्वारों से प्रवेश कर बड़ा इमामबाड़ा के 50 मीटर लंबे मध्य हॉल की बिना बीम वाली स्थापत्य कला का अनुभव करें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Courtyard is flat; entering the raised hall involves stone steps."
+      },
+      {
+        "order": 3,
+        "monument_slug": "shahi-baoli",
+        "duration_min": 20,
+        "audio_script_en": "Explore the cool arched galleries of Shahi Baoli, seeing how Gomti river water filled the stepwell and created a natural mirror for guards watching the complex entrance.",
+        "audio_script_hi": "शाही बावली की ठंडी मेहराबदार गैलरी देखें और जानें कि किस तरह गोमती नदी के जल में प्रतिबिंब द्वारा द्वार की निगरानी होती थी।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Steep narrow steps lead to lower water tiers."
+      },
+      {
+        "order": 4,
+        "monument_slug": "bhool-bhulaiya",
+        "duration_min": 45,
+        "audio_script_en": "Ascend with a licensed guide into the Bhool Bhulaiya's 489 identical doorways. Notice how whispering near one wall carries clearly along the brick gallery, while legends speak of mysterious tunnels to distant cities.",
+        "audio_script_hi": "लाइसेंसधारी गाइड के साथ 489 एक जैसे दरवाज़ों वाली भूलभुलैया में ऊपर जाएँ। दीवार के सहारे फुसफुसाने पर आवाज़ का दूर तक पहुँचना और गुप्त सुरंगों की कहानियाँ यहाँ के प्रमुख आकर्षण हैं।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Steep, narrow staircases; not suitable for wheelchairs or visitors with claustrophobia."
+      },
+      {
+        "order": 5,
+        "monument_slug": "asfi-mosque",
+        "duration_min": 20,
+        "audio_script_en": "From the rooftop parapet, gaze across at the three fluted white domes and tall minarets of Asfi Mosque. As an active place of worship, dress modestly and observe respectful quiet near prayer hours.",
+        "audio_script_hi": "छत की मुंडेर से आसफ़ी मस्जिद के तीन सफेद गुंबदों और ऊँची मीनारों को देखें। यह सक्रिय प्रार्थना स्थल है, अतः शालीन वस्त्र व शांति बनाए रखें।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Broad flight of steps separates courtyard from prayer terrace."
+      },
+      {
+        "order": 6,
+        "monument_slug": "chota-imambara",
+        "duration_min": 40,
+        "audio_script_en": "Conclude along the Hussainabad promenade at Chota Imambara, passing the 67-metre Clock Tower and Picture Gallery before stepping past the reflecting pool to see the famous crystal chandeliers and Nawab Muhammad Ali Shah's tomb.",
+        "audio_script_hi": "हुसैनाबाद मार्ग पर 67 मीटर ऊँचे घंटाघर और पिक्चर गैलरी के पास से गुजरते हुए छोटा इमामबाड़ा में अपनी यात्रा पूर्ण करें, जहाँ क्रिस्टल झाड़-फ़ानूस और नवाब मुहम्मद अली शाह का मकबरा स्थित है।",
+        "audio_url_en": null,
+        "audio_url_hi": null,
+        "accessibility_tip": "Step-free courtyard; footwear removed before entering the hall."
+      }
+    ]
+  }
+]
+

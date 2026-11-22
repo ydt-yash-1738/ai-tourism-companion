@@ -174,6 +174,28 @@
     "content_type": "RECORDED_HISTORY",
     "source_name": "Archaeological Survey of India (ASI)",
     "tags": ["rules", "shoe cover", "etiquette", "respect", "prohibited", "camera", "baggage", "नियम", "जूते", "शिष्टाचार"]
+  },
+  {
+    "chunk_key": "agra-street-food-culinary-guide",
+    "monument_slug": null,
+    "title": "Agra Street Food, Chaat Gali, Bedai-Jalebi & Petha Trail",
+    "title_hi": "आगरा का प्रसिद्ध स्ट्रीट फ़ूड: चाट गली, बेड़ई-जलेबी और पेठा",
+    "content": "Agra's celebrated local street food spans three signature zones: Sadar Bazaar Chaat Gali for crispy Aloo Bhalla, Pani Puri, and tandoori snacks in the evening; Belanganj and Rawatpara in Old Agra for classic morning Bedai served with spicy aloo sabzi and hot jalebi; and Noori Darwaza near Jama Masjid for translucent Angoori, Kesar, and Paan Petha sweets. Visitors seeking hygienic meals steps from the Taj Mahal gates can visit the Taj Ganj clean food court and Fatehabad Road dining strip.",
+    "content_hi": "आगरा के प्रसिद्ध स्ट्रीट फ़ूड के तीन मुख्य केंद्र हैं: शाम के समय सदर बाजार चाट गली (आलू भल्ला, पानी पूरी और चाट), सुबह बेलनगंज व रावतपाड़ा की गरमागरम बेड़ई-आलू सब्ज़ी और जलेबी, तथा जामा मस्जिद के पास नूरी दरवाज़ा की पारंपरिक पेठा गली (अंगूरी, केसर और पान पेठा)। ताजमहल के पूर्वी द्वार के पास ताजगंज फूड कोर्ट और फतेहाबाद रोड पर स्वच्छ भोजन उपलब्ध है।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "UP Tourism Culinary Trail",
+    "tags": ["street food", "food", "chaat", "chaat gali", "sadar bazaar", "petha", "bedai", "jalebi", "aloo bhalla", "eat", "local food", "taj ganj", "belanganj", "स्ट्रीट फ़ूड", "चाट", "पेठा", "बेड़ई", "जलेबी", "भोजन", "खाना"]
+  },
+  {
+    "chunk_key": "agra-travel-plan-logistics",
+    "monument_slug": null,
+    "title": "Agra Itinerary Planning, Step-Free Access & Craft Circuit",
+    "title_hi": "आगरा यात्रा योजना, सुगम मार्ग और शिल्प भ्रमण",
+    "content": "Visitors planning a 30-minute, 1-hour, or 3-hour Agra itinerary can combine the Taj Mahal complex and Agra Fort (2.5 km apart) with Taj Ganj Parchinkari marble inlay workshops and local food courts. For wheelchair-accessible and step-free routes, choose Darwaza-i-Rauza, the Charbagh garden and lower red-sandstone Taj terrace, Taj Mosque and Jawab terrace, Amar Singh Gate, and Jahangiri Mahal ground courtyard; skip climbing the upper Taj marble plinth and Musamman Burj stairs. Remember Taj Mahal closes every Friday while Agra Fort and Mehtab Bagh stay open daily.",
+    "content_hi": "आगरा में 30 मिनट, 1 घंटे या 3 घंटे की यात्रा योजना के लिए ताजमहल, 2.5 किमी दूर आगरा किला, ताजगंज पर्चिनकारी (ODOP) कार्यशाला और चाट/भोजन स्थलों को जोड़ा जा सकता है। व्हीलचेयर व सीढ़ी-रहित सुगम यात्रा के लिए दरवाज़ा-ए-रौज़ा, चारबाग उद्यान, निचला लाल बलुआ चबूतरा, अमर सिंह द्वार और जहाँगीरी महल का भूतल प्रांगण चुनें। ध्यान रखें कि ताजमहल प्रत्येक शुक्रवार बंद रहता है जबकि आगरा किला व मेहताब बाग प्रतिदिन खुलते हैं।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI) & UP Tourism",
+    "tags": ["itinerary", "travel plan", "plan", "schedule", "route", "3 hour", "1 hour", "half day", "wheelchair", "step-free", "family", "budget", "crafts", "यात्रा योजना", "प्लान", "टूर", "सुगम", "व्हीलचेयर", "परिवार"]
   }
 ]
 

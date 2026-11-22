@@ -4,13 +4,16 @@ import {
   Camera,
   Loader2,
   MapPin,
+  Mic,
   ShieldCheck,
   Square,
   Upload,
   Volume2,
+  X,
 } from 'lucide-react';
 import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
+import { useVoiceInput } from '../hooks/useVoiceInput';
 import { offlineVisionFallback } from '../services/offlineStore';
 import { postVisionAsk } from '../services/api';
 import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
@@ -50,6 +53,23 @@ export function CameraTab({
   const [result, setResult] = useState<VisionResponse | null>(null);
   const [audioStatus, setAudioStatus] = useState<AudioPlaybackState>('idle');
 
+  const {
+    recording,
+    transcribing,
+    voiceStatus,
+    clearVoiceStatus,
+    toggleMic,
+  } = useVoiceInput({
+    language,
+    isOnline,
+    value: question,
+    onValueChange: setQuestion,
+    onBeforeStart: () => {
+      stopSpeaking();
+      setAudioStatus('idle');
+    },
+  });
+
   const effectiveCoords = useDemoGps
     ? { lat: destConfig.demoGps.lat, lng: destConfig.demoGps.lng }
     : userCoords;
@@ -85,7 +105,8 @@ export function CameraTab({
   };
 
   const handleIdentify = async () => {
-    if (!imageFile || loading) return;
+    if (!imageFile || loading || recording || transcribing) return;
+    if (voiceStatus && !recording && !transcribing) clearVoiceStatus();
     const tryOffline = () => {
       const local = offlineVisionFallback(offlinePack, effectiveCoords, language, persona);
       if (local) {
@@ -172,13 +193,73 @@ export function CameraTab({
         </div>
 
         <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
-          <input
-            type="text"
-            className="chat-composer__input"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder={ui.cameraPlaceholder}
-          />
+          <div className={`camera-prompt-bar ${recording ? 'is-recording' : ''}`}>
+            <input
+              type="text"
+              className="camera-prompt-bar__input"
+              value={question}
+              onChange={(e) => {
+                setQuestion(e.target.value);
+                if (voiceStatus && !recording && !transcribing) clearVoiceStatus();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && imageFile && !loading && !recording && !transcribing) {
+                  e.preventDefault();
+                  void handleIdentify();
+                }
+              }}
+              placeholder={ui.cameraPlaceholder}
+              aria-label={ui.cameraPlaceholder}
+            />
+            {question && !recording && !transcribing && (
+              <button
+                type="button"
+                className="camera-prompt-bar__clear"
+                onClick={() => setQuestion('')}
+                aria-label={isHi ? 'प्रश्न हटाएँ' : 'Clear question'}
+              >
+                <X size={15} />
+              </button>
+            )}
+            <button
+              type="button"
+              className={`camera-prompt-bar__mic ${recording ? 'is-recording' : ''}`}
+              disabled={transcribing || loading}
+              onClick={toggleMic}
+              aria-label={
+                recording
+                  ? isHi
+                    ? 'वॉइस रिकॉर्डिंग रोकें'
+                    : 'Stop voice recording'
+                  : isHi
+                    ? 'अपना प्रश्न बोलें'
+                    : 'Speak your question'
+              }
+              title={
+                recording
+                  ? isHi
+                    ? 'रोकें'
+                    : 'Stop listening'
+                  : isHi
+                    ? 'बोलकर प्रश्न जोड़ें'
+                    : 'Speak your question'
+              }
+            >
+              {transcribing ? (
+                <Loader2 size={18} className="spin-icon" />
+              ) : recording ? (
+                <Square size={15} />
+              ) : (
+                <Mic size={18} />
+              )}
+            </button>
+          </div>
+
+          {voiceStatus && (
+            <div className={`voice-status ${recording || transcribing ? 'is-live' : 'is-warn'}`} role="status">
+              {voiceStatus}
+            </div>
+          )}
 
           <div className="filter-row" style={{ marginBottom: 0 }}>
             <button
@@ -199,7 +280,7 @@ export function CameraTab({
             <button
               type="button"
               className="pill-btn is-saffron"
-              disabled={!imageFile || loading}
+              disabled={!imageFile || loading || recording || transcribing}
               onClick={handleIdentify}
             >
               {loading ? <Loader2 size={16} className="spin-icon" /> : <Camera size={16} />}

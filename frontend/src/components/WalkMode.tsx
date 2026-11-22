@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Footprints,
+  Languages,
   Moon,
   Orbit,
   Pause,
@@ -15,6 +16,8 @@ import {
   X,
 } from 'lucide-react';
 import type { Walk } from '../data/walks';
+import { LANGUAGE_OPTIONS } from '../data/upCities';
+import { useTranslatedTexts } from '../hooks/useTranslatedTexts';
 import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
 import { AvatarCaption } from './AvatarCaption';
 
@@ -25,6 +28,8 @@ interface WalkModeProps {
   language: string;
   online: boolean;
   onClose: () => void;
+  /** change the app language right from the tour controls */
+  onChangeLanguage?: (lang: string) => void;
 }
 
 const SPEEDS = [1, 1.25, 0.85];
@@ -50,7 +55,7 @@ const MOVES = ['push-left', 'push-right', 'rise', 'push-center'];
  * each stop while Raahi speaks, then "walks" forward into the next place. Street View
  * is one tap away at any stop for a free 360° look around.
  */
-export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
+export function WalkMode({ walk, language, online, onClose, onChangeLanguage }: WalkModeProps) {
   const isHi = language.startsWith('hi');
   const stops = walk.stops;
   const [idx, setIdx] = useState(0);
@@ -66,10 +71,37 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
   const [view, setView] = useState<'360' | 'photo'>(online ? '360' : 'photo');
   const show360 = online && view === '360';
   const runRef = useRef(0);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!langOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!langRef.current?.contains(e.target as Node)) setLangOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLangOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [langOpen]);
+  const langMeta = LANGUAGE_OPTIONS.find((l) => l.code === language);
+  const walkTimerRef = useRef<number | null>(null);
 
+  // Other languages: stop titles and narration translated by the backend
+  // (English and Hindi are hand-written). Narration waits for the translation.
+  const translated = useTranslatedTexts(
+    useMemo(() => stops.flatMap((st) => [st.title, st.narration]), [stops]),
+    language,
+  );
+  const needsTranslation = !isHi && !language.toLowerCase().startsWith('en');
+  const stopTitle = (i: number) => (isHi ? stops[i].titleHi : translated.texts[i * 2] ?? stops[i].title);
   const stop = stops[idx];
-  const narration = isHi ? stop.narrationHi : stop.narration;
-  const title = isHi ? stop.titleHi : stop.title;
+  const narration = isHi ? stop.narrationHi : (translated.texts[idx * 2 + 1] ?? stop.narration);
+  const title = stopTitle(idx);
   const speed = SPEEDS[speedIdx];
   // seconds the camera move should last, roughly the narration length
   const shotSeconds = Math.max(8, narration.length / 14 / speed + 2);
@@ -77,13 +109,18 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
   const goTo = useCallback(
     (next: number) => {
       runRef.current += 1;
+      if (walkTimerRef.current !== null) {
+        window.clearTimeout(walkTimerRef.current);
+        walkTimerRef.current = null;
+      }
       stopSpeaking();
       setAudio('idle');
       setProgress(0);
       setPrevIdx(idx);
       setWalking(true);
       setIdx(next);
-      window.setTimeout(() => {
+      walkTimerRef.current = window.setTimeout(() => {
+        walkTimerRef.current = null;
         setWalking(false);
         setPrevIdx(null);
       }, WALK_MS);
@@ -93,43 +130,86 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
 
   // Play: narrate the current stop, then walk on to the next one
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || walking) return;
+    // wait for the translated narration so text and voice match
+    if (needsTranslation && !translated.ready) return;
     const run = ++runRef.current;
     let cancelled = false;
+    let advanceTimer: number | null = null;
+    let muteInterval: number | null = null;
+
     const next = () => {
       if (cancelled || run !== runRef.current) return;
       if (idx < stops.length - 1) goTo(idx + 1);
       else setPlaying(false);
     };
-    const timer = window.setTimeout(async () => {
+
+    const startTimer = window.setTimeout(async () => {
       if (cancelled || run !== runRef.current) return;
       if (voiceOn) {
         setProgress(0);
-        await speakText(narration, language, (s) => setAudio(s), { onProgress: setProgress, rate: speed });
-        window.setTimeout(next, 700);
+        const outcome = await speakText(
+          narration,
+          language,
+          (s) => {
+            if (!cancelled && run === runRef.current) setAudio(s);
+          },
+          {
+            onProgress: (p) => {
+              if (!cancelled && run === runRef.current) setProgress(p);
+            },
+            rate: speed,
+            // already translated above; only fall back to translating as spoken if that failed
+            autoTranslate: needsTranslation && narration === stop.narration,
+          },
+        );
+        if (cancelled || run !== runRef.current || outcome === 'cancelled') return;
+        advanceTimer = window.setTimeout(next, 700);
       } else {
         const ms = Math.max(4000, (narration.length / 15 / speed) * 1000);
         const started = performance.now();
         setAudio('playing');
-        const tick = window.setInterval(() => {
-          if (cancelled || run !== runRef.current) return window.clearInterval(tick);
+        muteInterval = window.setInterval(() => {
+          if (cancelled || run !== runRef.current) {
+            if (muteInterval !== null) {
+              window.clearInterval(muteInterval);
+              muteInterval = null;
+            }
+            return;
+          }
           const f = (performance.now() - started) / ms;
           setProgress(Math.min(1, f));
           if (f >= 1) {
-            window.clearInterval(tick);
+            if (muteInterval !== null) {
+              window.clearInterval(muteInterval);
+              muteInterval = null;
+            }
             setAudio('idle');
-            window.setTimeout(next, 500);
+            advanceTimer = window.setTimeout(next, 500);
           }
         }, 200);
       }
-    }, walking ? WALK_MS : 400);
+    }, 300);
+
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      window.clearTimeout(startTimer);
+      if (advanceTimer !== null) window.clearTimeout(advanceTimer);
+      if (muteInterval !== null) window.clearInterval(muteInterval);
+      stopSpeaking();
     };
-  }, [playing, idx, voiceOn, speed, narration, language, stops.length, goTo, walking]);
+  }, [playing, idx, voiceOn, speed, narration, language, isHi, stops.length, goTo, walking, needsTranslation, translated.ready, stop.narration]);
 
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(
+    () => () => {
+      if (walkTimerRef.current !== null) {
+        window.clearTimeout(walkTimerRef.current);
+        walkTimerRef.current = null;
+      }
+      stopSpeaking();
+    },
+    [],
+  );
 
   const togglePlay = () => {
     if (playing) {
@@ -167,7 +247,7 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
     const style = { ['--shot' as string]: `${shotSeconds}s` } as CSSProperties;
     return (
       <div key={`${s.id}-${role}`} className={`cine__shot is-${role} move-${MOVES[i % MOVES.length]} ${playing && role === 'now' ? 'is-rolling' : ''}`} style={style}>
-        <img src={s.photo} alt={role === 'now' ? (isHi ? s.titleHi : s.title) : ''} draggable={false} />
+        <img src={s.photo} alt={role === 'now' ? stopTitle(i) : ''} draggable={false} />
       </div>
     );
   };
@@ -175,10 +255,17 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
   return (
     <div className={`walk is-${time}`} role="dialog" aria-modal="true" aria-label={isHi ? walk.titleHi : walk.title}>
       <header className="walk__top">
-        <span className="walk__title">
-          <Footprints size={18} />
-          {isHi ? walk.titleHi : walk.title}
-        </span>
+        <Footprints size={18} className="walk__title-icon" aria-hidden="true" />
+        {/* two lines: the tour, then the stop you are at (it changes as you walk) */}
+        <div className="walk__title">
+          <span className="walk__eyebrow">
+            {(isHi ? walk.titleHi : walk.title).replace(/\s*[:：]\s*/, ' · ')}
+          </span>
+          <strong className="walk__now">
+            <b>{idx + 1}</b>
+            {title}
+          </strong>
+        </div>
         <div className="walk__times" role="radiogroup" aria-label="Time of day">
           {timeIcons.map(([key, Icon]) => (
             <button key={key} type="button" role="radio" aria-checked={time === key} aria-label={key} className={time === key ? 'is-active' : ''} onClick={() => setTime(key)}>
@@ -186,6 +273,23 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
             </button>
           ))}
         </div>
+        {/* phones: one button that steps through the times of day */}
+        {(() => {
+          const at = Math.max(0, timeIcons.findIndex(([key]) => key === time));
+          const [, CurrentIcon] = timeIcons[at];
+          const [nextKey] = timeIcons[(at + 1) % timeIcons.length];
+          return (
+            <button
+              type="button"
+              className="walk__time-cycle"
+              onClick={() => setTime(nextKey)}
+              aria-label={`Time of day: ${time}. Change to ${nextKey}`}
+              title={`Time of day: ${time}`}
+            >
+              <CurrentIcon size={17} />
+            </button>
+          );
+        })()}
         <button type="button" className="walk__close" onClick={onClose} aria-label="Close tour">
           <X size={20} />
         </button>
@@ -270,6 +374,11 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
       <section className="walk__panel">
         <div className="walk__status">
           {isHi ? 'पड़ाव' : 'Stop'} {idx + 1}/{stops.length} · {Math.round(overall * 100)}%
+          {needsTranslation && narration === stop.narration && (
+            <span className="walk__translating" role="status">
+              {LANGUAGE_OPTIONS.find((o) => o.code === language)?.label ?? language} · Translating…
+            </span>
+          )}
         </div>
         <AvatarCaption
           text={narration}
@@ -282,7 +391,7 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
         />
         <div className="walk__steps" role="tablist" aria-label="Stops">
           {stops.map((s, i) => (
-            <button key={s.id} type="button" role="tab" aria-selected={i === idx} aria-label={isHi ? s.titleHi : s.title} className={i < idx ? 'is-done' : i === idx ? 'is-now' : ''} onClick={() => i !== idx && goTo(i)}>
+            <button key={s.id} type="button" role="tab" aria-selected={i === idx} aria-label={stopTitle(i)} className={i < idx ? 'is-done' : i === idx ? 'is-now' : ''} onClick={() => i !== idx && goTo(i)}>
               {i + 1}
             </button>
           ))}
@@ -303,6 +412,41 @@ export function WalkMode({ walk, language, online, onClose }: WalkModeProps) {
           <button type="button" onClick={() => setVoiceOn((v) => !v)} aria-label={voiceOn ? 'Mute voice' : 'Turn voice on'} className={voiceOn ? 'is-on' : ''}>
             {voiceOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
           </button>
+          {onChangeLanguage && (
+            <div className="walk__lang" ref={langRef}>
+              <button
+                type="button"
+                className="walk__lang-btn"
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+                aria-label={isHi ? 'भाषा बदलें' : 'Change language'}
+                title={isHi ? 'भाषा बदलें' : 'Change language'}
+                onClick={() => setLangOpen((v) => !v)}
+              >
+                <Languages size={18} />
+                <span>{(langMeta?.code ?? language).split('-')[0].toUpperCase()}</span>
+              </button>
+              {langOpen && (
+                <div className="walk__lang-menu" role="radiogroup" aria-label={isHi ? 'भाषा' : 'Language'}>
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.code}
+                      type="button"
+                      role="radio"
+                      aria-checked={opt.code === language}
+                      className={opt.code === language ? 'is-active' : ''}
+                      onClick={() => {
+                        onChangeLanguage(opt.code);
+                        setLangOpen(false);
+                      }}
+                    >
+                      {opt.nativeLabel}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </div>

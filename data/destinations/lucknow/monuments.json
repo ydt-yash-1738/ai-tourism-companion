@@ -1,0 +1,162 @@
+[
+  {
+    "slug": "rumi-darwaza",
+    "name": "Rumi Darwaza",
+    "name_hi": "रूमी दरवाज़ा",
+    "short_summary": "Towering 18-metre 1784 Awadhi ceremonial gateway built under Nawab Asaf-ud-Daula, the enduring architectural emblem of Lucknow.",
+    "short_summary_hi": "1784 में नवाब आसफ़-उद-दौला के समय निर्मित लगभग 18 मीटर ऊँचा भव्य अवधी द्वार, जो लखनऊ की पहचान है।",
+    "lat": 26.8706,
+    "lng": 80.9126,
+    "geofence_radius_m": 40,
+    "visit_duration_min": 10,
+    "visual_cues": [
+      "very tall ornate gateway",
+      "flared lotus-petal crown at the top",
+      "pointed Awadhi arch with multi-storeyed side wings",
+      "road passing through the central arch"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Paved pedestrian plazas along the Hussainabad Heritage Walk",
+      "Shaded stone edges beside the gateway approach"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Viewed from level paved heritage sidewalks; use designated pedestrian crossings due to nearby traffic.",
+    "accessibility_notes_hi": "समतल विरासत फुटपाथ से सुगम दर्शन; पास के यातायात के कारण पैदल क्रॉसिंग का उपयोग करें।"
+  },
+  {
+    "slug": "bara-imambara",
+    "name": "Bara Imambara",
+    "name_hi": "बड़ा इमामबाड़ा",
+    "short_summary": "Vast 1784 Nawabi congregation complex commissioned during a severe famine, world-famous for its beamless vaulted central hall.",
+    "short_summary_hi": "1784 के भीषण अकाल के समय निर्मित विशाल नवाबी परिसर, जो बिना बीम और खंभों वाले अपने भव्य मध्य हॉल के लिए विश्वप्रसिद्ध है।",
+    "lat": 26.8691,
+    "lng": 80.9124,
+    "geofence_radius_m": 40,
+    "visit_duration_min": 25,
+    "visual_cues": [
+      "long arched white-and-ochre facade",
+      "twin fish motifs of Awadh on entrance gates",
+      "large green terraced courtyard and pools",
+      "nine arched openings to the great hall"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Courtyard lawns and stone garden edges",
+      "Shaded arcades framing the grand forecourt"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Outer forecourt, garden pathways, and lower courtyard are level and ramp-accessible; entering the elevated main hall involves steps.",
+    "accessibility_notes_hi": "बाहरी प्रांगण और उद्यान मार्ग समतल व रैंप युक्त हैं; ऊँचे मुख्य हॉल के प्रवेश पर सीढ़ियाँ हैं।"
+  },
+  {
+    "slug": "bhool-bhulaiya",
+    "name": "Bhool Bhulaiya",
+    "name_hi": "भूलभुलैया",
+    "short_summary": "Intricate labyrinth of over a thousand narrow arched passages, blind alleys, and balconies built above the Imambara's vaulted hall.",
+    "short_summary_hi": "बड़ा इमामबाड़ा के मुख्य हॉल के ऊपर निर्मित सैकड़ों संकरे रास्तों, एक जैसे दरवाज़ों और छज्जों का अद्भुत जाल।",
+    "lat": 26.8689,
+    "lng": 80.9129,
+    "geofence_radius_m": 35,
+    "visit_duration_min": 20,
+    "visual_cues": [
+      "narrow arched stucco passages",
+      "rows of identical doorways and staircases",
+      "open rooftop terrace overlooking Lucknow",
+      "thick brick walls with acoustic niches"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": false,
+    "step_free": false,
+    "rest_points": [
+      "Open rooftop terrace overlooking the courtyard and Asfi Mosque"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Reached by steep, narrow staircases with dim corners; not wheelchair accessible and best explored with a licensed guide.",
+    "accessibility_notes_hi": "खड़ी और संकरी सीढ़ियों से पहुँच; व्हीलचेयर के लिए उपयुक्त नहीं और लाइसेंसधारी गाइड के साथ देखना सुरक्षित है।"
+  },
+  {
+    "slug": "asfi-mosque",
+    "name": "Asfi Mosque",
+    "name_hi": "आसफ़ी मस्जिद",
+    "short_summary": "Grand white-domed mosque within the Bara Imambara complex built by Nawab Asaf-ud-Daula, still in active daily worship.",
+    "short_summary_hi": "बड़ा इमामबाड़ा परिसर में नवाब आसफ़-उद-दौला द्वारा निर्मित भव्य मस्जिद, जहाँ आज भी नियमित नमाज़ होती है।",
+    "lat": 26.8693,
+    "lng": 80.9119,
+    "geofence_radius_m": 35,
+    "visit_duration_min": 10,
+    "visual_cues": [
+      "three white fluted domes with lotus finials",
+      "twin tall octagonal minarets",
+      "eleven arched prayer bays above a broad flight of steps"
+    ],
+    "wheelchair_accessible": false,
+    "has_ramp": false,
+    "step_free": false,
+    "rest_points": [
+      "Shaded stone courtyard benches below the mosque terrace"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Broad steps lead up to the raised prayer terrace; visitors may admire the facade from the level courtyard and must dress modestly.",
+    "accessibility_notes_hi": "मस्जिद के ऊँचे चबूतरे तक चौड़ी सीढ़ियाँ जाती हैं; समतल आँगन से बाहरी दर्शन सुगम है और शालीन वस्त्र आवश्यक हैं।"
+  },
+  {
+    "slug": "shahi-baoli",
+    "name": "Shahi Baoli (Royal Stepwell)",
+    "name_hi": "शाही बावली (राजसी बावड़ी)",
+    "short_summary": "Five-storeyed 18th-century arched stepwell on the eastern flank of Bara Imambara featuring an ingenious water-reflection lookout.",
+    "short_summary_hi": "बड़ा इमामबाड़ा के पूर्वी हिस्से में स्थित पाँच मंजिला अष्टकोणीय-मेहराबदार बावड़ी, जिसमें पानी के प्रतिबिंब से प्रवेश द्वार की निगरानी होती थी।",
+    "lat": 26.8692,
+    "lng": 80.9134,
+    "geofence_radius_m": 30,
+    "visit_duration_min": 15,
+    "visual_cues": [
+      "deep five-storeyed octagonal water well",
+      "tiered arched galleries and curved verandahs",
+      "submerged lower water basin fed by Gomti channel",
+      "surveillance gallery above the deep shaft"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": false,
+    "step_free": true,
+    "rest_points": [
+      "Shaded upper gallery arcade overlooking the stepwell shaft",
+      "Courtyard lawn benches outside the Baoli pavilion"
+    ],
+    "stairs_warning": true,
+    "accessibility_notes": "Upper courtyard and level viewing gallery overlooking the stepwell are step-free; descending into lower stories requires steep stone stairs.",
+    "accessibility_notes_hi": "ऊपरी प्रांगण और बावड़ी देखने की गैलरी समतल है; निचली मंजिलों में उतरने के लिए खड़ी पत्थर की सीढ़ियाँ हैं।"
+  },
+  {
+    "slug": "chota-imambara",
+    "name": "Chota Imambara (Hussainabad Imambara)",
+    "name_hi": "छोटा इमामबाड़ा (हुसैनाबाद इमामबाड़ा)",
+    "short_summary": "Ornate 1838 congregation hall and mausoleum built by Nawab Muhammad Ali Shah, celebrated for its gilded dome, calligraphy, and crystal chandeliers.",
+    "short_summary_hi": "1838 में नवाब मुहम्मद अली शाह द्वारा निर्मित अलंकृत इमामबाड़ा, जो अपने सुनहरे गुंबद, सुलेख और बेल्जियन क्रिस्टल झाड़-फ़ानूसों के लिए प्रसिद्ध है।",
+    "lat": 26.8744,
+    "lng": 80.9046,
+    "geofence_radius_m": 35,
+    "visit_duration_min": 25,
+    "visual_cues": [
+      "gilded central dome and delicate white facade",
+      "Persian calligraphy bands along exterior walls",
+      "long rectangular reflecting water tank in courtyard",
+      "Belgian crystal chandeliers inside main hall"
+    ],
+    "wheelchair_accessible": true,
+    "has_ramp": true,
+    "step_free": true,
+    "rest_points": [
+      "Paved courtyard benches beside the central water tank",
+      "Shaded garden alcoves along the Hussainabad enclosure"
+    ],
+    "stairs_warning": false,
+    "accessibility_notes": "Wide paved courtyard, garden paths, and viewing approaches are level and ramp-accessible; footwear must be removed before entering the hall.",
+    "accessibility_notes_hi": "विस्तृत पक्का आँगन और उद्यान मार्ग समतल व रैंप युक्त हैं; मुख्य हॉल के भीतर प्रवेश से पहले जूते बाहर उतारने होते हैं।"
+  }
+]
+

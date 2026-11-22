@@ -62,7 +62,6 @@ export default function App() {
   // First launch or destination switch: load the content pack bundled inside the app
   // so everything works with no network and no backend. A later online download refreshes it.
   useEffect(() => {
-    if (offlinePack && offlinePack.destination.slug === selectedSlug) return;
     let active = true;
     fetch(`${import.meta.env.BASE_URL}packs/${selectedSlug}.json`)
       .then((res) => (res.ok ? (res.json() as Promise<OfflinePack>) : null))
@@ -75,11 +74,17 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [offlinePack, selectedSlug]);
+  }, [selectedSlug]);
 
   // Track whether the API is actually reachable, not just whether the phone has a network
   useEffect(() => {
-    const onStatus = (e: Event) => setServerReachable((e as CustomEvent<boolean>).detail);
+    const onStatus = (e: Event) => {
+      const reachable = (e as CustomEvent<boolean>).detail;
+      setServerReachable(reachable);
+      if (!reachable) {
+        setServedSlugs(null);
+      }
+    };
     window.addEventListener(SERVER_STATUS_EVENT, onStatus);
     return () => window.removeEventListener(SERVER_STATUS_EVENT, onStatus);
   }, []);
@@ -93,7 +98,7 @@ export default function App() {
   }, [isOnline, serverReachable]);
 
   useEffect(() => {
-    if (screen !== 'companion' || !isOnline) return;
+    if (screen !== 'companion' || !isOnline || !serverReachable) return;
     let active = true;
     getMonuments(selectedSlug)
       .then((list) => {
@@ -103,7 +108,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [screen, isOnline, selectedSlug]);
+  }, [screen, isOnline, serverReachable, selectedSlug]);
 
   useEffect(() => {
     if (!isOnline || !serverReachable || servedSlugs) return;

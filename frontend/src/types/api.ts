@@ -81,6 +81,33 @@ export interface FolkloreItem {
   attribution: string;
 }
 
+export interface ItineraryStopItem {
+  time_slot: string;
+  title: string;
+  category: 'monument' | 'food' | 'craft' | 'market' | 'heritage' | 'facility' | 'festival';
+  duration_min?: number | null;
+  notes: string;
+  accessibility_note: string;
+  lat?: number | null;
+  lng?: number | null;
+  source_slug?: string | null;
+}
+
+export interface RecommendedPlaceItem {
+  name: string;
+  category: string;
+  description: string;
+  timings: string;
+  budget_tier: string;
+  entry_fee_inr: string;
+  is_odop: boolean;
+  is_accessible?: boolean | null;
+  lat?: number | null;
+  lng?: number | null;
+  address: string;
+  source_slug?: string | null;
+}
+
 export interface ChatRequest {
   destination_slug: string;
   question: string;
@@ -96,6 +123,8 @@ export interface ChatResponse {
   answer_summary: string;
   verified_history: HistoryFactItem[];
   folklore_legends: FolkloreItem[];
+  itinerary_stops?: ItineraryStopItem[];
+  recommended_places?: RecommendedPlaceItem[];
   follow_up_suggestions: string[];
   is_knowledge_gap: boolean;
   matched_monument_slug: string | null;

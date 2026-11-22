@@ -86,6 +86,33 @@ class FolkloreItem(BaseModel):
     attribution: str
 
 
+class ItineraryStopItem(BaseModel):
+    time_slot: str
+    title: str
+    category: Literal["monument", "food", "craft", "market", "heritage", "facility", "festival"] = "monument"
+    duration_min: int | None = None
+    notes: str = ""
+    accessibility_note: str = ""
+    lat: float | None = None
+    lng: float | None = None
+    source_slug: str | None = None
+
+
+class RecommendedPlaceItem(BaseModel):
+    name: str
+    category: str
+    description: str
+    timings: str = ""
+    budget_tier: str = ""
+    entry_fee_inr: str = ""
+    is_odop: bool = False
+    is_accessible: bool | None = None
+    lat: float | None = None
+    lng: float | None = None
+    address: str = ""
+    source_slug: str | None = None
+
+
 class ChatMessageItem(BaseModel):
     role: Literal["user", "assistant"]
     content: str
@@ -106,6 +133,8 @@ class ChatResponse(BaseModel):
     answer_summary: str
     verified_history: list[HistoryFactItem] = Field(default_factory=list)
     folklore_legends: list[FolkloreItem] = Field(default_factory=list)
+    itinerary_stops: list[ItineraryStopItem] = Field(default_factory=list)
+    recommended_places: list[RecommendedPlaceItem] = Field(default_factory=list)
     follow_up_suggestions: list[str] = Field(default_factory=list)
     is_knowledge_gap: bool = False
     matched_monument_slug: str | None = None

@@ -1,0 +1,59 @@
+.scroll-stack {
+  position: relative;
+  width: 100%;
+}
+
+.scroll-stack__inner {
+  position: relative;
+  padding-inline: clamp(1rem, 6%, 5rem);
+}
+
+/* the browser pins each slot; the next one slides over it */
+.scroll-stack__slot {
+  position: sticky;
+}
+
+/* room after the last card so the stack can be seen complete */
+.scroll-stack__end {
+  height: 12vh;
+}
+
+.scroll-stack-card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 28px;
+  contain: layout paint;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0s;
+}
+
+.scroll-stack-card__shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #07111f;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* depth = how many cards lie on top of this one (set by ScrollStack.tsx) */
+.scroll-stack__slot[data-depth='1'] > .scroll-stack-card > .scroll-stack-card__shade {
+  opacity: 0.18;
+}
+
+.scroll-stack__slot[data-depth='2'] > .scroll-stack-card > .scroll-stack-card__shade {
+  opacity: 0.32;
+}
+
+/* three or more below the top: fade out, then stop drawing it at all */
+.scroll-stack__slot[data-depth='3'] > .scroll-stack-card {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+

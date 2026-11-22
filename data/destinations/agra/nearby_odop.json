@@ -166,6 +166,48 @@
     "lat": 27.1676,
     "lng": 78.0507,
     "address": "Shilpgram Open-Air Complex, Taj East Gate Road, Agra"
+  },
+  {
+    "slug": "belanganj-bedai-jalebi-lane",
+    "name": "Belanganj & Rawatpara Morning Bedai-Jalebi Trail",
+    "name_hi": "बेलनगंज एवं रावतपाड़ा प्रातः बेड़ई-जलेबी मार्ग",
+    "category": "food",
+    "is_odop": false,
+    "odop_product": null,
+    "budget_tier": "low",
+    "suitable_for": ["solo", "family", "kids", "elderly"],
+    "interests": ["food", "heritage", "culture"],
+    "estimated_time_min": 30,
+    "timings": "07:00 AM - 11:30 AM Daily",
+    "entry_fee_inr": "Free entry; INR 60-150 per plate",
+    "how_to_reach": "10-minute auto ride (~2.5 km north-west) from Agra Fort toward Rawatpara & Belanganj.",
+    "official_source": "UP Tourism Culinary Trail",
+    "description": "Classic old-Agra morning street-food stops famed for crisp spicy Bedai with aloo-sabzi and hot saffron jalebi served in leaf bowls.",
+    "description_hi": "आगरा की पुरानी गलियों में सुबह का प्रसिद्ध स्ट्रीट फ़ूड—मसालेदार बेड़ई-आलू सब्ज़ी और गरमागरम केसर जलेबी।",
+    "lat": 27.1862,
+    "lng": 78.0195,
+    "address": "Rawatpara & Belanganj Crossing, Old Agra"
+  },
+  {
+    "slug": "taj-ganj-mughlai-food-street",
+    "name": "Taj Ganj & Fatehabad Road Food & Rooftop Dining Strip",
+    "name_hi": "ताजगंज एवं फतेहाबाद रोड व्यंजन मार्ग",
+    "category": "food",
+    "is_odop": false,
+    "odop_product": null,
+    "budget_tier": "medium",
+    "suitable_for": ["solo", "family", "kids", "elderly"],
+    "interests": ["food", "culture"],
+    "estimated_time_min": 50,
+    "timings": "08:00 AM - 10:30 PM Daily",
+    "entry_fee_inr": "Free entry; INR 250-650 per person",
+    "how_to_reach": "5-minute walk or e-rickshaw ride south of Taj Mahal East and South Gates.",
+    "official_source": "UP Tourism Culinary Guide",
+    "description": "Walkable dining hub near the Taj Mahal gates offering Mughlai curries, vegetarian North Indian thalis, lassi, and shaded courtyard eateries.",
+    "description_hi": "ताजमहल के पूर्वी और दक्षिणी द्वार के पास मुगलई व्यंजन, शाकाहारी थाली और लस्सी के लिए सुगम भोजनालय क्षेत्र।",
+    "lat": 27.1679,
+    "lng": 78.0461,
+    "address": "Taj East Gate & Fatehabad Road, Taj Ganj, Agra"
   }
 ]
 

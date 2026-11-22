@@ -1,21 +1,35 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accessibility,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   Headphones,
   Loader2,
   MapPin,
+  Pause,
   Play,
-  Square,
+  RotateCcw,
+  RotateCw,
+  SkipBack,
+  SkipForward,
 } from 'lucide-react';
 import { getDestinationConfig } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
 import { getTours, postAnalyticsEvent } from '../services/api';
 import { haversineMeters } from '../services/offlineStore';
-import { speakText, stopSpeaking, type AudioPlaybackState } from '../services/speech';
+import {
+  getPlaybackInfo,
+  pauseSpeaking,
+  resumeSpeaking,
+  seekSpeaking,
+  setSpeakingRate,
+  speakText,
+  stopSpeaking,
+  type AudioPlaybackState,
+} from '../services/speech';
+import { stopExtras, styledStopScript } from '../data/tourStyles';
+import { StyleTabs } from './StyleTabs';
+import { useTranslatedTexts } from '../hooks/useTranslatedTexts';
 import { translateBatchCached } from '../services/translateCache';
 import type { Monument, OfflinePack, PersonaType, TourRoute } from '../types/api';
 import {
@@ -37,7 +51,16 @@ interface TourTabProps {
   userCoords: { lat: number; lng: number } | null;
   monuments: Monument[];
   offlinePack: OfflinePack | null;
+  onChangePersona: (p: PersonaType) => void;
 }
+
+const SPEEDS = [0.75, 1, 1.25, 1.5];
+const STYLE_ORDER: PersonaType[] = ['quick', 'kids', 'scholar', 'pilgrim'];
+const SPEED_KEY = 'up_tour_speed';
+const fmtTime = (sec: number) => {
+  const s = Math.max(0, Math.round(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
 
 export function TourTab({
   destinationSlug,
@@ -48,6 +71,7 @@ export function TourTab({
   userCoords,
   monuments,
   offlinePack,
+  onChangePersona,
 }: TourTabProps) {
   const ui = getUiText(language);
   const isHi = language.startsWith('hi');
@@ -65,6 +89,26 @@ export function TourTab({
   const [activeStopIdx, setActiveStopIdx] = useState<number>(0);
   const [audioStatus, setAudioStatus] = useState<AudioPlaybackState>('idle');
   const [audioProgress, setAudioProgress] = useState(0);
+  // music-app style player: pause, speed, clock (cloud audio is seekable)
+  const [paused, setPaused] = useState(false);
+  const [speed, setSpeed] = useState<number>(() => {
+    try {
+      const v = Number(localStorage.getItem(SPEED_KEY));
+      return SPEEDS.includes(v) ? v : 1;
+    } catch {
+      return 1;
+    }
+  });
+  const [clock, setClock] = useState<{ cur: number; dur: number; kind: 'cloud' | 'device' | 'none' }>({
+    cur: 0,
+    dur: 0,
+    kind: 'none',
+  });
+  const playTokenRef = useRef(0);
+  // where in the text the current narration started (0..1), when resumed part-way
+  const [startOffset, setStartOffset] = useState(0);
+  // while the progress bar is being dragged: the position under the finger (seek on release)
+  const [dragAt, setDragAt] = useState<number | null>(null);
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [translationSettledKey, setTranslationSettledKey] = useState<string | null>(null);
 
@@ -205,8 +249,12 @@ export function TourTab({
   };
 
   const handleSelectStop = (idx: number) => {
+    playTokenRef.current += 1;
     stopSpeaking();
     setAudioStatus('idle');
+    setPaused(false);
+    setAudioProgress(0);
+    setClock({ cur: 0, dur: 0, kind: 'none' });
     setActiveStopIdx(idx);
     const stop = stops[idx];
     if (stop && isOnline) {
@@ -222,25 +270,158 @@ export function TourTab({
     }
   };
 
-  const handlePlayStop = async () => {
+  // What Raahi reads here, in the chosen style (static texts for the tour)
+  // Other languages: all four style versions of this stop translated in one go
+  // by the backend translator, so switching style stays in the visitor's language.
+  // the monument's history, legends and etiquette from the destination's content pack
+  const extras = useMemo(
+    () => stopExtras(offlinePack, currentStop?.monument_slug ?? ''),
+    [offlinePack, currentStop],
+  );
+  const englishVariants = useMemo(
+    () =>
+      currentStop
+        ? STYLE_ORDER.map((st) =>
+            styledStopScript(
+              {
+                monumentSlug: currentStop.monument_slug,
+                scriptEn: currentStop.audio_script_en,
+                scriptHi: currentStop.audio_script_hi,
+              },
+              st,
+              false,
+              extras,
+            ),
+          )
+        : [],
+    [currentStop, extras],
+  );
+  const translatedVariants = useTranslatedTexts(englishVariants, language);
+
+  const scriptFor = (style: PersonaType): { text: string; english: boolean } => {
+    if (!currentStop) return { text: '', english: true };
+    if (needsDynamicTranslate) {
+      const text = translatedVariants.texts[STYLE_ORDER.indexOf(style)] ?? '';
+      // if the translation is not in yet, the voice translates as it speaks
+      return { text, english: !translatedVariants.ready };
+    }
+    const stop = {
+      monumentSlug: currentStop.monument_slug,
+      scriptEn: currentStop.audio_script_en,
+      scriptHi: currentStop.audio_script_hi,
+    };
+    return { text: styledStopScript(stop, style, isHi, extras), english: !isHi };
+  };
+  const currentScript = scriptFor(persona);
+  // rough length when the voice gives no timing (built-in speech): ~14 characters a second
+  const estimatedSeconds = currentScript.text.length / 14 / speed;
+
+  /** Narrate this stop in a style, optionally starting part-way (0..1) through the text. */
+  const playStop = async (style: PersonaType = persona, from = 0) => {
     if (!currentStop) return;
-    if (audioStatus !== 'idle') {
-      stopSpeaking();
-      setAudioStatus('idle');
+    const { text, english } = scriptFor(style);
+    // start at a word boundary at or after the requested point
+    let cut = 0;
+    if (from > 0.01) {
+      const at = Math.floor(Math.min(0.98, from) * text.length);
+      const space = text.indexOf(' ', at);
+      cut = space > 0 ? space + 1 : at;
+    }
+    const offset = text.length ? cut / text.length : 0;
+    const token = ++playTokenRef.current;
+    stopSpeaking();
+    setPaused(false);
+    setStartOffset(offset);
+    setAudioProgress(offset);
+    setClock({ cur: 0, dur: 0, kind: 'none' });
+    await speakText(text.slice(cut), language, (state) => {
+      if (token === playTokenRef.current) setAudioStatus(state);
+    }, {
+      autoTranslate: needsDynamicTranslate && english,
+      onProgress: (p) => {
+        if (token === playTokenRef.current) setAudioProgress(offset + p * (1 - offset));
+      },
+      rate: speed,
+    });
+  };
+
+  const handlePlayPause = () => {
+    if (audioStatus === 'idle') {
+      void playStop();
       return;
     }
-    const localizedScript = tr(currentStop.audio_script_en, currentStop.audio_script_hi);
-    const notTranslatedYet =
-      needsDynamicTranslate && localizedScript === currentStop.audio_script_en;
-
-    setAudioProgress(0);
-    await speakText(
-      localizedScript,
-      language,
-      (state) => setAudioStatus(state),
-      { autoTranslate: notTranslatedYet, onProgress: setAudioProgress },
-    );
+    if (audioStatus === 'loading') return;
+    if (paused) {
+      resumeSpeaking();
+      setPaused(false);
+    } else if (pauseSpeaking()) {
+      setPaused(true);
+    } else {
+      // this voice cannot pause: stop instead
+      playTokenRef.current += 1;
+      stopSpeaking();
+      setAudioStatus('idle');
+    }
   };
+
+  // overall position through this stop's text, 0..1
+  const overallFraction = (): number => {
+    const info = getPlaybackInfo();
+    if (info.kind === 'cloud' && info.duration > 0) {
+      return startOffset + (info.current / info.duration) * (1 - startOffset);
+    }
+    return audioStatus === 'idle' ? 0 : audioProgress;
+  };
+
+  const handleSeek = (fraction: number) => {
+    const info = getPlaybackInfo();
+    // within the clip that is playing: jump in the audio itself
+    if (info.kind === 'cloud' && info.duration > 0 && fraction >= startOffset) {
+      seekSpeaking(((fraction - startOffset) / (1 - startOffset || 1)) * info.duration);
+      return;
+    }
+    // otherwise (built-in voice, or before this clip's start): restart from that point
+    void playStop(persona, fraction);
+  };
+
+  const handleSkip = (seconds: number) => {
+    const total = clock.kind === 'cloud' && clock.dur > 0 ? clock.dur / (1 - startOffset || 1) : estimatedSeconds;
+    const next = Math.min(0.99, Math.max(0, overallFraction() + seconds / Math.max(1, total)));
+    handleSeek(next);
+  };
+
+  const handleSpeed = () => {
+    const next = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
+    setSpeed(next);
+    try {
+      localStorage.setItem(SPEED_KEY, String(next));
+    } catch {
+      // not remembered on this device; still applies now
+    }
+    if (audioStatus === 'playing' && !setSpeakingRate(next)) {
+      // built-in voices cannot change speed mid-sentence: restart this stop at the new speed
+      void (async () => {
+        await Promise.resolve();
+        void playStop();
+      })();
+    }
+  };
+
+  // Changing the style while Raahi is reading restarts this stop in the new style
+  const handleStyle = (next: PersonaType) => {
+    onChangePersona(next);
+    if (audioStatus !== 'idle') void playStop(next);
+  };
+
+  // keep the clock moving while audio plays
+  useEffect(() => {
+    if (audioStatus !== 'playing') return;
+    const id = window.setInterval(() => {
+      const info = getPlaybackInfo();
+      setClock({ cur: info.current, dur: info.duration, kind: info.kind });
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [audioStatus]);
 
   const nearbyStopMatch = useMemo(() => {
     if (!userCoords) return null;
@@ -502,9 +683,11 @@ export function TourTab({
                     {tr(currentStop.monument_name, currentStop.monument_name_hi)}
                   </h3>
 
-                  <div style={{ margin: '10px 0 12px' }}>
+                  <StyleTabs value={persona} onChange={handleStyle} language={language} />
+
+                  <div style={{ margin: '4px 0 12px' }}>
                     <AvatarCaption
-                      text={tr(currentStop.audio_script_en, currentStop.audio_script_hi)}
+                      text={currentScript.text}
                       status={audioStatus}
                       progress={audioProgress}
                       idleHint={ui.avatarIdleHint}
@@ -512,50 +695,111 @@ export function TourTab({
                     />
                   </div>
 
-                  <div className="filter-row" style={{ marginBottom: 0 }}>
-                    <button
-                      type="button"
-                      className="pill-btn"
-                      disabled={activeStopIdx <= 0}
-                      onClick={() => handleSelectStop(activeStopIdx - 1)}
-                    >
-                      <ChevronLeft size={16} />
-                      <span>{ui.prevStop}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`pill-btn ${
-                        audioStatus === 'loading' ? 'is-audio-loading' : 'is-saffron'
-                      }`}
-                      onClick={handlePlayStop}
-                    >
-                      {audioStatus === 'loading' ? (
-                        <Loader2 size={15} className="spin-icon" />
-                      ) : audioStatus === 'playing' ? (
-                        <Square size={15} />
-                      ) : (
-                        <Play size={15} />
-                      )}
-                      <span>
-                        {audioStatus === 'loading'
-                          ? ui.loadingAudio
-                          : audioStatus === 'playing'
-                            ? ui.stopAudio
-                            : ui.playAudioStory}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="pill-btn"
-                      disabled={activeStopIdx >= stops.length - 1}
-                      onClick={() => handleSelectStop(activeStopIdx + 1)}
-                    >
-                      <span>{ui.nextStop}</span>
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
+                  {(() => {
+                    const cloud = clock.kind === 'cloud' && clock.dur > 0;
+                    // whole-stop length: a clip that started part-way covers only the rest
+                    const total = cloud ? clock.dur / (1 - startOffset || 1) : estimatedSeconds;
+                    const fraction = cloud
+                      ? startOffset + (clock.cur / clock.dur) * (1 - startOffset)
+                      : audioStatus === 'idle'
+                        ? 0
+                        : audioProgress;
+                    const shown = dragAt ?? fraction;
+                    const elapsed = shown * total;
+                    const commitDrag = () => {
+                      if (dragAt === null) return;
+                      handleSeek(dragAt);
+                      setDragAt(null);
+                    };
+                    const busy = audioStatus === 'loading';
+                    const isPlaying = audioStatus === 'playing' && !paused;
+                    return (
+                      <div className="tour-player">
+                        <div className="tour-player__bar">
+                          <span className="tour-player__time">{fmtTime(elapsed)}</span>
+                          <input
+                            type="range"
+                            min={0}
+                            max={1000}
+                            value={Math.round(Math.min(1, Math.max(0, shown)) * 1000)}
+                            onChange={(e) => setDragAt(Number(e.target.value) / 1000)}
+                            onPointerUp={commitDrag}
+                            onTouchEnd={commitDrag}
+                            onKeyUp={commitDrag}
+                            onBlur={commitDrag}
+                            disabled={!currentScript.text || busy}
+                            style={{ ['--fill' as string]: `${Math.min(100, shown * 100)}%` }}
+                            aria-label={isHi ? 'ऑडियो में आगे-पीछे जाएँ' : 'Seek in narration'}
+                          />
+                          <span className="tour-player__time">
+                            {cloud ? '' : '~'}
+                            {fmtTime(total)}
+                          </span>
+                        </div>
+                        <div className="tour-player__controls">
+                          <button
+                            type="button"
+                            className="tour-player__btn"
+                            disabled={activeStopIdx <= 0}
+                            onClick={() => handleSelectStop(activeStopIdx - 1)}
+                            aria-label={ui.prevStop}
+                            title={ui.prevStop}
+                          >
+                            <SkipBack size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            className="tour-player__btn"
+                            disabled={busy || audioStatus === 'idle'}
+                            onClick={() => handleSkip(-10)}
+                            aria-label={isHi ? '10 सेकंड पीछे' : 'Back 10 seconds'}
+                            title={isHi ? '10 सेकंड पीछे' : 'Back 10 seconds'}
+                          >
+                            <RotateCcw size={18} />
+                            <small>10</small>
+                          </button>
+                          <button
+                            type="button"
+                            className={`tour-player__play ${busy ? 'is-loading' : ''}`}
+                            onClick={handlePlayPause}
+                            aria-label={busy ? ui.loadingAudio : isPlaying ? (isHi ? 'रोकें' : 'Pause') : ui.playAudioStory}
+                          >
+                            {busy ? <Loader2 size={24} className="spin-icon" /> : isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                          </button>
+                          <button
+                            type="button"
+                            className="tour-player__btn"
+                            disabled={busy || audioStatus === 'idle'}
+                            onClick={() => handleSkip(10)}
+                            aria-label={isHi ? '10 सेकंड आगे' : 'Forward 10 seconds'}
+                            title={isHi ? '10 सेकंड आगे' : 'Forward 10 seconds'}
+                          >
+                            <RotateCw size={18} />
+                            <small>10</small>
+                          </button>
+                          <button
+                            type="button"
+                            className="tour-player__btn"
+                            disabled={activeStopIdx >= stops.length - 1}
+                            onClick={() => handleSelectStop(activeStopIdx + 1)}
+                            aria-label={ui.nextStop}
+                            title={ui.nextStop}
+                          >
+                            <SkipForward size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            className="tour-player__speed"
+                            onClick={handleSpeed}
+                            aria-label={isHi ? `गति ${speed}x, बदलें` : `Speed ${speed}x, change`}
+                            title={isHi ? 'आवाज़ की गति' : 'Playback speed'}
+                          >
+                            {speed}×
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

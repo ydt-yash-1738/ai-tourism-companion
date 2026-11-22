@@ -174,6 +174,28 @@
     "content_type": "FOLKLORE_TRADITION",
     "source_name": "Buddhist Pilgrimage Tradition & Maha Bodhi Society",
     "tags": ["bodhi tree", "sanghamitta", "anuradhapura", "pilgrim", "spiritual", "folklore", "dharmapala"]
+  },
+  {
+    "chunk_key": "sarnath-street-food-culinary-guide",
+    "monument_slug": null,
+    "title": "Sarnath Street Food, Banarasi Kachori-Lassi & Monastery Cafes",
+    "title_hi": "सारनाथ स्ट्रीट फ़ूड: बनारसी कचौड़ी-लस्सी और मठ मार्ग कैफे",
+    "content": "Around Sarnath's ruins, visitors can enjoy affordable local food across three pedestrian-friendly spots: Monastery Road cafes near Wat Thai for steamed Tibetan momos, hot thukpa noodle soup, and ginger chai; Sarnath Crossing for morning Banarasi kachori-sabzi, hot jalebi, and thick clay-cup kulhad lassi; and clean satvik vegetarian thali eateries opposite the Sarnath Museum gate and Bodhi Garden plaza.",
+    "content_hi": "सारनाथ के स्मारकों के पास पैदल दूरी पर स्थानीय स्ट्रीट फ़ूड और स्वच्छ भोजनालय उपलब्ध हैं: थाई व तिब्बती मठ मार्ग पर गरम मोमोज़, थुकपा और मसाला चाय; सारनाथ चौराहे पर बनारसी कचौड़ी-सब्ज़ी, जलेबी और कुल्हड़ लस्सी; तथा संग्रहालय के सामने व बोधि उद्यान में सात्विक शाकाहारी थाली।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "UP Tourism Culinary Trail",
+    "tags": ["street food", "food", "momos", "thukpa", "kachori", "lassi", "thali", "tea", "chai", "eat", "local food", "monastery lane", "स्ट्रीट फ़ूड", "कचौड़ी", "लस्सी", "मोमोज़", "थाली", "भोजन", "खाना"]
+  },
+  {
+    "chunk_key": "sarnath-travel-plan-logistics",
+    "monument_slug": null,
+    "title": "Sarnath Itinerary Planning, Step-Free Paths & ODOP Circuit",
+    "title_hi": "सारनाथ यात्रा योजना, सीढ़ी-रहित सुगम मार्ग और ओडीओपी शिल्प",
+    "content": "Sarnath's Archaeological Park—Dhamek Stupa, Dharmarajika Stupa, and Ashoka Pillar—together with the Sarnath Museum and nearby Wat Thai, Digambar Jain Temple, Deer Park, and Rishipattana craft stalls form a compact, mostly flat step-free circuit ideal for 30-minute, 1-hour, or 3-hour plans for families and wheelchair users. Remember the Sarnath Archaeological Museum is closed every Friday, whereas the stupas and monasteries stay open daily; add Varanasi Wooden Lacquerware Toys on Rishipattana Marg or Banarasi Silk weavers at Sarai Mohana for UP ODOP crafts.",
+    "content_hi": "सारनाथ में धमेख स्तूप, धर्मराजिका स्तूप, अशोक स्तंभ और संग्रहालय का मुख्य परिसर समतल व व्हीलचेयर-सुगम है, जहाँ 30 मिनट, 1 घंटे या 3 घंटे की पारिवारिक यात्रा योजना आसानी से बन सकती है। इसके साथ थाई मंदिर, दिगंबर जैन मंदिर, मृगदाव, बनारसी काष्ठ खिलौने व सराय मोहना (ODOP रेशम) जोड़े जा सकते हैं। ध्यान रखें कि संग्रहालय शुक्रवार को बंद रहता है।",
+    "content_type": "RECORDED_HISTORY",
+    "source_name": "Archaeological Survey of India (ASI) & UP Tourism",
+    "tags": ["itinerary", "travel plan", "plan", "schedule", "route", "3 hour", "1 hour", "half day", "wheelchair", "step-free", "family", "budget", "crafts", "यात्रा योजना", "प्लान", "टूर", "सुगम", "व्हीलचेयर", "परिवार"]
   }
 ]
 
