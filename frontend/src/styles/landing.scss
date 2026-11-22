@@ -380,6 +380,88 @@
   }
 }
 
+// The destinations section takes the tint of the card on top of the stack. The
+// colour sits on one screen-sized sticky layer (a solid colour, cheap to repaint)
+// rather than on the whole tall section, so changing it never stutters a scroll.
+.dest-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.dest-backdrop {
+  position: sticky;
+  top: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100lvh;
+  margin-left: calc(50% - 50vw);
+  margin-bottom: -100lvh;
+  background-color: var(--dest-tint, var(--bg-ivory));
+  transition: background-color 0.6s ease;
+  pointer-events: none;
+}
+
+// Destinations as a scroll stack (components/scrollStack): one wide card per place
+.dest-stack {
+  margin-top: 8px;
+
+  .scroll-stack__inner {
+    padding-inline: 0;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+}
+
+.scroll-stack-card.dest-stack-item {
+  height: auto;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: inherit;
+  // a small, tight shadow: large blurred shadows are costly on stacked layers
+  box-shadow: 0 10px 22px -12px rgba(7, 17, 31, 0.45);
+
+  .dest-photo-card {
+    width: 100%;
+    box-shadow: none;
+
+    // no parallax on stack cards: without this, every photo is its own GPU layer
+    .dest-photo-card__media img {
+      will-change: auto;
+    }
+
+    // the stack moves the card itself; keep the hover lift subtle and flat
+    &.is-live:hover {
+      transform: none;
+    }
+  }
+
+  @include m.tablet-up {
+    .dest-photo-card {
+      flex-direction: row;
+      min-height: 300px;
+    }
+
+    .dest-photo-card__media {
+      flex: 1.15;
+      height: auto;
+      min-height: 300px;
+    }
+
+    .dest-photo-card__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 28px 30px;
+
+      h3 {
+        font-size: 1.9rem;
+      }
+    }
+  }
+}
+
 .dest-photo-card {
   display: flex;
   flex-direction: column;
@@ -944,4 +1026,320 @@
     border-inline: 1px solid rgba(255, 255, 255, 0.18);
     line-height: 26px;
   }
+}
+
+// --- Location scroll story (components/LocationStory.tsx) ----------------------
+// A tall section with a pinned full-screen stage; motion comes from scroll-driven
+// CSS (or the JS fallback). Only transforms and opacities animate.
+
+.loc-story {
+  position: relative;
+  height: 330svh;
+  background: var(--navy-ink, #07111f);
+  color: #fff;
+}
+
+.loc-story__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.loc-story__wash {
+  position: absolute;
+  inset: 0;
+  will-change: opacity;
+}
+
+.loc-story__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transition:
+    border-radius 0.45s ease,
+    box-shadow 0.45s ease;
+
+  &.is-card {
+    border-radius: 40px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.loc-story__photos {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: opacity;
+  }
+}
+
+.loc-story__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 17, 31, 0.35) 0%, rgba(7, 17, 31, 0.1) 40%, rgba(7, 17, 31, 0.78) 100%);
+}
+
+.loc-story__intro {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  right: 16px;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.loc-story__intro-title {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 1.08;
+  text-shadow: 0 6px 28px rgba(7, 17, 31, 0.7);
+}
+
+.loc-story__kicker {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-soft, #f3c77a);
+}
+
+.loc-story__panels {
+  position: absolute;
+  z-index: 3;
+  left: 20px;
+  right: 20px;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  height: 34svh;
+  pointer-events: none;
+
+  @include m.tablet-up {
+    left: max(24px, 6vw);
+    right: auto;
+    width: min(440px, 38vw);
+    top: 32%;
+    bottom: auto;
+    height: 44svh;
+  }
+}
+
+.loc-story__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+
+  @include m.tablet-up {
+    top: 0;
+    bottom: auto;
+  }
+}
+
+.loc-story__title {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 6.4vw, 2.6rem);
+  line-height: 1.1;
+  text-shadow: 0 4px 22px rgba(0, 0, 0, 0.35);
+}
+
+.loc-story__body {
+  margin: 10px 0 0;
+  max-width: 42ch;
+  font-size: calc(0.95rem * var(--text-scale, 1));
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+// reduced motion: the same content as a plain list
+.loc-story-list {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 44px 16px 12px;
+
+  &__title {
+    margin: 6px 0 18px;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 5vw, 2.4rem);
+  }
+
+  &__item {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 22px;
+
+    @include m.tablet-up {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+
+    img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+    }
+
+    .loc-story__kicker {
+      color: var(--saffron-deep);
+    }
+  }
+}
+
+// Landing-page music toggle (LandingMusic.tsx): small round button, bottom left
+.landing-music {
+  position: fixed;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(7, 17, 31, 0.72);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(7, 17, 31, 0.35);
+  cursor: pointer;
+
+  &.is-playing {
+    background: var(--saffron);
+    border-color: var(--saffron);
+  }
+
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 16px;
+
+    span {
+      width: 3px;
+      height: 100%;
+      border-radius: 2px;
+      background: #fff;
+      transform-origin: bottom;
+      animation: musicBar 0.9s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.45s;
+      }
+    }
+  }
+}
+
+@keyframes musicBar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-music__bars span {
+    animation: none;
+  }
+}
+
+// Phones: a two-row masthead, so neither the name nor any button gets cut.
+// Row 1: crest on the left, the controls on the right. Row 2: the full name.
+@media (max-width: 600px) {
+  .landing-topbar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'crest actions'
+      'titles titles';
+    align-items: center;
+    row-gap: 10px;
+    column-gap: 10px;
+
+    &__brand {
+      display: contents;
+    }
+
+    &__crest {
+      grid-area: crest;
+      width: 38px;
+      height: 38px;
+    }
+
+    &__actions {
+      grid-area: actions;
+      justify-self: end;
+      gap: 6px;
+    }
+
+    &__titles {
+      grid-area: titles;
+      padding-left: 2px;
+    }
+
+    &__tag,
+    &__title {
+      white-space: normal;
+      overflow: visible;
+    }
+
+    &__title {
+      font-size: 1.22rem;
+    }
+
+    .topbar-insights-btn,
+    .glass-select,
+    .font-size-ctl {
+      height: 38px;
+    }
+
+    .topbar-insights-btn {
+      width: 38px;
+      flex-shrink: 0;
+      padding: 0;
+      justify-content: center;
+    }
+
+    .glass-select {
+      padding: 0 8px 0 10px;
+
+      select {
+        max-width: 72px;
+        font-size: 0.82rem;
+      }
+    }
+  }
+}
+
+// While the hero story or the location story is off screen, the browser skips it
+// entirely (no style, layout, paint or GPU layers for its animations); it keeps
+// its last size, so nothing jumps. This keeps the heritage stack below light.
+.landing .story,
+.landing .loc-story,
+.landing .loc-story-list {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2000px;
 }

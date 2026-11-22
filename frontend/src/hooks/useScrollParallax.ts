@@ -5,12 +5,71 @@ import { useEffect } from 'react';
  * against the scroll by `factor` of its distance from the viewport centre, so
  * photos appear to sit deeper than the cards around them. An optional
  * `data-parallax-scale` (default 1.22 for <img>, 1 otherwise) over-sizes the
- * element so no gap shows inside its clipped frame.
- * One passive listener, one requestAnimationFrame per frame; off for reduced motion.
+ * element so no gap shows inside its clipped frame; the drift never exceeds
+ * that bleed.
+ *
+ * Where the browser supports scroll-driven animations (Chrome / Android WebView
+ * 115+), the drift is a CSS animation on a view timeline (`.parallax-css` in
+ * _media.scss): it runs on the compositor in step with the finger, and this hook
+ * only sets CSS variables (factor, scale, frame height) when elements appear or
+ * resize. Elsewhere it falls back to one requestAnimationFrame per scrolled
+ * frame. Off for reduced motion.
  */
 export function useScrollParallax() {
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    const factorOf = (el: HTMLElement) => parseFloat(el.dataset.parallax || '0.15');
+    const scaleOf = (el: HTMLElement) =>
+      parseFloat(el.dataset.parallaxScale || (el.tagName === 'IMG' ? '1.22' : '1'));
+
+    const cssDriven =
+      typeof CSS !== 'undefined' &&
+      CSS.supports?.('animation-timeline: view()') &&
+      CSS.supports('animation-range: cover');
+
+    if (cssDriven) {
+      // the frame height sets how far the photo may drift (its bleed)
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const host = entry.target as HTMLElement;
+          host.querySelectorAll<HTMLElement>(':scope > .parallax-css').forEach((el) => {
+            el.style.setProperty('--ph', `${entry.contentRect.height}px`);
+          });
+        }
+      });
+      const prepare = (root: ParentNode) => {
+        const els = [
+          ...(root instanceof HTMLElement && root.matches('[data-parallax]') ? [root] : []),
+          ...Array.from(root.querySelectorAll<HTMLElement>('[data-parallax]')),
+        ];
+        for (const el of els) {
+          if (el.classList.contains('parallax-css')) continue;
+          const host = el.parentElement ?? el;
+          el.style.setProperty('--pf', String(factorOf(el)));
+          el.style.setProperty('--ps', String(scaleOf(el)));
+          el.style.setProperty('--ph', `${host.getBoundingClientRect().height}px`);
+          el.style.transform = '';
+          el.classList.add('parallax-css');
+          if (host !== el) ro.observe(host);
+        }
+      };
+      prepare(document);
+      // only newly added nodes are looked at, so React re-renders cost nothing here
+      const mo = new MutationObserver((records) => {
+        for (const r of records) {
+          r.addedNodes.forEach((n) => {
+            if (n.nodeType === 1) prepare(n as HTMLElement);
+          });
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+      return () => {
+        mo.disconnect();
+        ro.disconnect();
+      };
+    }
+
     let nodes: HTMLElement[] = [];
     let raf = 0;
 
@@ -25,8 +84,8 @@ export function useScrollParallax() {
         const host = el.parentElement ?? el;
         const rect = host.getBoundingClientRect();
         if (rect.bottom < -200 || rect.top > vh + 200) continue;
-        const factor = parseFloat(el.dataset.parallax || '0.15');
-        const scale = parseFloat(el.dataset.parallaxScale || (el.tagName === 'IMG' ? '1.22' : '1'));
+        const factor = factorOf(el);
+        const scale = scaleOf(el);
         const rawOffset = (rect.top + rect.height / 2 - vh / 2) * -factor;
         const maxBleed = (rect.height * (scale - 1)) / 2;
         const offset = scale > 1 ? Math.max(-maxBleed, Math.min(maxBleed, rawOffset)) : rawOffset;
@@ -38,7 +97,9 @@ export function useScrollParallax() {
     }
 
     collect();
-    const mo = new MutationObserver(() => collect());
+    const mo = new MutationObserver((records) => {
+      if (records.some((r) => r.addedNodes.length || r.removedNodes.length)) collect();
+    });
     mo.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
