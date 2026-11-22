@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getDestinationConfig, getMonumentMedia } from '../data/destinationMedia';
 import { getUiText } from '../data/i18n';
+import { ANSWER_STYLES } from '../data/answerStyles';
 import { AvatarCaption } from './AvatarCaption';
 import { GuideAvatar } from './GuideAvatar';
 import { PERSONA_OPTIONS } from '../data/upCities';
@@ -54,6 +55,8 @@ interface ChatTurn {
   fromDevice?: boolean;
   /** set when a question is re-asked after the answer style changed */
   styleLabel?: string;
+  /** the answer style this answer was given in (decides what is read aloud) */
+  style?: PersonaType;
 }
 
 export function GuideTab({
@@ -79,8 +82,17 @@ export function GuideTab({
   // read synchronously (state is one render behind): is an answer on its way, and
   // was the answer style changed meanwhile (then re-ask in it once the answer lands)
   const loadingRef = useRef(false);
+  const composerInputRef = useRef<HTMLInputElement>(null);
   // answer-style menu on the search bar
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
+  // a gentle nudge on the style chip until it has been opened once on this device
+  const [styleChipSeen, setStyleChipSeen] = useState(() => {
+    try {
+      return localStorage.getItem('up_style_chip_seen') === '1';
+    } catch {
+      return true;
+    }
+  });
   const styleMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!styleMenuOpen) return;
@@ -295,6 +307,7 @@ export function GuideTab({
         text: res.answer_summary,
         response: res,
         fromDevice,
+        style: activePersona,
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
@@ -321,7 +334,37 @@ export function GuideTab({
     const folklorePart = r?.folklore_legends.length
       ? `${ui.localFolklore}: ${r.folklore_legends.map((f) => f.text).join(' ')}`
       : '';
-    return [turn.text, stopsPart, placesPart, historyPart, folklorePart].filter(Boolean).join(' ');
+    // What Raahi reads depends on the style the answer was given in
+    switch (turn.style ?? persona) {
+      case 'quick':
+        // just the answer (and a plan's stops, when it is one)
+        return [turn.text, stopsPart].filter(Boolean).join(' ');
+      case 'kids': {
+        // short for children: the answer, one story, one line of history
+        const firstSentences = (text: string, n: number) =>
+          (text.match(/[^.!?।]+[.!?।]+/g) ?? [text]).slice(0, n).join(' ').trim();
+        const firstHistory = firstSentences(r?.verified_history[0]?.text ?? '', 1);
+        const story = r?.folklore_legends[0]?.text;
+        const stories = story ? `${isHi ? 'और एक कहानी सुनो' : 'And here is a story'}: ${firstSentences(story, 2)}` : '';
+        return [turn.text, stories, firstHistory, stopsPart].filter(Boolean).join(' ');
+      }
+      case 'pilgrim':
+        return [turn.text, stopsPart, placesPart, historyPart].filter(Boolean).join(' ');
+      default:
+        // History & Arch: everything, sources included
+        return [
+          turn.text,
+          stopsPart,
+          placesPart,
+          historyPart,
+          r?.verified_history.length
+            ? `${isHi ? 'स्रोत' : 'Sources'}: ${[...new Set(r.verified_history.map((h) => h.source))].join(', ')}`
+            : '',
+          folklorePart,
+        ]
+          .filter(Boolean)
+          .join(' ');
+    }
   };
 
   const handleReadAloud = async (turn: ChatTurn) => {
@@ -412,16 +455,16 @@ export function GuideTab({
   };
 
   // Changing the style re-asks the last question in it, so the change shows at once
+  // Choosing a style puts that style's sample question in the chat box, ready to
+  // send; choosing another swaps it. A question the visitor typed is never replaced.
   const handlePersonaChange = (next: PersonaType) => {
-    if (next === persona) return;
-    onChangePersona(next);
-    if (loadingRef.current) {
-      // an answer is on its way: re-ask in the new style as soon as it arrives
-      pendingStyleRef.current = next;
-      return;
-    }
-    const lastQuestion = [...messages].reverse().find((m) => m.role === 'user');
-    if (lastQuestion) void sendQuestion(lastQuestion.text, undefined, next);
+    if (next !== persona) onChangePersona(next);
+    const current = input.trim();
+    const isSample = (['quick', 'kids', 'scholar', 'pilgrim'] as PersonaType[]).some(
+      (st) => personaExample(st) === current,
+    );
+    if (!current || isSample) setInput(personaExample(next));
+    window.setTimeout(() => composerInputRef.current?.focus(), 0);
   };
 
   return (
@@ -808,15 +851,26 @@ export function GuideTab({
         <div className="composer__style" ref={styleMenuRef}>
           <button
             type="button"
-            className="composer__style-btn"
+            className={`composer__style-btn ${styleChipSeen ? '' : 'is-new'}`}
             aria-haspopup="true"
             aria-expanded={styleMenuOpen}
-            onClick={() => setStyleMenuOpen((v) => !v)}
+            onClick={() => {
+              setStyleMenuOpen((v) => !v);
+              if (!styleChipSeen) {
+                setStyleChipSeen(true);
+                try {
+                  localStorage.setItem('up_style_chip_seen', '1');
+                } catch {
+                  // the nudge simply shows again next visit
+                }
+              }
+            }}
             title={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}
           >
             <Sparkles size={13} aria-hidden="true" />
             <span>{ui.personas[persona]}</span>
             <ChevronDown size={13} aria-hidden="true" />
+            {!styleChipSeen && <em className="composer__style-new">{isHi ? 'आज़माएँ' : 'Try'}</em>}
           </button>
           {styleMenuOpen && (
             <div className="style-menu" role="radiogroup" aria-label={isHi ? 'राही कैसे उत्तर दे?' : 'How should Raahi answer?'}>
@@ -833,22 +887,16 @@ export function GuideTab({
                     setStyleMenuOpen(false);
                   }}
                 >
-                  <strong>{ui.personas[p.id]}</strong>
+                  <strong>
+                    {(() => {
+                      const Icon = ANSWER_STYLES.find((st) => st.id === p.id)?.icon;
+                      return Icon ? <Icon size={14} aria-hidden="true" /> : null;
+                    })()}
+                    {ui.personas[p.id]}
+                  </strong>
                   <span>{personaHint(p.id)}</span>
                 </button>
               ))}
-              {!loading && (
-                <button
-                  type="button"
-                  className="persona-try"
-                  onClick={() => {
-                    setStyleMenuOpen(false);
-                    void sendQuestion(personaExample(persona), undefined, persona);
-                  }}
-                >
-                  {isHi ? 'आज़माएँ: ' : 'Try: '}“{personaExample(persona)}” →
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -865,6 +913,7 @@ export function GuideTab({
           {transcribing ? <Loader2 size={20} className="spin-icon" /> : recording ? <Square size={18} /> : <Mic size={20} />}
         </button>
         <input
+          ref={composerInputRef}
           type="text"
           className="composer__input"
           value={input}

@@ -410,3 +410,66 @@ export function startBrowserSpeechFallback(
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Player controls for the current narration (audio tour player)
+// Cloud (Sarvam) audio supports pause, seek and live speed changes; the
+// browser's built-in voice supports pause/resume only; the app's native voice
+// can only be stopped.
+// ---------------------------------------------------------------------------
+
+export interface PlaybackInfo {
+  /** 'cloud' = an audio clip (seekable), 'device' = built-in speech, 'none' = nothing playing */
+  kind: 'cloud' | 'device' | 'none';
+  current: number;
+  duration: number;
+  paused: boolean;
+}
+
+export function getPlaybackInfo(): PlaybackInfo {
+  if (currentAudio) {
+    const duration = Number.isFinite(currentAudio.duration) ? currentAudio.duration : 0;
+    return { kind: 'cloud', current: currentAudio.currentTime, duration, paused: currentAudio.paused };
+  }
+  if (!isNative && typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+    return { kind: 'device', current: 0, duration: 0, paused: window.speechSynthesis.paused };
+  }
+  return { kind: 'none', current: 0, duration: 0, paused: false };
+}
+
+/** Pause the current narration. Returns false when it cannot be paused (native voice). */
+export function pauseSpeaking(): boolean {
+  if (currentAudio) {
+    currentAudio.pause();
+    return true;
+  }
+  if (!isNative && typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+    window.speechSynthesis.pause();
+    return true;
+  }
+  return false;
+}
+
+export function resumeSpeaking(): void {
+  if (currentAudio) {
+    void currentAudio.play().catch(() => undefined);
+    return;
+  }
+  if (!isNative && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.resume();
+  }
+}
+
+/** Jump to a point (seconds) in the current cloud narration. Returns false if not seekable. */
+export function seekSpeaking(seconds: number): boolean {
+  if (!currentAudio || !Number.isFinite(currentAudio.duration)) return false;
+  currentAudio.currentTime = Math.max(0, Math.min(currentAudio.duration, seconds));
+  return true;
+}
+
+/** Change the speed of the narration that is playing now (cloud audio only). */
+export function setSpeakingRate(rate: number): boolean {
+  if (!currentAudio) return false;
+  currentAudio.playbackRate = rate;
+  return true;
+}

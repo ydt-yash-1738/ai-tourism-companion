@@ -10,6 +10,8 @@ import { ArrowRight, Compass } from 'lucide-react';
 export interface StorySlide {
   id: string;
   photo: string;
+  /** optional smaller copies for phones */
+  srcSet?: string;
   alt: string;
   objectPosition?: string;
   cityName: string;
@@ -62,13 +64,24 @@ export function ScrollStory({
     onActiveChangeRef.current((safeIndex + delta + count) % count);
   };
 
+  // The slideshow (and the place on the Enter button) only moves while the
+  // hero is on screen, so nothing changes while the visitor reads further down.
+  const [heroInView, setHeroInView] = useState(true);
   useEffect(() => {
-    if (!autoplay || staticMode || count < 2) return;
+    const root = rootRef.current;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting), { threshold: 0.35 });
+    io.observe(root);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!autoplay || staticMode || count < 2 || !heroInView) return;
     const timer = window.setTimeout(() => {
       onActiveChangeRef.current((safeIndex + 1) % count);
     }, AUTOPLAY_MS);
     return () => window.clearTimeout(timer);
-  }, [autoplay, staticMode, count, safeIndex]);
+  }, [autoplay, staticMode, count, safeIndex, heroInView]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -77,6 +90,46 @@ export function ScrollStory({
     const bottomEl = root.querySelector<HTMLElement>('.story__bottom');
     if (!photosEl || !bottomEl) return;
 
+    // Preferred: the same motion as a CSS scroll-driven animation, run by the
+    // compositor in step with the finger (Chrome / Android WebView 115+).
+    const cssScroll =
+      typeof CSS !== 'undefined' &&
+      CSS.supports?.('animation-timeline: scroll()') &&
+      CSS.supports('animation-range: 0px 100px');
+    if (cssScroll) {
+      const styleEl = document.createElement('style');
+      document.head.appendChild(styleEl);
+      const build = () => {
+        const top = root.getBoundingClientRect().top + window.scrollY;
+        const h = Math.max(1, root.offsetHeight);
+        // keyframes mirror render() below: progress = scrolled / height
+        const fadeEnd = ((1 - 0.18) / 0.95) * 100;
+        const range = `animation-timeline:scroll(root block);animation-range:${Math.round(top)}px ${Math.round(top + h)}px`;
+        styleEl.textContent = [
+          `@keyframes hero-photos{from{transform:translate3d(0,0,0) scale(1.06)}to{transform:translate3d(0,${(h * 0.28).toFixed(1)}px,0) scale(1.12)}}`,
+          `@keyframes hero-bottom{0%{transform:translate3d(0,0,0);opacity:1}${fadeEnd.toFixed(2)}%{opacity:0.18}100%{transform:translate3d(0,${(h * 0.12).toFixed(1)}px,0);opacity:0.18}}`,
+          `.story .story__photos{animation:hero-photos linear both;${range}}`,
+          `.story .story__bottom{animation:hero-bottom linear both;${range}}`,
+        ].join('\n');
+        photosEl.style.transform = '';
+        bottomEl.style.transform = '';
+        bottomEl.style.opacity = '';
+      };
+      let resizeTimer = 0;
+      const onResize = () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(build, 150);
+      };
+      build();
+      window.addEventListener('resize', onResize);
+      return () => {
+        window.removeEventListener('resize', onResize);
+        window.clearTimeout(resizeTimer);
+        styleEl.remove();
+      };
+    }
+
+    // Fallback: drive it from JavaScript, one frame per scroll event.
     let raf = 0;
 
     const render = () => {
@@ -124,6 +177,8 @@ export function ScrollStory({
           <img
             key={sl.id}
             src={sl.photo}
+            srcSet={sl.srcSet}
+            sizes="100vw"
             alt={i === safeIndex ? sl.alt : ''}
             style={{ objectPosition: sl.objectPosition || '50% 50%' }}
             className={i === safeIndex ? 'is-active' : ''}
@@ -174,7 +229,7 @@ export function ScrollStory({
                   className={`story__dot-btn ${i === safeIndex ? 'is-active' : ''}`}
                   onClick={() => onActiveChangeRef.current(i)}
                 >
-                  {i === safeIndex && autoplay && !staticMode && (
+                  {i === safeIndex && autoplay && !staticMode && heroInView && (
                     <span key={`${sl.id}-${safeIndex}`} style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
                   )}
                 </button>

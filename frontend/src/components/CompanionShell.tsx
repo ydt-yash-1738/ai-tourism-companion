@@ -353,6 +353,7 @@ export function CompanionShell({
               destinationSlug={destinationSlug}
               language={language}
               persona={persona}
+              onChangePersona={onChangePersona}
               isOnline={liveOk}
               sessionHash={sessionHash}
               userCoords={userCoords}
@@ -548,7 +549,7 @@ export function CompanionShell({
       )}
 
       {walkOpen && walk && (
-        <WalkMode walk={walk} language={language} online={isOnline} onClose={() => setWalkOpen(false)} />
+        <WalkMode walk={walk} language={language} online={isOnline} onClose={() => setWalkOpen(false)} onChangeLanguage={onChangeLanguage} />
       )}
 
       <EmergencyModal
